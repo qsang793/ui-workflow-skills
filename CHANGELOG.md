@@ -2,6 +2,32 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.3] — 2026-05-23
+
+### Renamed — templates (drop `lovable-` prefix)
+Templates are not Lovable-specific. They work in both Lovable and Google AI Studio, and the prefix was misleading:
+- `lovable-prompt-scenario-A.md` → `prompt-scenario-A.md`
+- `lovable-prompt-scenario-B.md` → `prompt-scenario-B.md`
+- `lovable-prompt-scenario-C.md` → `prompt-scenario-C.md`
+- `lovable-brand-block.md` → `brand-block.md`
+- `lovable-constraints-block.md` → `constraints-block.md`
+
+Placeholder names updated to match: `{{lovable-brand-block}}` → `{{brand-block}}`, `{{lovable-constraints-block}}` → `{{constraints-block}}`. `design-brief` skill updated to use the new paths and placeholder names.
+
+### Added — tool selection matrix (Lovable vs Google AI Studio)
+- `UI_IMPROVEMENT_GUIDE.md` (Bước 3): added "Chọn tool nào?" table + per-tool post-iteration instructions (Lovable: download ZIP / GitHub sync; AI Studio: copy from chat).
+- `CHEAT_SHEET.md`: added compact tool-pick block before the 4-cách table.
+- `design-brief/SKILL.md`: new step 1b — asks user which tool they'll use, then tailors the step 4 output instructions accordingly. Recommends AI Studio for scenario C, Lovable for A/B.
+
+### Changed — `ingest-lovable-export`
+- Description softened to clarify it handles **both** Lovable (ZIP / GitHub) and Google AI Studio (paste) outputs. Skill name kept as `ingest-lovable-export` for stability — not renamed (would have broken existing references).
+- Step 1 prompt now annotates each option with the tool that typically produces it.
+
+### Why
+The user pointed out that the templates were Lovable-biased (prefix `lovable-`, deliverable sections referencing "Lovable" specifically). For scenario C — where the output must be HTML+CSS only — Google AI Studio is actually a better fit than Lovable. This release removes the bias and gives non-tech users clear tool guidance.
+
+---
+
 ## [0.1.2] — 2026-05-23
 
 ### Added — `ingest-lovable-export` skill

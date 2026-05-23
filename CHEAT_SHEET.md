@@ -31,7 +31,19 @@
 
 ---
 
-## 📥 Bước 5 — 4 cách bỏ code Lovable vào project
+## 🎨 Bước 4 — Chọn Lovable hay Google AI Studio?
+
+| | **Lovable** | **Google AI Studio** |
+|---|---|---|
+| Tốt cho | Kịch bản A, B | **Kịch bản C** |
+| Output | ZIP / GitHub sync | Copy-paste code từ chat |
+
+→ **Kịch bản C → AI Studio.** Lovable mặc định trả React, fight với ràng buộc.
+→ **A / B → Lovable.** Build full app từ specs.
+
+---
+
+## 📥 Bước 5 — 4 cách bỏ code vào project
 
 Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
 
@@ -92,4 +104,4 @@ Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
 
 ---
 
-*Bộ skill: `qsang793/ui-workflow-skills` v0.1.2 — Updated tự động khi dev push.*
+*Bộ skill: `qsang793/ui-workflow-skills` v0.1.3 — Updated tự động khi dev push.*

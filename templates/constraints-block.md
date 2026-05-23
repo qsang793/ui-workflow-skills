@@ -1,5 +1,5 @@
 <!-- Reusable constraints block. Filled by the design-brief skill from Q5+Q8 answers. -->
-<!-- Substitute into the {{lovable-constraints-block}} placeholder in scenario templates. -->
+<!-- Substitute into the {{constraints-block}} placeholder in scenario templates. -->
 
 ## Constraints
 

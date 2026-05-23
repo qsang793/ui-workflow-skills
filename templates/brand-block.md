@@ -1,5 +1,5 @@
 <!-- Reusable brand block. Filled by the design-brief skill from Q3+Q4 answers. -->
-<!-- Substitute into the {{lovable-brand-block}} placeholder in scenario templates. -->
+<!-- Substitute into the {{brand-block}} placeholder in scenario templates. -->
 
 ## Brand
 

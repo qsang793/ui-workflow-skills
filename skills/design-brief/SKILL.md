@@ -26,6 +26,20 @@ A non-tech stakeholder cannot write a good prompt for Lovable. This skill conduc
 
 Read the scenario from `ui-scenario-picker`'s output. If missing, ask the user (1 question, then continue).
 
+### 1b. Ask which design tool the user will use
+
+> "Which design tool will you paste this prompt into — **Lovable** or **Google AI Studio**?"
+
+Recommendation to share if the user is unsure:
+
+| Scenario | Recommended tool | Why |
+|---|---|---|
+| A (greenfield) | Lovable | Builds the whole app from specs in one shot |
+| B (migrate stack) | Lovable | Outputs a complete project in the target framework |
+| C (keep stack) | **Google AI Studio** | Naturally produces HTML+CSS without fighting React defaults |
+
+Save the answer — it changes the output guidance in step 4 (Lovable downloads ZIP / syncs GitHub; AI Studio is copy-paste from chat).
+
 ### 2. Interview — ONE question at a time
 
 Wait for each answer before sending the next. Do **not** dump all questions at once.
@@ -57,18 +71,18 @@ Never accept "idk" twice on the same question — pick the safest default ("mini
 
 | Scenario | Base template |
 |---|---|
-| A | `templates/lovable-prompt-scenario-A.md` |
-| B | `templates/lovable-prompt-scenario-B.md` |
-| C | `templates/lovable-prompt-scenario-C.md` |
+| A | `templates/prompt-scenario-A.md` |
+| B | `templates/prompt-scenario-B.md` |
+| C | `templates/prompt-scenario-C.md` |
 
 Always also fill in:
-- `templates/lovable-brand-block.md` (from Q3, Q4)
-- `templates/lovable-constraints-block.md` (from Q5, Q8)
+- `templates/brand-block.md` (from Q3, Q4)
+- `templates/constraints-block.md` (from Q5, Q8)
 
 **Substitution mechanism (explicit)**:
 1. Use the `Read` tool to load all three files (base template + brand block + constraints block).
 2. Fill `<PLACEHOLDERS>` in each file with the user's answers, using literal string replacement.
-3. In the base template, replace `{{lovable-brand-block}}` with the **entire filled brand-block content** and `{{lovable-constraints-block}}` with the **entire filled constraints-block content**. No paraphrasing, no summarizing — literal insertion.
+3. In the base template, replace `{{brand-block}}` with the **entire filled brand-block content** and `{{constraints-block}}` with the **entire filled constraints-block content**. No paraphrasing, no summarizing — literal insertion.
 
 **For scenario C only — if `ui-audit` reported existing design tokens** (a `:root { --foo: }` block in the project's CSS), append this section to the assembled prompt before "Deliverable":
 
@@ -93,9 +107,13 @@ File content format:
 === END COPY ===
 ```
 
-Then in chat, point the user at the file with one line:
+Then in chat, point the user at the file with **tool-specific** next steps:
 
-> ✅ Prompt saved to `LOVABLE_PROMPT.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Lovable / Google AI Studio. When you have 2–3 designs you like, screenshot each and come back to invoke `/integration-planner`.
+**If user chose Lovable** (from step 1b):
+> ✅ Prompt saved to `LOVABLE_PROMPT.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Lovable. After Lovable produces a project you like, either click "Download ZIP" or enable "Sync to GitHub". Then come back and invoke `/ingest-lovable-export`.
+
+**If user chose Google AI Studio** (from step 1b):
+> ✅ Prompt saved to `LOVABLE_PROMPT.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Google AI Studio. AI Studio will return code in chat — copy each file's content out, then come back and invoke `/ingest-lovable-export` and choose the **"Paste"** method.
 
 ## Critical Rule for Scenario C
 

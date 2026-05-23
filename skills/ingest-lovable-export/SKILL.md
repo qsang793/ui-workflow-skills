@@ -1,6 +1,6 @@
 ---
 name: ingest-lovable-export
-description: Use after the user downloads, syncs, or pastes a Lovable / Google AI Studio export and needs to stage it into the project. Accepts a ZIP path, GitHub URL, an existing folder, or pasted code. Always lands the export at `lovable-export/` at the project root and validates content against the chosen scenario (e.g. scenario C must be HTML+CSS, NOT React). Required step between Lovable and `/integration-planner`.
+description: Use after the user finishes iterating in a design tool (Lovable or Google AI Studio) and needs to stage the output into the project. Lovable typically gives a ZIP or GitHub sync; Google AI Studio gives code blocks in chat — the skill handles both, plus an "already unzipped folder" path. Always lands the export at `lovable-export/` at the project root and validates content against the chosen scenario (e.g. scenario C must be HTML+CSS, NOT React). Required step before `/integration-planner`.
 ---
 
 # Ingest Lovable Export
@@ -25,11 +25,11 @@ The convention across this skill bundle: Lovable / Google AI Studio output alway
 
 If the user did not specify a source in their initial message, ask **one** question with the four options:
 
-> "Where's the Lovable export?
-> 1. A ZIP file I downloaded — paste the path (e.g. `~/Downloads/lovable-abc.zip`)
-> 2. A GitHub repo URL (if you used Lovable's GitHub sync)
+> "Where's the design tool output?
+> 1. A ZIP file I downloaded — paste the path (e.g. `~/Downloads/lovable-abc.zip`)  *(Lovable)*
+> 2. A GitHub repo URL — if you used Lovable's GitHub sync
 > 3. A folder I already unzipped — paste the path
-> 4. I'll paste the code right here"
+> 4. I'll paste the code right here  *(typical for Google AI Studio)*"
 
 ### 2. Confirm scenario
 

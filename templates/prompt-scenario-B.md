@@ -40,9 +40,9 @@ You are redesigning the frontend of an existing web application. The **backend s
 2. <action 2>
 3. <action 3>
 
-{{lovable-brand-block}}
+{{brand-block}}
 
-{{lovable-constraints-block}}
+{{constraints-block}}
 
 ## Deliverable
 - Complete **<TARGET_FRAMEWORK>** project

@@ -35,9 +35,9 @@ Produce **semantic HTML5 + CSS only.**
 - `<page 2>`
 - ...
 
-{{lovable-brand-block}}
+{{brand-block}}
 
-{{lovable-constraints-block}}
+{{constraints-block}}
 
 {{existing-design-tokens}}
 <!-- design-brief skill inserts the project's :root { --foo: } block here if one exists.

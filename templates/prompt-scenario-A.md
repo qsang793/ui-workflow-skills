@@ -23,9 +23,9 @@ You are designing a complete web application from scratch.
 2. <action 2>
 3. <action 3>
 
-{{lovable-brand-block}}
+{{brand-block}}
 
-{{lovable-constraints-block}}
+{{constraints-block}}
 
 ## Deliverable
 - A complete, production-ready **Next.js 14 + Tailwind CSS** project (App Router)

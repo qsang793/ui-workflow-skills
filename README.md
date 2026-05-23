@@ -2,7 +2,7 @@
 
 Một bộ 8 Claude Code skills + 5 prompt templates cho Lovable / Google AI Studio, dùng để cải thiện UI cho **dự án bất kỳ**. Thiết kế để **non-technical stakeholder điều khiển**, developer chỉ can thiệp khi skill báo blocker.
 
-**Version: 0.1.2** — Added `ingest-lovable-export` skill để stage Lovable output vào `lovable-export/` một cách non-tech-friendly. Xem `CHANGELOG.md`.
+**Version: 0.1.3** — Removed Lovable bias in template names + added "chọn Lovable hay Google AI Studio?" tool matrix vào boss guide & cheat sheet. Recommend AI Studio cho scenario C, Lovable cho A/B. Xem `CHANGELOG.md`.
 
 ---
 
@@ -64,11 +64,11 @@ ui-workflow-skills/
 │   ├── ui-translator/SKILL.md          dịch React → stack cũ (kịch bản C)
 │   └── preview-deploy/SKILL.md         deploy Vercel preview
 └── templates/
-    ├── lovable-prompt-scenario-A.md
-    ├── lovable-prompt-scenario-B.md
-    ├── lovable-prompt-scenario-C.md   (cấm React — critical lockdown)
-    ├── lovable-brand-block.md
-    └── lovable-constraints-block.md
+    ├── prompt-scenario-A.md
+    ├── prompt-scenario-B.md
+    ├── prompt-scenario-C.md            (cấm React — critical lockdown)
+    ├── brand-block.md
+    └── constraints-block.md
 ```
 
 ---

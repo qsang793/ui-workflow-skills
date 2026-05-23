@@ -70,13 +70,29 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 
 ### Bước 3 — Vẽ giao diện bằng Lovable / Google AI Studio
 
-**Bước này không có Claude.** Anh làm trực tiếp trên Lovable hoặc Google AI Studio.
+**Bước này không có Claude.** Anh làm trực tiếp trên 1 trong 2 tool.
 
-1. Paste prompt từ bước 2 vào.
-2. Lovable trả về thiết kế. Xem, sửa, lặp lại đến khi ưng.
-3. Khi thấy 2-3 phương án OK → **chụp ảnh tất cả** để mang về Claude.
+#### Chọn tool nào?
 
-⚠️ **Đừng chọn theo cảm giác chớp nhoáng.** Nếu Lovable cho 3 phương án, hãy mang cả 3 về cho dev xem trước khi chốt.
+| | **Lovable** | **Google AI Studio** |
+|---|---|---|
+| Output | Full React/Next.js project (ZIP + GitHub sync) | Code blocks trong chat (copy-paste) |
+| Tốt cho | Kịch bản A, B (full app) | Kịch bản C (visual mockup, HTML+CSS) |
+| Giá | Gói tháng có phí | Free tier rộng |
+
+→ **Kịch bản C** (giữ stack cũ): chọn **Google AI Studio**. Lovable mặc định trả React, sẽ phải "ép" mới chịu trả HTML thuần.
+→ **Kịch bản A/B**: chọn **Lovable**. Sweet spot của nó.
+
+#### Sau khi chọn
+
+1. Paste prompt từ `LOVABLE_PROMPT.md` vào tool đã chọn.
+2. Xem kết quả, sửa, lặp lại đến khi ưng (2-3 phương án).
+3. **Chụp ảnh tất cả** các phương án đẹp trước khi quyết định.
+4. Khi đã chốt:
+   - **Lovable**: bấm "Download ZIP" hoặc enable "Sync to GitHub".
+   - **AI Studio**: copy code từ chat (sẽ paste vào skill ở Bước 4).
+
+⚠️ **Đừng chọn theo cảm giác chớp nhoáng.** Nếu tool cho 3 phương án, hãy mang cả 3 về cho dev xem trước khi chốt.
 
 ---
 
