@@ -2,7 +2,7 @@
 
 Một bộ 8 Claude Code skills + 5 prompt templates cho Lovable / Google AI Studio, dùng để cải thiện UI cho **dự án bất kỳ**. Thiết kế để **non-technical stakeholder điều khiển**, developer chỉ can thiệp khi skill báo blocker.
 
-**Version: 0.1.3** — Removed Lovable bias in template names + added "chọn Lovable hay Google AI Studio?" tool matrix vào boss guide & cheat sheet. Recommend AI Studio cho scenario C, Lovable cho A/B. Xem `CHANGELOG.md`.
+**Version: 0.1.4** — Bug fixes: (1) install verify regex giờ catch cả `ingest-lovable-export` (trước đó bị miss → boss nghĩ install lỗi), (2) LICENSE copyright về đúng `qsang793` (trước đó là `koliaphan` do lệch git config lúc commit đầu). Xem `CHANGELOG.md`.
 
 ---
 
@@ -17,7 +17,7 @@ mkdir -p ~/.claude/skills
 ln -sf ~/projects/ui-workflow-skills/skills/* ~/.claude/skills/
 
 # 3. Verify
-ls ~/.claude/skills/ | grep -E '^(ui-|design-|integration-|preview-)'
+ls ~/.claude/skills/ | grep -E '^(ui-|design-|ingest-|integration-|preview-)'
 ```
 
 Cần thấy 8 skills: `design-brief`, `ingest-lovable-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`.

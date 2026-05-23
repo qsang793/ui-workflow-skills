@@ -104,4 +104,4 @@ Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
 
 ---
 
-*Bộ skill: `qsang793/ui-workflow-skills` v0.1.3 — Updated tự động khi dev push.*
+*Bộ skill: `qsang793/ui-workflow-skills` v0.1.4 — Updated tự động khi dev push.*

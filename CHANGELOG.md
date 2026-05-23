@@ -2,6 +2,16 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.4] — 2026-05-24
+
+### Fixed — install verify regex missed the new skill
+README install script used `grep -E '^(ui-|design-|integration-|preview-)'` to confirm symlinks landed. This regex was written for v0.1.1 (7 skills) and never updated when `ingest-lovable-export` was added in v0.1.2. A user following the install commands would see 7 results instead of 8 and reasonably conclude the install failed. Regex now includes `ingest-`.
+
+### Fixed — LICENSE copyright holder
+v0.1.1 commit was authored by `qsang793` (the repo owner) but the `LICENSE` file accidentally listed `koliaphan` (the local git config name at the time the LICENSE was first written, before the per-repo author config was set). Corrected to `qsang793`.
+
+---
+
 ## [0.1.3] — 2026-05-23
 
 ### Renamed — templates (drop `lovable-` prefix)
