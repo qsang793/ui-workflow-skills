@@ -80,7 +80,30 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 
 ---
 
-### Bước 4 — Lên kế hoạch tích hợp
+### Bước 4 — Mang code Lovable về project
+
+```
+/ingest-lovable-export
+```
+
+**Claude làm gì:** Lấy code Lovable từ chỗ anh để + đặt vào folder `lovable-export/` ở root project — chỗ skill kế tiếp biết tìm. Đồng thời check xem Lovable có làm đúng kịch bản không (ví dụ kịch bản C cấm React).
+
+**Anh có 4 cách đưa code cho Claude:**
+
+| Cách | Khi nào dùng | Nói với Claude |
+|---|---|---|
+| **ZIP** | Bấm nút "Download" trên Lovable | "ZIP ở `~/Downloads/lovable-abc.zip`" |
+| **GitHub** | Lovable sync sang GitHub | "Repo ở `https://github.com/.../...`" |
+| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/lovable-export/`" |
+| **Paste** | Lovable chỉ trả code trong chat | "Tôi sẽ paste từng file vào đây" |
+
+→ Không cần mở terminal. Skill xử lý hết.
+
+🚨 **Nếu kịch bản là C mà Lovable trả ra React/JSX** → skill sẽ báo "SCENARIO MISMATCH", **DỪNG NGAY** và quay lại Lovable sửa prompt (xem `LOVABLE_PROMPT.md` mục CRITICAL CONSTRAINT).
+
+---
+
+### Bước 5 — Lên kế hoạch tích hợp
 
 ```
 /integration-planner
@@ -102,7 +125,7 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 
 ---
 
-### Bước 5 — Tích hợp code (chỉ kịch bản B/C khác nhau ở bước này)
+### Bước 6 — Tích hợp code (chỉ kịch bản B/C khác nhau ở bước này)
 
 **Kịch bản A hoặc B** (greenfield, hoặc đổi công nghệ):
 ```
@@ -120,7 +143,7 @@ Claude **dịch** thiết kế Lovable (thường là React) sang công nghệ F
 
 ---
 
-### Bước 6 — Triển khai bản preview để click thử
+### Bước 7 — Triển khai bản preview để click thử
 
 ```
 /preview-deploy
@@ -134,7 +157,7 @@ Claude **dịch** thiết kế Lovable (thường là React) sang công nghệ F
 
 ---
 
-### Bước 7 — Checklist trước khi ra prod
+### Bước 8 — Checklist trước khi ra prod
 
 Tự anh đi qua từng mục:
 
@@ -204,7 +227,8 @@ Ba câu này thuộc lòng = tiết kiệm rất nhiều tiền và đêm mất 
 | `/ui-scenario-picker` | Lúc bắt đầu, không chắc kịch bản A/B/C |
 | `/ui-audit` | Đầu dự án (trừ kịch bản A) |
 | `/design-brief` | Trước khi mở Lovable |
-| `/integration-planner` | Sau khi có thiết kế từ Lovable |
+| `/ingest-lovable-export` | Sau khi tải/export code từ Lovable — đưa vào project |
+| `/integration-planner` | Sau khi đã ingest, để check Lovable khớp với BE không |
 | `/ui-translator` | Kịch bản C — dịch Lovable về công nghệ cũ |
 | `/integration-wire` | Kịch bản A/B — ghép code Lovable vào BE |
 | `/preview-deploy` | Trước khi duyệt cuối |

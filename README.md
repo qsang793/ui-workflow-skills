@@ -1,8 +1,8 @@
 # UI Workflow Skills
 
-Một bộ 7 Claude Code skills + 5 prompt templates cho Lovable / Google AI Studio, dùng để cải thiện UI cho **dự án bất kỳ**. Thiết kế để **non-technical stakeholder điều khiển**, developer chỉ can thiệp khi skill báo blocker.
+Một bộ 8 Claude Code skills + 5 prompt templates cho Lovable / Google AI Studio, dùng để cải thiện UI cho **dự án bất kỳ**. Thiết kế để **non-technical stakeholder điều khiển**, developer chỉ can thiệp khi skill báo blocker.
 
-**Version: 0.1.1** — pilot-tested trên một repo Vanilla JS + FastAPI. 12 refinements đã áp dụng từ v0.1.0. Xem `PILOT_RETROSPECTIVE.md` để biết chi tiết.
+**Version: 0.1.2** — Added `ingest-lovable-export` skill để stage Lovable output vào `lovable-export/` một cách non-tech-friendly. Xem `CHANGELOG.md`.
 
 ---
 
@@ -20,7 +20,7 @@ ln -sf ~/projects/ui-workflow-skills/skills/* ~/.claude/skills/
 ls ~/.claude/skills/ | grep -E '^(ui-|design-|integration-|preview-)'
 ```
 
-Cần thấy 7 skills: `design-brief`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`.
+Cần thấy 8 skills: `design-brief`, `ingest-lovable-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`.
 
 **Updates về sau**:
 
@@ -55,13 +55,14 @@ ui-workflow-skills/
 ├── LICENSE                            ← MIT
 ├── .gitignore
 ├── skills/
-│   ├── ui-scenario-picker/SKILL.md    quyết định kịch bản A / B / C
-│   ├── ui-audit/SKILL.md              map stack + pain points
-│   ├── design-brief/SKILL.md          phỏng vấn user → prompt Lovable
-│   ├── integration-planner/SKILL.md   diff Lovable vs BE (read-only guardrail)
-│   ├── integration-wire/SKILL.md      thực thi tích hợp (kịch bản A/B)
-│   ├── ui-translator/SKILL.md         dịch React → stack cũ (kịch bản C)
-│   └── preview-deploy/SKILL.md        deploy Vercel preview
+│   ├── ui-scenario-picker/SKILL.md     quyết định kịch bản A / B / C
+│   ├── ui-audit/SKILL.md               map stack + pain points
+│   ├── design-brief/SKILL.md           phỏng vấn user → prompt Lovable
+│   ├── ingest-lovable-export/SKILL.md  stage Lovable output vào lovable-export/
+│   ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
+│   ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
+│   ├── ui-translator/SKILL.md          dịch React → stack cũ (kịch bản C)
+│   └── preview-deploy/SKILL.md         deploy Vercel preview
 └── templates/
     ├── lovable-prompt-scenario-A.md
     ├── lovable-prompt-scenario-B.md
@@ -83,7 +84,9 @@ User: "tôi muốn cải thiện UI"
    ↓
 /design-brief         →  LOVABLE_PROMPT.md (paste-ready cho Lovable)
    ↓
-[user mở Lovable, vẽ, export code]
+[user mở Lovable, vẽ, export code (ZIP / GitHub / folder)]
+   ↓
+/ingest-lovable-export →  stage vào lovable-export/ + validate scenario
    ↓
 /integration-planner  →  INTEGRATION_PLAN.md  ← GUARDRAIL: stop nếu blocker
    ↓
@@ -104,6 +107,7 @@ User: "preview approved, ship to prod"
 |---|---|---|
 | **Diagnostic** | `ui-scenario-picker`, `ui-audit`, `integration-planner` | Đọc + hỏi, không sửa code. An toàn invoke nhiều lần. |
 | **Generative** | `design-brief` | Phỏng vấn user, sinh prompt + ghi `LOVABLE_PROMPT.md`. Không sửa source code. |
+| **Staging** | `ingest-lovable-export` | Đưa Lovable export về `lovable-export/`, validate scenario. Không sửa source code hiện tại, chỉ tạo folder mới. |
 | **Action** | `integration-wire`, `ui-translator`, `preview-deploy` | Sửa code / deploy. Chỉ invoke khi diagnostic skill đã PASS. |
 
 → **Quy tắc**: không bao giờ chạy action skill khi diagnostic skill chưa OK.

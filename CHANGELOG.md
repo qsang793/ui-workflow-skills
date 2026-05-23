@@ -2,6 +2,29 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.2] — 2026-05-23
+
+### Added — `ingest-lovable-export` skill
+New skill that bridges the gap between Lovable export and `integration-planner`. Accepts a ZIP path, GitHub URL, an unzipped folder, or pasted-in code; stages everything to the conventional location `lovable-export/` at project root; validates the content against the chosen scenario (e.g. scenario C must be HTML+CSS, not React) and fails loudly on mismatch.
+
+### Changed — `integration-planner`
+- Hard-pinned expected input location to `lovable-export/`. Skill now refuses to search alternates.
+- Added explicit precondition block: if `lovable-export/` is missing, output a single message telling the user to run `/ingest-lovable-export` first.
+
+### Changed — `UI_IMPROVEMENT_GUIDE.md` (boss guide)
+- Renumbered the 7-step flow to 8 steps. New "Bước 4 — Mang code Lovable về project" inserted between Lovable iteration and integration-planner.
+- Updated the quick-reference command table to include `/ingest-lovable-export`.
+
+### Changed — `CHEAT_SHEET.md`
+- Bumped flow from "7 lệnh" to "8 lệnh", inserted `/ingest-lovable-export` between Lovable and `/integration-planner`.
+- Added section "📥 Bước 5 — 4 cách bỏ code Lovable vào project" with the ZIP / GitHub / Folder / Paste cheat table.
+- Added one more troubleshooting row: "Đã tải code Lovable, không biết để đâu → `/ingest-lovable-export`".
+
+### Why
+v0.1.1 had a quiet gap: after step 4 (user iterates in Lovable), users were expected to "just have" the export at the right place before invoking `/integration-planner`. Non-tech users would have had to open a terminal and unzip manually. v0.1.2 makes the staging an explicit, claude-driven skill.
+
+---
+
 ## [0.1.1] — 2026-05-21
 
 ### Pilot test

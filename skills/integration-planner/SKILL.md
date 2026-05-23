@@ -11,8 +11,23 @@ Lovable does not know your BE. It invents API calls based on the design. This sk
 
 ## When to Use
 
-- After Lovable export is in the repo (typically `lovable-export/`, `_designs/`, or similar)
+- After Lovable export is staged at `lovable-export/` at the project root (use `/ingest-lovable-export` if not yet staged)
 - Before any `ui-translator` or `integration-wire` work
+
+## Precondition
+
+This skill expects `lovable-export/` to exist at the project root. **If missing**, output exactly:
+
+```
+🚨 Cannot find lovable-export/ at project root.
+
+Stage the Lovable export first. Run:
+  /ingest-lovable-export
+
+Then re-run /integration-planner.
+```
+
+Stop. Do not attempt to search for alternate locations.
 
 ## When NOT to Use
 

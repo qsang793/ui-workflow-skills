@@ -16,17 +16,33 @@
 
 ---
 
-## 🔁 Quy trình 7 lệnh — luôn theo thứ tự này
+## 🔁 Quy trình 8 lệnh — luôn theo thứ tự này
 
 ```
 1. /ui-scenario-picker     →  Chọn A / B / C
 2. /ui-audit               →  Bản đồ UI hiện tại (bỏ qua nếu A)
-3. /design-brief           →  Sinh prompt cho Lovable
+3. /design-brief           →  Sinh prompt cho Lovable (ghi LOVABLE_PROMPT.md)
 4. [Tự vẽ trên Lovable / Google AI Studio]
-5. /integration-planner    →  Kiểm tra Lovable có khớp với BE không
-6. /integration-wire (A/B)  HOẶC  /ui-translator (C)
-7. /preview-deploy         →  Link Vercel để click thử
+5. /ingest-lovable-export  →  Bỏ code Lovable vào lovable-export/
+6. /integration-planner    →  Kiểm tra Lovable có khớp với BE không
+7. /integration-wire (A/B)  HOẶC  /ui-translator (C)
+8. /preview-deploy         →  Link Vercel để click thử
 ```
+
+---
+
+## 📥 Bước 5 — 4 cách bỏ code Lovable vào project
+
+Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
+
+| Cách | Khi nào dùng | Nói gì với Claude |
+|---|---|---|
+| **ZIP** | Tải nút "Download" trên Lovable | "Lovable export ở `~/Downloads/lovable-abc.zip`" |
+| **GitHub** | Lovable sync sang GitHub | "Lovable repo ở `https://github.com/.../...`" |
+| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/lovable-export/`" |
+| **Paste** | Lovable chỉ trả code trong chat | "Tôi sẽ paste từng file" |
+
+→ Tất cả đều land vào `lovable-export/` ở root project. Không cần mở terminal.
 
 ---
 
@@ -70,9 +86,10 @@
 |---|---|
 | Không biết bắt đầu | `/ui-scenario-picker` |
 | Bí ở giữa flow | "tôi đang ở bước X, gặp Y, gợi ý cho tôi" |
+| Đã tải code Lovable, không biết để đâu | `/ingest-lovable-export` |
 | Skill báo lỗi lạ | Copy nguyên thông báo gửi dev |
 | Lovable trả ra UI không vừa ý | Mở Lovable, sửa prompt, lặp lại — đừng "ép" Claude |
 
 ---
 
-*Bộ skill: `qsang793/ui-workflow-skills` v0.1.1 — Updated tự động khi dev push.*
+*Bộ skill: `qsang793/ui-workflow-skills` v0.1.2 — Updated tự động khi dev push.*
