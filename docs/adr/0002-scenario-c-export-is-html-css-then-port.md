@@ -1,0 +1,3 @@
+# Scenario C Design export is HTML + CSS only, then Ported
+
+For Scenario C the Design prompt forbids any framework or JavaScript, ingest fails the Design export if it finds React, and `design-port` moves the static HTML + CSS into the existing stack one screen at a time, turning plain-English interaction comments into code in the project's own style. We rejected letting the Design tool emit React and translating it back: React output carries component state, hooks and Tailwind idioms that have no direct equivalent in a vanilla or server-templated stack, so translation hallucinates more and costs more review than porting markup the project's stack already speaks.

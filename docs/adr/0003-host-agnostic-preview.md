@@ -1,0 +1,3 @@
+# Preview is host-agnostic: Vercel only for static frontends
+
+A Preview must be clickable from the Stakeholder's own phone. Vercel is used only when the frontend is static and can reach a public backend; when the backend serves the frontend (FastAPI/Jinja, Flask, Django templates) the app runs locally and is exposed through a temporary tunnel, or the project's own staging is used. We rejected Vercel-for-everything because a static deploy of a server-rendered frontend 404s on every API call and cannot render templates. The tunnel URL is public, so the skill warns about it and closes the tunnel once the Preview is approved.
