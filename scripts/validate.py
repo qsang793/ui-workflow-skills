@@ -11,6 +11,8 @@ PLACEHOLDER_RE = re.compile(r"\{\{([a-z0-9-]+)\}\}")
 BUNDLED_PATH_RE = re.compile(r"`(?:\$\{CLAUDE_SKILL_DIR\}/)?(templates/[\w./-]+)`")
 MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:|#)([^)#\s]+)")
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.M)
+OLD_NAME_RE = re.compile(r"ingest-lovable-export|lovable-export|LOVABLE_PROMPT|ui-translator")
+HEADING_RE = re.compile(r"(#+) ")
 
 
 def parse_frontmatter(text):
@@ -73,6 +75,33 @@ def check_links(root):
     return errors
 
 
+def active_lines(text):
+    """Yield (line number, line), skipping any "Migrating from 0.x" section."""
+    level, fenced = None, False
+    for n, line in enumerate(text.splitlines(), 1):
+        if line.lstrip().startswith(("```", "~~~")):
+            fenced = not fenced
+        heading = None if fenced else HEADING_RE.match(line)
+        if heading and level and len(heading.group(1)) <= level:
+            level = None
+        if heading and "Migrating from 0.x" in line:
+            level = len(heading.group(1))
+        if not level:
+            yield n, line
+
+
+def check_old_names(root):
+    # 0.x names may stay only in historical text: the changelog, retrospectives, migration sections.
+    errors = []
+    for md in root.rglob("*.md"):
+        if ".git" in md.parts or md.name == "CHANGELOG.md" or "retrospective" in md.name.lower():
+            continue
+        for n, line in active_lines(md.read_text(encoding="utf-8")):
+            for old in OLD_NAME_RE.findall(line):
+                errors.append(f"{md}:{n}: old name '{old}'")
+    return errors
+
+
 def check_manifests(root, skill_names):
     errors = []
     try:
@@ -98,6 +127,7 @@ def validate(root):
     for d in skill_dirs:
         errors += check_skill(d)
     errors += check_links(root)
+    errors += check_old_names(root)
     errors += check_manifests(root, [d.name for d in skill_dirs])
     return errors
 

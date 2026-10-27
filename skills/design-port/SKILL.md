@@ -1,9 +1,9 @@
 ---
-name: ui-translator
+name: design-port
 description: Use for scenario C only — when the Lovable export is React/Tailwind but the existing project uses a different stack (Vanilla JS, jQuery, Vue, Svelte, FastAPI Jinja templates, etc.). Translates one component at a time, preserving visual design tokens (colors, spacing, typography) but rewriting the implementation in the target stack. Never bulk-translate.
 ---
 
-# UI Translator
+# Design Port
 
 ## Overview
 

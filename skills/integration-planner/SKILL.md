@@ -11,18 +11,18 @@ Lovable does not know your BE. It invents API calls based on the design. This sk
 
 ## When to Use
 
-- After Lovable export is staged at `lovable-export/` at the project root (use `/ingest-lovable-export` if not yet staged)
-- Before any `ui-translator` or `integration-wire` work
+- After Lovable export is staged at `.ui-workflow/export/` at the project root (use `/ingest-design-export` if not yet staged)
+- Before any `design-port` or `integration-wire` work
 
 ## Precondition
 
-This skill expects `lovable-export/` to exist at the project root. **If missing**, output exactly:
+This skill expects `.ui-workflow/export/` to exist at the project root. **If missing**, output exactly:
 
 ```
-🚨 Cannot find lovable-export/ at project root.
+🚨 Cannot find .ui-workflow/export/ at project root.
 
 Stage the Lovable export first. Run:
-  /ingest-lovable-export
+  /ingest-design-export
 
 Then re-run /integration-planner.
 ```
@@ -89,7 +89,7 @@ Even if endpoints match, check auth:
 
 ### 6. Write the plan
 
-File: `INTEGRATION_PLAN.md` at project root.
+File: `.ui-workflow/integration-plan.md`.
 
 ## Output Format
 
@@ -118,7 +118,7 @@ File: `INTEGRATION_PLAN.md` at project root.
 - Compatible? <yes | no — with note>
 
 ## Next step
-<If PROCEED: "Invoke /ui-translator (scenario C) or /integration-wire (scenario A/B)">
+<If PROCEED: "Invoke /design-port (scenario C) or /integration-wire (scenario A/B)">
 <If STOP: "🚨 Do NOT proceed. Show this plan to the developer.">
 ```
 
@@ -145,5 +145,5 @@ Non-tech stakeholders are tempted to skip past blockers because the design looks
 
 - `design-brief` — predecessor
 - `integration-wire` — runs next for scenarios A/B (if PROCEED)
-- `ui-translator` — runs next for scenario C (if PROCEED)
+- `design-port` — runs next for scenario C (if PROCEED)
 - `preview-deploy` — final step

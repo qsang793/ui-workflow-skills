@@ -1,5 +1,5 @@
 <!-- Scenario B: Migrate existing FE to a new stack. -->
-<!-- Fill in <PLACEHOLDERS> from design-brief answers and from UI_AUDIT.md. -->
+<!-- Fill in <PLACEHOLDERS> from design-brief answers and from .ui-workflow/audit.md. -->
 
 You are redesigning the frontend of an existing web application. The **backend stays unchanged**; the frontend is being rewritten in **<TARGET_FRAMEWORK>** (e.g. Next.js 14 + Tailwind).
 
@@ -24,7 +24,7 @@ You are redesigning the frontend of an existing web application. The **backend s
 | <add more — paste from your real BE> | | | |
 
 ## What's wrong with the current FE
-<paste high-priority pain points from UI_AUDIT.md — be specific>
+<paste high-priority pain points from .ui-workflow/audit.md — be specific>
 
 ## Target users
 <who uses this and their context>
