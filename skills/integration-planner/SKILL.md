@@ -36,6 +36,19 @@ Stop. Do not attempt to search for alternate locations.
 
 ## Process
 
+Reply in the language of the Stakeholder's latest message; if unclear, use `Stakeholder language` from the Workflow state.
+
+### 0. Read the Workflow state
+
+Read `.ui-workflow/state.md` at the project root before anything else. Take the Scenario from it, never from chat or the Design export. Stop with a short message, without doing anything else, when:
+
+- The file is missing: say the Scenario has not been picked yet and give the command `/ui-workflow-skills:ui-scenario-picker`.
+- `Blocked` is not `none` and `Current step` is another step: repeat the reason and say a Developer must decide first. Re-running the step that stopped is allowed.
+- `Scenario` is `A`: say there is no backend to plan against, so this step is skipped by design, and give the command for the recorded `Current step`.
+- `Completed steps` lacks `ingest`. Name the first missing step and its command, and never guess its output.
+
+When this step succeeds, append `planner` to `Completed steps` and set `Current step` to `port` (C) or `wire` (B). A STOP verdict is not a success. On success, also set `Blocked: none`, update `Stakeholder language` if the Stakeholder switched language, and set `Updated: <YYYY-MM-DD> by integration-planner`. A STOP, a mismatch or an escalation never completes the step: leave `Completed steps` as it is, set `Current step: planner` and write the reason in `Blocked`. Step commands: picker `/ui-workflow-skills:ui-scenario-picker`, audit `/ui-workflow-skills:ui-audit`, brief `/ui-workflow-skills:design-brief`, ingest `/ui-workflow-skills:ingest-design-export`, planner `/ui-workflow-skills:integration-planner`, port `/ui-workflow-skills:design-port`, wire `/ui-workflow-skills:integration-wire`, preview `/ui-workflow-skills:preview-deploy`.
+
 ### 1. Find API calls in Lovable code
 
 Grep these patterns:

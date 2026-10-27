@@ -1,0 +1,27 @@
+# Behavioural evals
+
+Each folder here is one case for `claude plugin eval`: a `prompt.md` (what the Stakeholder says), a `scaffold.sh` that copies a fixture project into the run's working directory, and `graders/` that check what the run left behind. Graders check behaviour only (files in `.ui-workflow/`, whether the run stopped, the reply's language), never exact wording.
+
+| Case | Checks |
+|---|---|
+| `picker-fastapi-vanilla` | Picker on a FastAPI + vanilla JS project, in Vietnamese: Scenario C, Workflow state written, reply in Vietnamese |
+| `picker-mixed-migration` | Picker on React next to vanilla JS: escalates to a Developer, no Scenario, no step completed |
+| `audit-fastapi-vanilla` | `ui-audit` writes `.ui-workflow/audit.md` with at most five items per severity and advances the Workflow state |
+| `brief-names-missing-audit` | `design-brief` under Scenario C without an audit names the audit step and its command, writes no Design prompt |
+| `brief-scenario-a-skips-audit` | `design-brief` under Scenario A does not report the skipped audit as missing |
+
+Fixtures live in `fixtures/`. The Workflow state format is in [the workflow contract](../docs/workflow-contract.md).
+
+## Run locally
+
+From the repo root (needs a Claude login or `ANTHROPIC_API_KEY`):
+
+```bash
+claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --ablation none
+```
+
+`--scaffold` runs the case scripts in this folder, which only copy fixtures. Add `--case <name>` for one case and `--runs 1` for a quick check. One run of every case costs about 1 USD. Results land in `evals/results/<timestamp>/`; keep the run you cite in the changelog.
+
+## Run in CI
+
+Actions → evals → Run workflow. It needs an `ANTHROPIC_API_KEY` repository secret. The job fails when a case scores below 0.8 (LLM graders vote two out of three, so a perfect score is not guaranteed on every run) and uploads the results as an artifact.

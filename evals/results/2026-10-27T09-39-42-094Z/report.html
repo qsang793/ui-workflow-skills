@@ -1,0 +1,1331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.307</span>
+<span class="num">2026-10-27 09:39 UTC</span>
+<span class="num">2m 40s</span>
+<span class="num">$2.55</span>
+<span class="num">15 runs</span>
+<span class="num">4 in flight</span>
+
+
+<span>judge default</span>
+<span class="num">threshold 100%</span>
+
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">5</span><span class="sub">5 of 5 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>audit-fastapi-vanilla</h2>
+<span class="muted mono">evals/audit-fastapi-vanilla</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.24 · 09:39:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-27)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja template (single-page app with client-side tabs)
+- Build tool: none (raw HTML/CSS/JS served from `app/static/`)
+- CSS: plain CSS in `app/static/styles.css` plus inline `style=` attributes in `app/templates/index.html`
+- State: none — data lives in the DOM; reminders are re-fetched after each change
+- Design tokens: `app/static/styles.css` (`:root` with `--color-primary`, `--color-success`, `--color-text`, `--space-2`)
+
+## Pages / Routes (top 10)
+- `/` — `app/templates/index.html` (the single page, rendered by `app/main.py`)
+- Tab &quot;Today&quot; — `#today` view, filled by `loadReminders()` in `app/static/app.js` (shows reminders not yet done)
+- Tab &quot;All reminders&quot; — `#all` view, `app/static/app.js` (shows every reminder; done ones are struck through)
+- Tab &quot;Settings&quot; — `#settings` view, `app/templates/index.html` (notification time input + Save)
+- `GET /api/reminders` — `app/main.py`
+- `POST /api/reminders/{reminder_id}/done` — `app/main.py`
+
+## Style approach
+There is a small stylesheet that defines four design tokens, but nothing uses them: `var(--` appears 0 times. The colours are typed in directly instead, 16 different ones across 2 files, and 11 inline `style=` attributes in the template override the stylesheet. Each tab button has its own grey (`#333`, `#444`, `#555`), and the &quot;Done&quot; button uses a different blue (`#3182ce`) from the header (`#2b6cb0`).
+
+## Pain points
+
+### 🔴 High
+- **Not usable on phones.** There is no `&lt;meta name=&quot;viewport&quot;&gt;`, the page is fixed at `width: 800px` (`index.html:7`), views at `760px` (`styles.css:9`), the input at `300px`, and there are 0 media queries. On a phone the page shows as a tiny zoomed-out desktop page.
+- **Design tokens exist but are never used.** The `:root` tokens in `styles.css` are ignored, and colours are hardcoded in both files instead. Pointing everything at the tokens is the cheapest way to get a consistent look, and it lets a redesign change colours in one place.
+- **No loading, error or empty states.** `loadReminders()` and `markDone()` (`app.js:9-29`) show nothing while waiting, never check `res.ok`, and the &quot;Done&quot; button can be clicked many times. An empty list shows a blank area: the `.empty` class is defined but never used.
+- **Settings &quot;Save&quot; does nothing real.** It only shows an `alert()` (`app.js:31-33`). The backend has no settings endpoint, so the notification time is never saved. Users will think it worked.
+
+### 🟡 Medium
+- **Tabs are not accessible.** They are plain `&lt;button&gt;`s with no `role=&quot;tablist&quot;`/`aria-selected`, and the current tab has no visual highlight, so users can&apos;t tell which tab they are on. The page has 0 `aria-` attributes and no `&lt;header&gt;`/`&lt;nav&gt;`/`&lt;main&gt;`, and `&lt;html&gt;` has no `lang`.
+- **Settings input has no label.** &quot;Notification time&quot; is a `&lt;p&gt;`, not a `&lt;label for&gt;`, and the field is a free-text input instead of `type=&quot;time&quot;`.
+- **Broken, inaccessible logo.** `&lt;img src=&quot;/static/logo.png&quot;&gt;` has no `alt`, and `logo.png` does not exist in `app/static/`, so it shows as a broken image.
+- **Reminder titles are inserted as raw HTML.** `innerHTML` with `r.title` (`app.js:17-22`) means a title containing HTML will be rendered or executed. Build the rows with `textContent` during the redesign.
+
+### 🟢 Low
+- Inline `onclick=&quot;markDone(...)&quot;` in generated rows. Use `addEventListener` to match the rest of `app.js`.
+- Hardcoded English strings and no i18n setup (fine for now, but worth knowing).
+- Dates are shown as raw `2026-11-01` strings, not friendly formats like &quot;Sat, 1 Nov&quot;.
+
+## Recommendation
+Confirm scenario C. The codebase is tiny (107 lines total, no oversized files) and nothing here needs a stack change. A responsive layout, a cleanup to use the design tokens, and proper states will fix it within the current Vanilla JS + Jinja stack.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.26 · 09:39:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-27)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja template (`app/templates/index.html`)
+- Build tool: none (raw HTML/CSS/JS served from `app/static/`)
+- CSS: plain CSS in `app/static/styles.css` (13 lines) + 11 inline `style=` attributes in the template
+- State: none on the client (the DOM is the state); reminders live in an in-memory Python list in `app/main.py`
+- Design tokens: `app/static/styles.css` (`--color-primary`, `--color-success`, `--color-text`, `--space-2`) — defined but used 0 times
+
+## Pages / Routes (top 10)
+Single-page app; the tabs are what the user sees as pages.
+- Tab &quot;Today&quot; — `#today` in `app/templates/index.html`, filled by `loadReminders()` in `app/static/app.js`
+- Tab &quot;All reminders&quot; — `#all` in `app/templates/index.html`, filled by `loadReminders()` in `app/static/app.js`
+- Tab &quot;Settings&quot; — `#settings` in `app/templates/index.html`
+- `/` — `app/main.py` (renders `index.html`)
+- `/api/reminders` (GET) — `app/main.py`
+- `/api/reminders/{reminder_id}/done` (POST) — `app/main.py`
+
+No file is over 500 lines (largest: `app/static/app.js`, 35 lines).
+
+## Style approach
+Styling is split between a tiny stylesheet and inline `style=` attributes in the template, and both use raw hex colors. A small set of design tokens exists in `:root`, but nothing references them, so the same brand blue and green are retyped by hand. Layout is fixed-width (800px body, 760px views, 300px input) with no media queries.
+
+## Pain points
+
+### 🔴 High
+- Not responsive: no `&lt;meta name=&quot;viewport&quot;&gt;`, `body` fixed at `width: 800px`, `.view` at `760px`, settings input at `300px`, and 0 media queries. On a phone the page renders zoomed-out and scrolls sideways.
+- Tokens exist but are unused: `:root` defines `--color-primary` / `--color-success`, yet `var(--` appears 0 times. The same values (`#2b6cb0`, `#38a169`) are hard-coded instead, plus a near-duplicate blue (`#3182ce`) and 4 different greys for the three tab buttons (`#333`, `#444`, `#555`, `#777`). About 16 unique colors in 40 lines of markup and CSS. Wiring these tokens up is the highest-leverage redesign action.
+- Accessibility basics missing: the logo `&lt;img&gt;` has no `alt` (and `/static/logo.png` doesn&apos;t exist, so it shows as a broken image). There are no `&lt;header&gt;`/`&lt;nav&gt;`/`&lt;main&gt;` landmarks, 0 `aria-` attributes, and the tabs have no `role=&quot;tab&quot;`/`aria-selected`. The notification-time input has no `&lt;label&gt;`, and `&lt;html&gt;` has no `lang`.
+
+### 🟡 Medium
+- No loading or error states. I checked both `fetch` calls. `loadReminders()` shows a blank view until the data arrives and nothing if the request fails. `markDone()` doesn&apos;t disable the button or show any feedback.
+- No empty state: the `.empty` class is styled but never used, so when everything is done the &quot;Today&quot; tab is just blank.
+- Tabs don&apos;t show which one is active: the button never changes when clicked.
+- &quot;Done&quot; button still shows on completed reminders in &quot;All reminders&quot;.
+- Settings &quot;Save&quot; doesn&apos;t save anything: it only shows an `alert()`, and the backend has no settings endpoint. Flag this for `integration-planner`.
+
+### 🟢 Low
+- 11 inline `style=` attributes in the template. That&apos;s below the sprawl threshold, but they should move into the stylesheet during the redesign.
+- Reminder titles are inserted with `innerHTML` and aren&apos;t escaped, and the rows use inline `onclick`. Switch to `textContent` and event listeners when the rows are rebuilt.
+- Notification-time input is a plain text box. `type=&quot;time&quot;` would give phones a native picker.
+- Text is hard-coded in English with no i18n markers. That&apos;s fine unless other languages are planned.
+
+## Recommendation
+Keep scenario C: the app is tiny (about 100 lines total) and every issue above can be fixed in the current FastAPI + Jinja + vanilla JS stack, so a migration isn&apos;t needed.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.25 · 09:39:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-27)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja template (`app/templates/index.html`)
+- Build tool: none (raw static files mounted at `/static`)
+- CSS: plain CSS in `app/static/styles.css` (13 lines) plus 11 inline `style=` attributes in the template
+- State: none. The DOM is the state. `loadReminders()` re-renders by rebuilding `innerHTML`, and `markDone` is a global called from inline `onclick`
+- Design tokens: `app/static/styles.css` (`:root` holds 4 tokens), but none of them are used (0 `var(--` references)
+
+## Pages / Routes (top 10)
+This is a single-page app. The three tabs are what users see as &quot;pages&quot;.
+- `/` → tab **Today**: `app/templates/index.html` (`#today`), filled by `app/static/app.js`. Shows reminders that aren&apos;t done yet
+- `/` → tab **All reminders**: `app/templates/index.html` (`#all`), filled by `app/static/app.js`. Shows every reminder
+- `/` → tab **Settings**: `app/templates/index.html` (`#settings`). One &quot;Notification time&quot; input and a Save button
+- `GET /api/reminders`: `app/main.py`. Returns the in-memory list
+- `POST /api/reminders/{id}/done`: `app/main.py`. Marks a reminder as done
+
+File sizes: every file is under 50 lines, so none needs splitting.
+
+## Style approach
+Most styling is written inline in the HTML. That includes the page width, the header colour, the three tab text colours and the Save button colour. The small stylesheet covers tabs and reminder rows with hardcoded hex values. There is a `:root` token block whose values match colours used elsewhere, but nothing references it, so the tokens and the actual styles have already drifted apart.
+
+## Pain points
+
+### 🔴 High
+- **Not usable on phones.** There is no `&lt;meta name=&quot;viewport&quot;&gt;`, the `&lt;body&gt;` is fixed at `width: 800px`, `.view` at `760px` and the input at `300px`, and there are 0 media queries. On a phone the page shows zoomed out and scrolls sideways.
+- **Design tokens exist but nothing uses them.** `--color-primary` (#2b6cb0) and `--color-success` (#38a169) are typed out again as inline hex values instead of being referenced. There are 16 unique colours in a 2-file UI, and the three tab buttons each have a different grey (#333, #444, #555). Wiring everything to tokens is the highest-value redesign step.
+- **No loading, error or empty states.** Both `fetch` calls were checked. `loadReminders()` shows a blank area while loading and does nothing if the request fails. `markDone()` doesn&apos;t disable its button, so double clicks send repeat requests. The `.empty` style is defined but never used, so an empty &quot;Today&quot; tab is just blank.
+- **Broken and inaccessible logo.** `&lt;img src=&quot;/static/logo.png&quot;&gt;` has no `alt`, and `logo.png` isn&apos;t in `app/static/`, so the header shows a broken-image icon.
+
+### 🟡 Medium
+- **No semantic structure or ARIA.** There are 0 `aria-` attributes, no `&lt;header&gt;`, `&lt;nav&gt;` or `&lt;main&gt;`, and no `lang` on `&lt;html&gt;`. The tabs are plain buttons with no `role=&quot;tab&quot;` or `aria-selected`.
+- **Settings input has no label.** &quot;Notification time&quot; is a `&lt;p&gt;`, not a `&lt;label for=&quot;notify-time&quot;&gt;`. The field has no `type=&quot;time&quot;`, so it accepts free text.
+- **No active-tab indicator.** Nothing shows which tab you&apos;re on. Tab switching only toggles `style.display`.
+- **&quot;Done&quot; button shows on reminders that are already done** in the All tab, and tapping it does nothing visible.
+- **Settings &quot;Save&quot; doesn&apos;t save.** It only calls `alert()` and there is no backend endpoint for it. The design brief should treat this as a missing feature, not just a styling job.
+
+### 🟢 Low
+- Reminder titles go into `innerHTML` without escaping, so a title containing HTML would render as HTML. Switch to `textContent` during the redesign.
+- Dates show raw (`2026-11-01`) instead of a friendly format like &quot;Sat, 1 Nov&quot;.
+- Hardcoded English strings with no i18n markers. This is fine for now unless a second language is planned.
+- The Save button&apos;s white text on green (#38a169) is about 3.0:1 contrast, which is below the WCAG AA 4.5:1 for normal text.
+- The `&lt;title&gt;` is static (&quot;Reminders&quot;) and doesn&apos;t include the owner&apos;s name or a count.
+
+## Recommendation
+Stay with scenario C. The codebase is tiny and clean enough that a polish pass fixes everything above without changing the stack: viewport plus fluid layout, wiring styles to tokens, semantic tabs, and loading, empty and error states. Treat Settings persistence as a separate small backend task.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The scenario is picked. Please audit the current UI now.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">audit-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">max-five-per-tier</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/audit.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;### [^\\n]*\\n(?:[ \\t]*\\n)*(?:[ \\t]*[-*] [^\\n]*\\n(?:[ \\t]+(?![-*] )\\S[^\\n]*\\n|[ \\t]*\\n)*){6}&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">names-next-command</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;/ui-workflow-skills:design-brief&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-brief</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*brief\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-content</span><span class="badge">llm</span></div>
+<div class="md"><p>This UI audit lists the Today, All reminders and Settings tabs (or views) as pages, and reports that design tokens exist in a <code>:root</code> block but are mostly bypassed by hard-coded colours or inline styles.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.ui-workflow/audit.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">severity-tiers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/audit.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>brief-names-missing-audit</h2>
+<span class="muted mono">evals/brief-names-missing-audit</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.13 · 09:39:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:ui-audit</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t write the design prompt yet because the UI audit hasn&apos;t been run.
+
+According to `.ui-workflow/state.md`, this project is **Scenario C**: it keeps the current FastAPI + Jinja + vanilla JS setup. So far only `picker` is marked as done. In Scenario C the audit has to come before the prompt. It finds things like your existing colors and fonts, and the prompt needs those so the design tool reuses them instead of making up new ones.
+
+**Next step:** run `/ui-workflow-skills:ui-audit`. When it finishes, run `/ui-workflow-skills:design-brief` again and I&apos;ll start the questions.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.14 · 09:40:11 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:ui-audit</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t write the design prompt yet. Your project is set to **scenario C**, which keeps your current FastAPI + Jinja + vanilla JS setup. In that scenario the UI audit has to run before the design brief, and the workflow file shows only the scenario picker as done (`.ui-workflow/state.md`).
+
+The audit looks through your current UI and finds what needs fixing. The design prompt depends on it in two ways:
+- It tells the prompt which sections need improving.
+- It picks up the colors and styles your project already uses, so the design tool reuses them instead of inventing new ones.
+
+Run this next:
+
+```
+/ui-workflow-skills:ui-audit
+```
+
+Once it finishes, run `/ui-workflow-skills:design-brief` again. I&apos;ll ask you a few short questions, one at a time, and save a ready-to-paste prompt to `.ui-workflow/design-prompt.md`.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.14 · 09:40:40 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:ui-audit</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t write the prompt yet because the UI audit hasn&apos;t been run.
+
+Your project is set to keep its current stack (FastAPI with Jinja templates and plain JavaScript). For that path, the audit has to come first. It records your current pages, problem areas and any colors already defined in your CSS, and the prompt uses those so the design tool matches your site instead of inventing a new look. So far only the scenario-picking step is marked done.
+
+Run this next:
+
+```
+/ui-workflow-skills:ui-audit
+```
+
+When it finishes, run `/ui-workflow-skills:design-brief` again. I&apos;ll ask you about 9 short questions, one at a time, and save a paste-ready prompt to `.ui-workflow/design-prompt.md`.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Let's write the prompt for the design tool now.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">names-audit-command</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;/ui-workflow-skills:ui-audit&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-prompt-written</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;files&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;design-prompt\\.md&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply tells the Stakeholder that the UI audit step has not been done yet and must run before the Design prompt, and it does not start the Design prompt interview.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-3">
+<div class="case-head">
+<h2>brief-scenario-a-skips-audit</h2>
+<span class="muted mono">evals/brief-scenario-a-skips-audit</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.13 · 09:40:43 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Your Scenario is **A**: you&apos;re building a new frontend from scratch. The Scenario picker is done, and Scenario A doesn&apos;t need an audit, so we can start on the prompt.
+
+First question:
+
+**Which design tool will you paste this prompt into: Lovable or Google AI Studio?**
+
+If you&apos;re not sure, I recommend **Lovable** for a new project. It builds the whole app from one description, and you can download the result as a ZIP or sync it to GitHub.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.13 · 09:40:46 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Your workflow state shows **Scenario A**: a new frontend built from scratch. The scenario has already been picked, and this scenario doesn&apos;t need an audit, so we can start on the prompt.
+
+First question:
+
+**Which design tool will you paste this prompt into: Lovable or Google AI Studio?**
+
+If you&apos;re not sure, I&apos;d go with **Lovable**. For a new app, it builds the whole project from one set of specs.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">4 turns · $0.13 · 09:40:51 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-audit-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">You&apos;re on **Scenario A** (a new frontend from scratch), so we don&apos;t need an audit. We can go straight to the brief.
+
+I&apos;ll ask a few short questions, one at a time, and turn your answers into a prompt you can paste in.
+
+**First question:** Which design tool will you paste this prompt into: **Lovable** or **Google AI Studio**?
+
+If you&apos;re not sure, I&apos;d go with **Lovable**. It&apos;s good at building a whole new app from a description in one go, which is what you need here.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Let's write the prompt for the design tool now.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-audit-command</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;/ui-workflow-skills:ui-audit&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply starts the Design prompt interview by asking the Stakeholder a question (for example which Design tool they will use, or who the audience is). Saying that Scenario A has no audit step is fine. It fails only if it says the audit is missing, needed or must run first, or if it stops instead of asking a question.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-4">
+<div class="case-head">
+<h2>picker-fastapi-vanilla</h2>
+<span class="muted mono">evals/picker-fastapi-vanilla</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.16 · 09:41:07 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">language-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Stakeholder language:\s*Vietnamese</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-audit</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">picker-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Dự án của bạn đã có giao diện chạy được, và bạn muốn giữ nguyên công nghệ. Vì vậy tôi chọn hướng C: chỉ làm đẹp giao diện, không đổi công nghệ. Đây cũng là hướng nhanh và an toàn nhất, thường mất khoảng 3–7 ngày.
+
+```
+Scenario: C (Production)
+Lý do: Dự án đã có giao diện chạy bằng FastAPI và Jinja2, gồm app/templates/index.html, app/static/app.js và app/static/styles.css. Bạn đã nói rõ là muốn giữ công nghệ hiện tại, chỉ làm mới giao diện.
+Bước tiếp theo: /ui-workflow-skills:ui-audit
+Đã lưu: .ui-workflow/state.md
+```
+
+Bước tiếp theo là rà soát giao diện hiện tại để liệt kê những chỗ cần sửa trước khi thiết kế lại. Khi xem qua, tôi đã thấy vài chỗ cần sửa:
+- **Không xem tốt trên điện thoại:** trang bị cố định ở chiều rộng 800px.
+- **Màu sắc không thống nhất:** màu được ghi rải rác trong từng thẻ HTML, ví dụ ba nút tab dùng ba sắc xám hơi khác nhau.
+- **Logo thiếu chữ mô tả:** ảnh logo không có thuộc tính `alt`, nên người dùng trình đọc màn hình sẽ không biết đó là gì.
+
+Bạn có muốn tôi chạy bước rà soát ngay bây giờ không?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">scenario-c</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*C\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/state.md exists as expected</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.16 · 09:41:09 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">language-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Stakeholder language:\s*Vietnamese</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-audit</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">picker-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Tôi đã xem qua dự án. Đây là một ứng dụng nhắc việc (Reminders), viết bằng FastAPI. Giao diện gồm một template Jinja (`app/templates/index.html`), JavaScript thuần (`app/static/app.js`) và một file CSS (`app/static/styles.css`). Dự án không có `package.json` hay framework frontend nào. Bạn đã muốn giữ nguyên công nghệ nên không cần hỏi thêm: ta chỉ làm đẹp giao diện, không viết lại.
+
+```
+Scenario: C (Production)
+Lý do: Dự án đã có giao diện FastAPI + Jinja + JS thuần đang chạy, và bạn muốn giữ nguyên công nghệ, nên chỉ làm đẹp giao diện (thường mất 3–7 ngày).
+Bước tiếp theo: /ui-workflow-skills:ui-audit
+Đã lưu: .ui-workflow/state.md
+```
+
+Bước tiếp theo là rà soát giao diện hiện tại để tìm những chỗ cần sửa. Ví dụ, trang đang cố định rộng 800px nên dễ vỡ trên điện thoại, và màu sắc đang viết rải rác trong HTML. Bạn có muốn tôi chạy `/ui-workflow-skills:ui-audit` luôn không?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">scenario-c</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*C\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/state.md exists as expected</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.16 · 09:41:13 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">language-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Stakeholder language:\s*Vietnamese</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-audit</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">picker-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Bạn muốn giữ nguyên công nghệ hiện tại, nên tôi chọn hướng C: chỉ làm đẹp giao diện, không viết lại phần nào. Bạn đã nói rõ ý mình nên tôi không cần hỏi thêm.
+
+```
+Scenario: C (Production)
+Why: Dự án đã có giao diện chạy được, viết bằng FastAPI + Jinja2 (gồm app/templates/index.html, app/static/app.js và app/static/styles.css). Bạn muốn giữ công nghệ này và chỉ làm mới phần nhìn.
+Next step: /ui-workflow-skills:ui-audit
+Saved: .ui-workflow/state.md
+```
+
+Hướng này thường mất khoảng 3–7 ngày, và những gì đang chạy tốt sẽ được giữ nguyên.
+
+Bước tiếp theo là rà soát giao diện hiện tại để tìm các điểm cần sửa. Ví dụ, tôi đã thấy trang có chiều rộng cố định 800px nên sẽ hiển thị kém trên điện thoại. Màu sắc cũng đang được ghi thẳng vào từng phần tử thay vì để chung trong file CSS. Bạn có muốn tôi chạy `/ui-workflow-skills:ui-audit` ngay không?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">scenario-c</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*C\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/state.md exists as expected</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Tôi muốn giao diện của dự án này đẹp hơn. Tôi muốn giữ nguyên công nghệ hiện tại, chỉ làm mới giao diện thôi.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">language-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Stakeholder language:\\s*Vietnamese&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-audit</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*audit\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">picker-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is written in Vietnamese, recommends Scenario C (keep the current stack and restyle it), and names the next step as the UI audit with its command. It does not ask the Stakeholder to choose a Scenario they already answered.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">scenario-c</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Scenario:\\s*C\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">state-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.ui-workflow/state.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-5">
+<div class="case-head">
+<h2>picker-mixed-migration</h2>
+<span class="muted mono">evals/picker-mixed-migration</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.17 · 09:41:14 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-scenario</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-step-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The first step is a decision a developer needs to make. I can&apos;t pick a redesign approach yet because your project currently has **two frontends**:
+
+1. **The one users see today**: a FastAPI page built with templates and plain JavaScript, with Today, All reminders and Settings tabs.
+   - `app/templates/index.html`
+   - `app/static/app.js`
+   - `app/static/styles.css`
+2. **A newer React version that was started but not finished**: so far it only shows a plain list of reminder titles. The code comment says &quot;Only this page has been moved so far.&quot;
+   - `web/src/App.tsx`
+   - `web/src/main.tsx`
+   - `package.json`
+
+It looks like someone began moving the app to React and stopped partway. Until a developer decides which frontend to keep, any design work could go into the version that later gets thrown away.
+
+```
+Scenario: none (escalated)
+Why: Both a template + plain JavaScript frontend (app/) and an unfinished React frontend (web/) exist in the same project
+Next step: A developer decides which frontend stays, then re-run /ui-workflow-skills:ui-scenario-picker
+Saved: .ui-workflow/state.md
+```
+
+**What to do now:** send this to your developer and ask: *&quot;Should we keep the current template-based frontend, or finish the move to React?&quot;* Once they answer, run `/ui-workflow-skills:ui-scenario-picker` again and I&apos;ll take you through the rest, starting with a review of the current UI.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.17 · 09:41:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-scenario</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-step-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Before any design work, a developer needs to make one decision. This project currently has two separate frontends, and I can&apos;t pick a redesign path until it&apos;s settled which one you&apos;re keeping.
+
+**What&apos;s in the project:**
+
+1. **The original frontend:** a FastAPI page built from a template, with plain JavaScript and CSS.
+   - `app/templates/index.html`
+   - `app/static/app.js`
+   - `app/static/styles.css`
+   - It has the full reminders page: the Today, All reminders and Settings tabs.
+
+2. **A newer React frontend that&apos;s only just started:** React, Vite and TypeScript.
+   - `web/src/App.tsx`
+   - `web/src/main.tsx`
+   - `package.json` at the project root
+   - A comment in the code says &quot;Only this page has been moved so far,&quot; and right now it just shows a plain list of reminder titles.
+
+Both frontends load data from the same backend address (`/api/reminders`).
+
+Someone started moving the app to React and didn&apos;t finish. Polishing the current frontend and finishing the React move are very different jobs: the first usually takes days, the second weeks. Which frontend stays depends on technical trade-offs, so a developer should make that call, not me and not you.
+
+```
+Scenario: none (blocked)
+Why: Two frontends exist side by side (the FastAPI template with plain JavaScript in app/, and an unfinished React app in web/). A developer must decide which one stays.
+Next step: Ask a developer to choose which frontend to keep, then run /ui-workflow-skills:ui-scenario-picker again
+Saved: .ui-workflow/state.md
+```
+
+I&apos;ve saved this as a blocked note in `.ui-workflow/state.md`. Once a developer has decided, run the picker again and it will take you through the redesign one step at a time.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.17 · 09:41:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-scenario</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Scenario:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-step-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*none</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Before you can start on the design, a developer needs to decide one thing: which of your two frontends you&apos;re keeping.
+
+Your project has two separate frontends that both show the same reminders:
+
+1. **The current app (Python FastAPI with plain HTML/JS):** `app/templates/index.html`, `app/static/app.js` and `app/static/styles.css`. This is the full app with the Today, All reminders and Settings tabs.
+2. **A new version in React, only started:** `web/src/App.tsx` and `web/src/main.tsx`. A comment in the code says *&quot;Only this page has been moved so far&quot;*, and right now it only shows a bare list of reminder titles.
+
+Someone started moving the app from the first to the second and didn&apos;t finish. Which way to go changes the whole plan. Polishing the current app usually takes days, while finishing the move to React takes weeks. That&apos;s a technical call, so I&apos;ve left it to a developer rather than picking a default.
+
+```
+Scenario: none (escalated to a developer)
+Why: Both a React frontend (web/src/*.tsx) and a plain HTML/JS frontend (app/templates, app/static) exist — a half-finished migration
+Next step: A developer decides which frontend stays, then re-run /ui-workflow-skills:ui-scenario-picker
+Saved: .ui-workflow/state.md
+```
+
+**What to ask your developer:** &quot;Do we finish moving to React in `web/`, or drop it and improve the current app in `app/`?&quot; Once they answer, run the picker again and it will set you up for the right design work.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>I want to make the UI of this project look nicer. Where do I start?</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:\\s*(?!none)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-scenario</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Scenario:\\s*none&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-step-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*none&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply, in English, explains that the project holds a newer framework frontend (React) next to the older plain HTML/JavaScript frontend, so the migration looks half-finished, and tells the Stakeholder to have a Developer decide before continuing. It does not choose or recommend Scenario A, B or C, or which frontend to keep, and it does not ask the Stakeholder the Scenario questions.</p>
+</div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+name: evals
+
+# Behavioural evals cost API credit, so they run only on demand (before a release).
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per case
+        default: "3"
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the shell sandbox
+        # Ubuntu 24.04 blocks unprivileged user namespaces, which bubblewrap needs.
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap socat
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Run behavioural evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RUNS: ${{ inputs.runs }}
+        run: >
+          npx -y @anthropic-ai/claude-code@2.1.307 plugin eval . --trust-plugin --scaffold
+          --allow-tools Bash Write Edit --ablation none --no-publish --runs "$RUNS" --threshold 0.8
+          --output-dir eval-results --report eval-results/report.html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: eval-results

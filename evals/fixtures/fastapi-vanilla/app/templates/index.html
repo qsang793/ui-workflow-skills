@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <title>Reminders</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body style="width: 800px; margin: 0 auto; background: #fafafa">
+  <div class="top" style="background: #2b6cb0; color: #fff; padding: 12px">
+    <img src="/static/logo.png">
+    <span style="font-size: 22px">Hello {{ owner }}</span>
+  </div>
+  <div class="tabs">
+    <button data-tab="today" style="color: #333">Today</button>
+    <button data-tab="all" style="color: #444">All reminders</button>
+    <button data-tab="settings" style="color: #555">Settings</button>
+  </div>
+  <div id="today" class="view"></div>
+  <div id="all" class="view" style="display: none"></div>
+  <div id="settings" class="view" style="display: none">
+    <p style="color: #777">Notification time</p>
+    <input id="notify-time" style="width: 300px; border: 1px solid #ccc">
+    <button id="save" style="background: #38a169; color: white">Save</button>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -21,6 +21,17 @@ Turn vague "the UI looks bad" into a one-page report with: stack used, pages/rou
 
 ## Process
 
+Reply in the language of the Stakeholder's latest message; if unclear, use `Stakeholder language` from the Workflow state. Write the report's prose in that language but keep the headings below in English, because later skills read them.
+
+### 0. Read the Workflow state
+
+Read `.ui-workflow/state.md` at the project root before anything else. Stop with a short message, without auditing, when:
+
+- The file is missing: say the Scenario has not been picked yet and give the command `/ui-workflow-skills:ui-scenario-picker`.
+- `Blocked` is not `none` and `Current step` is another step: repeat the reason and say a Developer must decide first. Re-running the step that stopped is allowed.
+- `Scenario` is `A`: say there is no frontend to audit, so this step is skipped by design, and give the command for the recorded `Current step`.
+- `Completed steps` does not include `picker`: name the picker step and its command.
+
 ### 1. Detect the stack
 
 Read in this order:
@@ -64,7 +75,11 @@ Read in this order:
 
 Single markdown file: `.ui-workflow/audit.md` (create the `.ui-workflow/` folder at the project root if missing).
 
-Cap at **5 items per severity tier**. More than that = the report is too long for a non-tech stakeholder to act on.
+Cap at **5 items per severity tier**. More than that = the report is too long for a non-tech stakeholder to act on. A tier with nothing in it has the single bullet `- none`.
+
+### 5. Update the Workflow state
+
+In `.ui-workflow/state.md`: append `audit` to `Completed steps`, set `Current step: brief`, `Blocked: none` and `Updated: <YYYY-MM-DD> by ui-audit`, and update `Stakeholder language` if the Stakeholder switched language. Leave the other fields as they are. Then tell the Stakeholder the top High items in a few lines, where the report is, and the next command, `/ui-workflow-skills:design-brief`.
 
 ## Output Format
 
@@ -76,6 +91,7 @@ Cap at **5 items per severity tier**. More than that = the report is too long fo
 - Build tool: <none / vite / next / etc.>
 - CSS: <e.g. plain CSS in src/styles.css, or Tailwind, or CSS modules>
 - State: <e.g. Redux / global window vars / none>
+- Design tokens: <file holding the `:root { --... }` block | none>
 
 ## Pages / Routes (top 10)
 - `/` — `<path-to-entry-template>`
@@ -85,16 +101,16 @@ Cap at **5 items per severity tier**. More than that = the report is too long fo
 ## Style approach
 <2–3 sentences describing how styling currently works>
 
-## Pain points (prioritized)
+## Pain points
 
-### 🔴 High (cap at 5)
+### 🔴 High
 - <e.g. No responsive breakpoints — fixed 800px width breaks on mobile>
 - <e.g. 47 unique color hex codes, no design tokens>
 
-### 🟡 Medium (cap at 5)
+### 🟡 Medium
 - <e.g. 12 fetch() calls without matching loading state>
 
-### 🟢 Low (cap at 5)
+### 🟢 Low
 - <e.g. Inconsistent button padding>
 
 ## Recommendation

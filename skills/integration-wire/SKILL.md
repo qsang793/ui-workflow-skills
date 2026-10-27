@@ -22,6 +22,19 @@ After `integration-planner` returns PROCEED, this skill actually performs the wi
 
 ## Process
 
+Reply in the language of the Stakeholder's latest message; if unclear, use `Stakeholder language` from the Workflow state.
+
+### 0. Read the Workflow state
+
+Read `.ui-workflow/state.md` at the project root before anything else. Take the Scenario from it, never from chat or the Design export. Stop with a short message, without doing anything else, when:
+
+- The file is missing: say the Scenario has not been picked yet and give the command `/ui-workflow-skills:ui-scenario-picker`.
+- `Blocked` is not `none` and `Current step` is another step: repeat the reason and say a Developer must decide first. Re-running the step that stopped is allowed.
+- `Scenario` is `C`: say this step is for Scenarios A and B and give the command for the recorded `Current step`.
+- `Completed steps` lacks a step this one needs (A: `ingest`; B: `planner`). Scenario A skips the planner by design, so never report it missing there. Name the first missing step and its command, and never guess its output.
+
+When this step succeeds, set `Work branch` to the branch you work on, append `wire` to `Completed steps` and set `Current step: preview`; also set `Blocked: none`, update `Stakeholder language` if the Stakeholder switched language, and set `Updated: <YYYY-MM-DD> by integration-wire`. A STOP, a mismatch or an escalation never completes the step: leave `Completed steps` as it is, set `Current step: wire` and write the reason in `Blocked`. Step commands: picker `/ui-workflow-skills:ui-scenario-picker`, audit `/ui-workflow-skills:ui-audit`, brief `/ui-workflow-skills:design-brief`, ingest `/ui-workflow-skills:ingest-design-export`, planner `/ui-workflow-skills:integration-planner`, port `/ui-workflow-skills:design-port`, wire `/ui-workflow-skills:integration-wire`, preview `/ui-workflow-skills:preview-deploy`.
+
 ### 1. Load the plan
 
 Read `.ui-workflow/integration-plan.md`. If missing or older than the Lovable export, run `/integration-planner` first.
