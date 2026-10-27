@@ -1,0 +1,13 @@
+{
+  "name": "ui-workflow-skills",
+  "version": "0.2.0",
+  "description": "Claude Code skills for non-technical stakeholders to drive UI improvement work via Lovable or Google AI Studio.",
+  "author": {
+    "name": "qsang793",
+    "url": "https://github.com/qsang793"
+  },
+  "homepage": "https://github.com/qsang793/ui-workflow-skills",
+  "repository": "https://github.com/qsang793/ui-workflow-skills",
+  "license": "MIT",
+  "keywords": ["claude-code", "skills", "ui", "lovable", "google-ai-studio", "redesign"]
+}

@@ -1,0 +1,24 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test the validator
+        run: python -m unittest discover -s scripts -p "test_*.py"
+      - name: Check skills, templates, links and versions
+        run: python scripts/validate.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Official plugin validator
+        run: npx -y @anthropic-ai/claude-code@2.1.307 plugin validate ./ --strict

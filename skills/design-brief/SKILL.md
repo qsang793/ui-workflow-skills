@@ -71,20 +71,20 @@ Never accept "idk" twice on the same question — pick the safest default ("mini
 
 | Scenario | Base template |
 |---|---|
-| A | `templates/prompt-scenario-A.md` |
-| B | `templates/prompt-scenario-B.md` |
-| C | `templates/prompt-scenario-C.md` |
+| A | `${CLAUDE_SKILL_DIR}/templates/prompt-scenario-A.md` |
+| B | `${CLAUDE_SKILL_DIR}/templates/prompt-scenario-B.md` |
+| C | `${CLAUDE_SKILL_DIR}/templates/prompt-scenario-C.md` |
 
 Always also fill in:
-- `templates/brand-block.md` (from Q3, Q4)
-- `templates/constraints-block.md` (from Q5, Q8)
+- `${CLAUDE_SKILL_DIR}/templates/brand-block.md` (from Q3, Q4)
+- `${CLAUDE_SKILL_DIR}/templates/constraints-block.md` (from Q5, Q8)
 
 **Substitution mechanism (explicit)**:
 1. Use the `Read` tool to load all three files (base template + brand block + constraints block).
 2. Fill `<PLACEHOLDERS>` in each file with the user's answers, using literal string replacement.
 3. In the base template, replace `{{brand-block}}` with the **entire filled brand-block content** and `{{constraints-block}}` with the **entire filled constraints-block content**. No paraphrasing, no summarizing — literal insertion.
 
-**For scenario C only — if `ui-audit` reported existing design tokens** (a `:root { --foo: }` block in the project's CSS), append this section to the assembled prompt before "Deliverable":
+**For scenario C only — `{{existing-design-tokens}}`**: if `ui-audit` reported existing design tokens (a `:root { --foo: }` block in the project's CSS), replace `{{existing-design-tokens}}` and the HTML comment under it with the section below. If there are no tokens, delete the placeholder and the comment — never leave the raw placeholder in the prompt.
 
 ```
 ## Existing design tokens (REUSE — do not invent new colors)
