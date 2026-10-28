@@ -1,0 +1,13 @@
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+
+.tabs button { padding: 6px 10px; border: 1px solid #e2e8f0; background: #ffffff; }
+.view { padding: 16px; width: 760px; }
+.reminder { display: flex; justify-content: space-between; border-bottom: 1px solid #edf2f7; padding: 8px 0; color: #2d3748; }
+.reminder.done { color: #a0aec0; text-decoration: line-through; }
+.reminder button { background: #3182ce; color: #fff; border: 0; }
+.empty { color: #718096; }

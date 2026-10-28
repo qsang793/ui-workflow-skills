@@ -10,6 +10,11 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - `ingest-design-export` adds `.ui-workflow/export*/` to the project's `.gitignore`; the rest of `.ui-workflow/` stays committable.
 - `scripts/validate.py` rejects the old names outside the changelog, retrospectives and "Migrating from 0.x" sections.
 
+### Added — Workflow state and behavioural evals
+- `.ui-workflow/state.md` records Scenario, Design tool, current step, completed steps, Work branch, Stakeholder language and any Blocker. `ui-scenario-picker` writes it; every skill reads it first and names the missing step and its command instead of guessing. Contract, step order per Scenario and handoff formats: `docs/workflow-contract.md`.
+- Every skill replies in the Stakeholder's language. The picker labels every Scenario Beta; Scenario C becomes Production once its end-to-end pilot passes.
+- Behavioural evals for `claude plugin eval` under `evals/`, with a FastAPI + vanilla JS fixture and a mixed framework/vanilla fixture. Run locally or via the manual `evals` workflow. Local run 2026-10-27: 5 cases × 3 runs, every run scored 1.0 (`evals/results/2026-10-27T09-39-42-094Z/`).
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging
