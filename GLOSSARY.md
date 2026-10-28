@@ -43,8 +43,12 @@ The persisted record of the chosen Scenario, the chosen Design tool and the curr
 _Avoid_: Context, session
 
 **Blocker**:
-A mismatch between the Design export and the existing backend that would need a backend change; it stops the workflow until a Developer decides.
+Data a Screen displays, or Required behaviour, that the existing backend cannot supply; it stops the workflow until a Developer decides.
 _Avoid_: Error, issue
+
+**Required behaviour**:
+What a screen does today, plus the must-haves the Stakeholder named in the interview; it can never be dropped to fit the design.
+_Avoid_: Committed feature, core feature
 
 **Port**:
 Rebuilding the look of one Screen of a Scenario C Design export in the project's existing templates, styles and data code.
