@@ -67,6 +67,14 @@ class ValidateTest(unittest.TestCase):
         })
         self.assertEqual(errors, [])
 
+    def test_agent_worktrees_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            make_repo(Path(tmp))
+            stale = Path(tmp) / ".claude/worktrees/old/skills/x"
+            stale.mkdir(parents=True)
+            (stale / "SKILL.md").write_text("Run `/ui-translator`. [gone](./gone.md)\n")
+            self.assertEqual(validate(tmp), [])
+
     def test_old_name_after_migration_section_reported(self):
         errors = self.run_case(files={
             "README.md": "## Migrating from 0.x\n\n`ui-translator` renamed.\n\n## Usage\n\nRun `/ui-translator`.\n",

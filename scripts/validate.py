@@ -64,11 +64,17 @@ def check_skill(skill_dir):
     return errors
 
 
+def markdown_files(root):
+    # Skip git internals and agent worktrees, which are other checkouts of this repo.
+    for md in root.rglob("*.md"):
+        rel = md.relative_to(root).parts
+        if ".git" not in rel and rel[:2] != (".claude", "worktrees"):
+            yield md
+
+
 def check_links(root):
     errors = []
-    for md in root.rglob("*.md"):
-        if ".git" in md.parts:
-            continue
+    for md in markdown_files(root):
         for target in MD_LINK_RE.findall(md.read_text(encoding="utf-8")):
             if not (md.parent / target).exists():
                 errors.append(f"{md}: broken link {target}")
@@ -93,8 +99,8 @@ def active_lines(text):
 def check_old_names(root):
     # 0.x names may stay only in historical text: the changelog, retrospectives, migration sections.
     errors = []
-    for md in root.rglob("*.md"):
-        if ".git" in md.parts or md.name == "CHANGELOG.md" or "retrospective" in md.name.lower():
+    for md in markdown_files(root):
+        if md.name == "CHANGELOG.md" or "retrospective" in md.name.lower():
             continue
         for n, line in active_lines(md.read_text(encoding="utf-8")):
             for old in OLD_NAME_RE.findall(line):
