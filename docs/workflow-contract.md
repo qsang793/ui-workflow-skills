@@ -145,9 +145,25 @@ At most five bullets under each severity. An empty severity has the single bulle
 | Screen | Export file | Target template | Data it displays | Backend source |
 ```
 
+Export file is the route or page file of the Screen (`src/routes/dashboard.tsx`, `src/pages/Dashboard.tsx`, `app/dashboard/page.tsx`, `dashboard.html`), followed by `#<view>` when one route holds several Screens.
+
 The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` plan is addressed to the Developer.
 
 ### `design-port` input
 
-- `.ui-workflow/export/`: HTML and CSS only, no framework code and no JavaScript, one HTML file per screen. Interaction notes are HTML comments of the form `<!-- interaction: <plain-English behaviour> -->` next to the element they describe.
-- `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION` and a Screens table naming, per screen, the export file to Port and the existing template it replaces.
+- `.ui-workflow/export/`: the Design export as staged by ingest, in any framework (TanStack Start, React + Vite, Next, Angular) or plain HTML + CSS. It is a visual reference (ADR-0004): `design-port` reads its source and never installs, builds or runs it.
+- `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION` and a Screens table naming, per Screen, the export file to Port and the existing template it replaces.
+
+What `design-port` extracts from each Screen:
+
+- Markup structure: element tree, semantic tags, order. Components defined inside the export (for example `components/ui/button.tsx`) are read to see what they render.
+- Style values: Tailwind classes resolved through the export's own Tailwind config and CSS variables, then Tailwind's default scale; plain CSS read as is.
+- Design tokens: colours, spacing, fonts (including font links), radii, shadows, breakpoints, mapped onto the project's existing tokens first. A new token is added only when none matches.
+- Copy: labels, placeholders, empty and error text. Text that comes from data is replaced by the backend field named in the Screens table.
+- Displayed states: hover, focus, disabled, active, open, empty, loading, error, as far as the export shows them.
+- Interaction intent, in plain English, from event handlers or from `<!-- interaction: <plain-English behaviour> -->` comments. Code is never translated.
+- Icons and images: an icon becomes the matching icon of the project's existing set, else inline SVG (taken from the icon library's published static SVG when the export does not contain it, with library and licence named in the report). Images are copied into the project's existing static folder. No package is added.
+
+Everything else is discarded: state, hooks, routing, data fetching, mock data, auth, backend or server code, build config, dependencies, tests, migrations and `.env` files.
+
+Output is CSS in the project's existing stylesheet structure; Tailwind classes stay only when the project already uses Tailwind. A value that cannot be resolved statically is reported for that Screen and replaced by the nearest existing token, never guessed. An interaction that needs data or behaviour the backend does not provide is not Ported: it is listed under "Not ported" in the Screen's report in the Stakeholder's language, and does not block approval.
