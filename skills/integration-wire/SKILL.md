@@ -1,6 +1,6 @@
 ---
 name: integration-wire
-description: Use for scenarios A and B after integration-planner returns PROCEED. Replaces Lovable's mock data with real BE fetches, configures auth to match BE's existing pattern, sets env vars and routing per the integration plan. For scenario C, use ui-translator instead. Never invoke if planner verdict is STOP.
+description: Use for scenarios A and B after integration-planner returns PROCEED. Replaces Lovable's mock data with real BE fetches, configures auth to match BE's existing pattern, sets env vars and routing per the integration plan. For scenario C, use design-port instead. Never invoke if planner verdict is STOP.
 ---
 
 # Integration Wire
@@ -17,14 +17,14 @@ After `integration-planner` returns PROCEED, this skill actually performs the wi
 
 ## When NOT to Use
 
-- Scenario C — use `ui-translator` instead (it does both translation and wiring)
+- Scenario C — use `design-port` instead (it does both translation and wiring)
 - `integration-planner` returned STOP — escalate to developer, do NOT proceed
 
 ## Process
 
 ### 1. Load the plan
 
-Read `INTEGRATION_PLAN.md` from project root. If missing or older than the Lovable export, run `/integration-planner` first.
+Read `.ui-workflow/integration-plan.md`. If missing or older than the Lovable export, run `/integration-planner` first.
 
 If verdict is STOP, refuse to continue. Print the blocker list and exit.
 
@@ -117,7 +117,7 @@ Invoke `/preview-deploy` to push to Vercel.
 
 ## Critical Rules
 
-- **Never invent endpoints.** Use only what's in `INTEGRATION_PLAN.md`.
+- **Never invent endpoints.** Use only what's in `.ui-workflow/integration-plan.md`.
 - **Never modify the BE from this skill.** If something requires BE changes, escalate to developer.
 - **Always run the build before declaring done.** A successful "wire" with a broken build is worse than a TODO.
 - **Never bypass a STOP verdict from the planner.** No exceptions, no "just this once".
@@ -139,4 +139,4 @@ Invoke `/preview-deploy` to push to Vercel.
 
 - `integration-planner` — must return PROCEED before this runs
 - `preview-deploy` — runs after
-- `ui-translator` — sibling for scenario C
+- `design-port` — sibling for scenario C

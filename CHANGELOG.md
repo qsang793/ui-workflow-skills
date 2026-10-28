@@ -2,6 +2,14 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Changed — tool-neutral names and `.ui-workflow/` folder
+- `ingest-lovable-export` → `ingest-design-export`, `ui-translator` → `design-port`. No aliases.
+- Intermediate files move from the project root into `.ui-workflow/`: `UI_AUDIT.md` → `audit.md`, `LOVABLE_PROMPT.md` → `design-prompt.md`, `INTEGRATION_PLAN.md` → `integration-plan.md`, `lovable-export/` → `export/`.
+- `ingest-design-export` adds `.ui-workflow/export*/` to the project's `.gitignore`; the rest of `.ui-workflow/` stays committable.
+- `scripts/validate.py` rejects the old names outside the changelog, retrospectives and "Migrating from 0.x" sections.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging

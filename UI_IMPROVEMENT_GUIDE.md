@@ -85,7 +85,7 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 
 #### Sau khi chọn
 
-1. Paste prompt từ `LOVABLE_PROMPT.md` vào tool đã chọn.
+1. Paste prompt từ `.ui-workflow/design-prompt.md` vào tool đã chọn.
 2. Xem kết quả, sửa, lặp lại đến khi ưng (2-3 phương án).
 3. **Chụp ảnh tất cả** các phương án đẹp trước khi quyết định.
 4. Khi đã chốt:
@@ -99,10 +99,10 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 ### Bước 4 — Mang code Lovable về project
 
 ```
-/ingest-lovable-export
+/ingest-design-export
 ```
 
-**Claude làm gì:** Lấy code Lovable từ chỗ anh để + đặt vào folder `lovable-export/` ở root project — chỗ skill kế tiếp biết tìm. Đồng thời check xem Lovable có làm đúng kịch bản không (ví dụ kịch bản C cấm React).
+**Claude làm gì:** Lấy code Lovable từ chỗ anh để + đặt vào folder `.ui-workflow/export/` ở root project — chỗ skill kế tiếp biết tìm. Đồng thời check xem Lovable có làm đúng kịch bản không (ví dụ kịch bản C cấm React).
 
 **Anh có 4 cách đưa code cho Claude:**
 
@@ -110,12 +110,12 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 |---|---|---|
 | **ZIP** | Bấm nút "Download" trên Lovable | "ZIP ở `~/Downloads/lovable-abc.zip`" |
 | **GitHub** | Lovable sync sang GitHub | "Repo ở `https://github.com/.../...`" |
-| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/lovable-export/`" |
+| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/design-export/`" |
 | **Paste** | Lovable chỉ trả code trong chat | "Tôi sẽ paste từng file vào đây" |
 
 → Không cần mở terminal. Skill xử lý hết.
 
-🚨 **Nếu kịch bản là C mà Lovable trả ra React/JSX** → skill sẽ báo "SCENARIO MISMATCH", **DỪNG NGAY** và quay lại Lovable sửa prompt (xem `LOVABLE_PROMPT.md` mục CRITICAL CONSTRAINT).
+🚨 **Nếu kịch bản là C mà Lovable trả ra React/JSX** → skill sẽ báo "SCENARIO MISMATCH", **DỪNG NGAY** và quay lại Lovable sửa prompt (xem `.ui-workflow/design-prompt.md` mục CRITICAL CONSTRAINT).
 
 ---
 
@@ -151,7 +151,7 @@ Claude lấy code từ Lovable, nối vào BE của anh.
 
 **Kịch bản C** (giữ công nghệ cũ):
 ```
-/ui-translator
+/design-port
 ```
 Claude **dịch** thiết kế Lovable (thường là React) sang công nghệ FE anh đang dùng. Giữ nguyên ý tưởng thiết kế, đổi cách hiện thực.
 
@@ -243,9 +243,9 @@ Ba câu này thuộc lòng = tiết kiệm rất nhiều tiền và đêm mất 
 | `/ui-scenario-picker` | Lúc bắt đầu, không chắc kịch bản A/B/C |
 | `/ui-audit` | Đầu dự án (trừ kịch bản A) |
 | `/design-brief` | Trước khi mở Lovable |
-| `/ingest-lovable-export` | Sau khi tải/export code từ Lovable — đưa vào project |
+| `/ingest-design-export` | Sau khi tải/export code từ Lovable — đưa vào project |
 | `/integration-planner` | Sau khi đã ingest, để check Lovable khớp với BE không |
-| `/ui-translator` | Kịch bản C — dịch Lovable về công nghệ cũ |
+| `/design-port` | Kịch bản C — dịch Lovable về công nghệ cũ |
 | `/integration-wire` | Kịch bản A/B — ghép code Lovable vào BE |
 | `/preview-deploy` | Trước khi duyệt cuối |
 

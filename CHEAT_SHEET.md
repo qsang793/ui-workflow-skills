@@ -21,11 +21,11 @@
 ```
 1. /ui-scenario-picker     →  Chọn A / B / C
 2. /ui-audit               →  Bản đồ UI hiện tại (bỏ qua nếu A)
-3. /design-brief           →  Sinh prompt cho Lovable (ghi LOVABLE_PROMPT.md)
+3. /design-brief           →  Sinh prompt cho Lovable (ghi .ui-workflow/design-prompt.md)
 4. [Tự vẽ trên Lovable / Google AI Studio]
-5. /ingest-lovable-export  →  Bỏ code Lovable vào lovable-export/
+5. /ingest-design-export   →  Bỏ code Lovable vào .ui-workflow/export/
 6. /integration-planner    →  Kiểm tra Lovable có khớp với BE không
-7. /integration-wire (A/B)  HOẶC  /ui-translator (C)
+7. /integration-wire (A/B)  HOẶC  /design-port (C)
 8. /preview-deploy         →  Link Vercel để click thử
 ```
 
@@ -45,16 +45,16 @@
 
 ## 📥 Bước 5 — 4 cách bỏ code vào project
 
-Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
+Gõ `/ingest-design-export`, skill sẽ hỏi anh chọn cách nào:
 
 | Cách | Khi nào dùng | Nói gì với Claude |
 |---|---|---|
 | **ZIP** | Tải nút "Download" trên Lovable | "Lovable export ở `~/Downloads/lovable-abc.zip`" |
 | **GitHub** | Lovable sync sang GitHub | "Lovable repo ở `https://github.com/.../...`" |
-| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/lovable-export/`" |
+| **Folder** | Đã tự unzip ra đâu đó | "Đã unzip ở `~/Desktop/design-export/`" |
 | **Paste** | Lovable chỉ trả code trong chat | "Tôi sẽ paste từng file" |
 
-→ Tất cả đều land vào `lovable-export/` ở root project. Không cần mở terminal.
+→ Tất cả đều land vào `.ui-workflow/export/` ở root project. Không cần mở terminal.
 
 ---
 
@@ -98,7 +98,7 @@ Gõ `/ingest-lovable-export`, skill sẽ hỏi anh chọn cách nào:
 |---|---|
 | Không biết bắt đầu | `/ui-scenario-picker` |
 | Bí ở giữa flow | "tôi đang ở bước X, gặp Y, gợi ý cho tôi" |
-| Đã tải code Lovable, không biết để đâu | `/ingest-lovable-export` |
+| Đã tải code Lovable, không biết để đâu | `/ingest-design-export` |
 | Skill báo lỗi lạ | Copy nguyên thông báo gửi dev |
 | Lovable trả ra UI không vừa ý | Mở Lovable, sửa prompt, lặp lại — đừng "ép" Claude |
 

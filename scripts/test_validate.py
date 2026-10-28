@@ -14,7 +14,7 @@ Read `${CLAUDE_SKILL_DIR}/templates/base.md`. Replace `{{extra}}` with notes.
 """
 
 
-def make_repo(root, skill=SKILL, base="{{block}}\n{{extra}}\n", version="1.0.0"):
+def make_repo(root, skill=SKILL, base="{{block}}\n{{extra}}\n", version="1.0.0", files=None):
     skill_dir = root / "skills/demo"
     (skill_dir / "templates").mkdir(parents=True)
     (skill_dir / "SKILL.md").write_text(skill)
@@ -25,6 +25,8 @@ def make_repo(root, skill=SKILL, base="{{block}}\n{{extra}}\n", version="1.0.0")
     (root / ".claude-plugin/marketplace.json").write_text(json.dumps({"plugins": [{"name": "demo"}]}))
     (root / "CHANGELOG.md").write_text("## [1.0.0] — 2026-01-01\n")
     (root / "README.md").write_text("[log](./CHANGELOG.md)\n")
+    for rel, text in (files or {}).items():
+        (root / rel).write_text(text)
 
 
 class ValidateTest(unittest.TestCase):
@@ -51,6 +53,33 @@ class ValidateTest(unittest.TestCase):
     def test_version_must_match_changelog(self):
         errors = self.run_case(version="0.9.0")
         self.assertTrue(any("CHANGELOG" in e for e in errors))
+
+    def test_old_name_in_skill_reported(self):
+        errors = self.run_case(skill=SKILL + "Stage into `lovable-export/`.\n")
+        self.assertTrue(any("lovable-export" in e and "SKILL.md" in e for e in errors))
+
+    def test_old_name_allowed_in_history(self):
+        errors = self.run_case(files={
+            "CHANGELOG.md": "## [1.0.0] — 2026-01-01\nRenamed `ui-translator`.\n",
+            "PILOT_RETROSPECTIVE.md": "Wrote `LOVABLE_PROMPT.md`.\n",
+            "README.md": "# Demo\n\n## Migrating from 0.x\n\n```bash\n# move it\nmv lovable-export .ui-workflow/export\n```\n\n"
+                         "`/ingest-lovable-export` is gone.\n",
+        })
+        self.assertEqual(errors, [])
+
+    def test_agent_worktrees_ignored(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            make_repo(Path(tmp))
+            stale = Path(tmp) / ".claude/worktrees/old/skills/x"
+            stale.mkdir(parents=True)
+            (stale / "SKILL.md").write_text("Run `/ui-translator`. [gone](./gone.md)\n")
+            self.assertEqual(validate(tmp), [])
+
+    def test_old_name_after_migration_section_reported(self):
+        errors = self.run_case(files={
+            "README.md": "## Migrating from 0.x\n\n`ui-translator` renamed.\n\n## Usage\n\nRun `/ui-translator`.\n",
+        })
+        self.assertTrue(any("README.md:7" in e and "ui-translator" in e for e in errors))
 
 
 if __name__ == "__main__":

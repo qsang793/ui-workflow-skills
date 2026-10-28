@@ -62,7 +62,7 @@ Read in this order:
 
 ### 4. Write the report
 
-Single markdown file at the project root: `UI_AUDIT.md`.
+Single markdown file: `.ui-workflow/audit.md` (create the `.ui-workflow/` folder at the project root if missing).
 
 Cap at **5 items per severity tier**. More than that = the report is too long for a non-tech stakeholder to act on.
 

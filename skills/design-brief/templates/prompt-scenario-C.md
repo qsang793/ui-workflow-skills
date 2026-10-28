@@ -1,5 +1,5 @@
 <!-- Scenario C: Keep existing stack. CRITICAL constraints. -->
-<!-- Fill in <PLACEHOLDERS> from design-brief answers and UI_AUDIT.md. -->
+<!-- Fill in <PLACEHOLDERS> from design-brief answers and .ui-workflow/audit.md. -->
 
 You are producing a **visual design** that will be re-implemented in an existing codebase. The existing codebase uses **<EXISTING_STACK>** (e.g. Vanilla JavaScript + plain CSS + FastAPI Jinja templates), NOT React.
 
@@ -24,10 +24,10 @@ Produce **semantic HTML5 + CSS only.**
 ---
 
 ## What the existing UI does (do not redesign functionality)
-<paste structure summary from UI_AUDIT.md — list of pages and what they do>
+<paste structure summary from .ui-workflow/audit.md — list of pages and what they do>
 
 ## What needs to look better
-<paste high-priority visual pain points from UI_AUDIT.md>
+<paste high-priority visual pain points from .ui-workflow/audit.md>
 
 ## Pages to redesign
 <list — same set as today, just visually improved>

@@ -29,7 +29,7 @@ ln -sf ~/projects/ui-workflow-skills/skills/* ~/.claude/skills/
 ls ~/.claude/skills/ | grep -E '^(ui-|design-|ingest-|integration-|preview-)'
 ```
 
-Cần thấy 8 skills: `design-brief`, `ingest-lovable-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`. Cập nhật bằng `git pull`, symlink tự nhận bản mới.
+Cần thấy 8 skills: `design-brief`, `design-port`, `ingest-design-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`. Cập nhật bằng `git pull`, symlink tự nhận bản mới.
 
 ---
 
@@ -68,10 +68,10 @@ ui-workflow-skills/
     ├── design-brief/
     │   ├── SKILL.md                    phỏng vấn user → prompt Lovable
     │   └── templates/                  5 prompt templates (scenario A/B/C, brand, constraints)
-    ├── ingest-lovable-export/SKILL.md  stage Lovable output vào lovable-export/
+    ├── ingest-design-export/SKILL.md   stage Lovable output vào .ui-workflow/export/
     ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
     ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
-    ├── ui-translator/SKILL.md          dịch React → stack cũ (kịch bản C)
+    ├── design-port/SKILL.md            dịch React → stack cũ (kịch bản C)
     └── preview-deploy/SKILL.md         deploy Vercel preview
 ```
 
@@ -84,17 +84,17 @@ User: "tôi muốn cải thiện UI"
    ↓
 /ui-scenario-picker   →  scenario A / B / C
    ↓
-/ui-audit             →  UI_AUDIT.md (skip cho A)
+/ui-audit             →  .ui-workflow/audit.md (skip cho A)
    ↓
-/design-brief         →  LOVABLE_PROMPT.md (paste-ready cho Lovable)
+/design-brief         →  .ui-workflow/design-prompt.md (paste-ready cho Lovable)
    ↓
 [user mở Lovable, vẽ, export code (ZIP / GitHub / folder)]
    ↓
-/ingest-lovable-export →  stage vào lovable-export/ + validate scenario
+/ingest-design-export →  stage vào .ui-workflow/export/ + validate scenario
    ↓
-/integration-planner  →  INTEGRATION_PLAN.md  ← GUARDRAIL: stop nếu blocker
+/integration-planner  →  .ui-workflow/integration-plan.md  ← GUARDRAIL: stop nếu blocker
    ↓
-/integration-wire (A/B)  hoặc  /ui-translator (C)
+/integration-wire (A/B)  hoặc  /design-port (C)
    ↓
 /preview-deploy       →  https://<branch>.vercel.app
    ↓
@@ -110,9 +110,9 @@ User: "preview approved, ship to prod"
 | Loại | Skill | Đặc điểm |
 |---|---|---|
 | **Diagnostic** | `ui-scenario-picker`, `ui-audit`, `integration-planner` | Đọc + hỏi, không sửa code. An toàn invoke nhiều lần. |
-| **Generative** | `design-brief` | Phỏng vấn user, sinh prompt + ghi `LOVABLE_PROMPT.md`. Không sửa source code. |
-| **Staging** | `ingest-lovable-export` | Đưa Lovable export về `lovable-export/`, validate scenario. Không sửa source code hiện tại, chỉ tạo folder mới. |
-| **Action** | `integration-wire`, `ui-translator`, `preview-deploy` | Sửa code / deploy. Chỉ invoke khi diagnostic skill đã PASS. |
+| **Generative** | `design-brief` | Phỏng vấn user, sinh prompt + ghi `.ui-workflow/design-prompt.md`. Không sửa source code. |
+| **Staging** | `ingest-design-export` | Đưa Lovable export về `.ui-workflow/export/`, validate scenario. Không sửa source code hiện tại, chỉ tạo folder mới và thêm 1 dòng ignore vào `.gitignore`. |
+| **Action** | `integration-wire`, `design-port`, `preview-deploy` | Sửa code / deploy. Chỉ invoke khi diagnostic skill đã PASS. |
 
 → **Quy tắc**: không bao giờ chạy action skill khi diagnostic skill chưa OK.
 
@@ -133,7 +133,7 @@ User: "preview approved, ship to prod"
 - ✅ `ui-scenario-picker` — đúng kịch bản (C) dựa filesystem
 - ✅ `ui-audit` — phát hiện 1723 inline styles, 246 unique colors vs 16 design tokens, 5 files >500 lines
 - ✅ `design-brief` template lockdown — verified "no React" appears 6+ chỗ trong scenario-C
-- ⏸ `integration-planner`, `integration-wire`, `ui-translator`, `preview-deploy` — chưa pilot (cần Lovable output thật, sẽ test trong follow-up)
+- ⏸ `integration-planner`, `integration-wire`, `design-port`, `preview-deploy` — chưa pilot (cần Lovable output thật, sẽ test trong follow-up)
 
 12 learnings từ pilot → đã apply vào v0.1.1. Xem `PILOT_RETROSPECTIVE.md`.
 

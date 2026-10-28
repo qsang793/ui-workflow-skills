@@ -93,7 +93,7 @@ Always also fill in:
 
 ### 4. Output
 
-**Write the assembled prompt to a file** at the project root: `LOVABLE_PROMPT.md`. Non-tech users find files easier to copy from than scrolling chat.
+**Write the assembled prompt to a file**: `.ui-workflow/design-prompt.md` (create the `.ui-workflow/` folder at the project root if missing). Non-tech users find files easier to copy from than scrolling chat.
 
 File content format:
 
@@ -110,10 +110,10 @@ File content format:
 Then in chat, point the user at the file with **tool-specific** next steps:
 
 **If user chose Lovable** (from step 1b):
-> ✅ Prompt saved to `LOVABLE_PROMPT.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Lovable. After Lovable produces a project you like, either click "Download ZIP" or enable "Sync to GitHub". Then come back and invoke `/ingest-lovable-export`.
+> ✅ Prompt saved to `.ui-workflow/design-prompt.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Lovable. After Lovable produces a project you like, either click "Download ZIP" or enable "Sync to GitHub". Then come back and invoke `/ingest-design-export`.
 
 **If user chose Google AI Studio** (from step 1b):
-> ✅ Prompt saved to `LOVABLE_PROMPT.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Google AI Studio. AI Studio will return code in chat — copy each file's content out, then come back and invoke `/ingest-lovable-export` and choose the **"Paste"** method.
+> ✅ Prompt saved to `.ui-workflow/design-prompt.md`. Open the file, copy everything between the `=== COPY ===` markers, and paste into Google AI Studio. AI Studio will return code in chat — copy each file's content out, then come back and invoke `/ingest-design-export` and choose the **"Paste"** method.
 
 ## Critical Rule for Scenario C
 

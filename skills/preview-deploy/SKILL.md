@@ -1,6 +1,6 @@
 ---
 name: preview-deploy
-description: Use after integration is complete (integration-wire or ui-translator finished, build green) and before user approves UI for production. Deploys the current branch to a Vercel preview URL on the free tier so the user can click-test on real phones and laptops. Required step — screenshots can hide bugs that real interaction reveals.
+description: Use after integration is complete (integration-wire or design-port finished, build green) and before user approves UI for production. Deploys the current branch to a Vercel preview URL on the free tier so the user can click-test on real phones and laptops. Required step — screenshots can hide bugs that real interaction reveals.
 ---
 
 # Preview Deploy
@@ -11,7 +11,7 @@ Stakeholders approve UI based on what they can click on real devices, not screen
 
 ## When to Use
 
-- After `integration-wire` or `ui-translator` declares complete with a passing build
+- After `integration-wire` or `design-port` declares complete with a passing build
 - Before any `git merge` to main / production deploy
 
 ## When NOT to Use
@@ -129,5 +129,5 @@ If the BE runs on AWS / Hetzner / your own VPS:
 
 ## Related Skills
 
-- `integration-wire` / `ui-translator` — must complete with green build first
+- `integration-wire` / `design-port` — must complete with green build first
 - (After approval) Outside this workflow: production deploy is the user's responsibility, not Claude's.
