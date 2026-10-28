@@ -2,6 +2,27 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] — 2026-10-27
+
+### Added — Claude Code plugin packaging
+- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`. Install in one step with `/plugin install ui-workflow-skills --marketplace qsang793/ui-workflow-skills`. Plugin-installed skills are namespaced, e.g. `/ui-workflow-skills:design-brief`. The symlink install still works and keeps the short names.
+- `plugin.json` is now the single source of the version number.
+
+### Added — CI
+- `scripts/validate.py` checks skill frontmatter (name matches folder, description present and ≤ 1024 chars), bundled template paths, template placeholders, relative Markdown links, and that `plugin.json` version matches the latest CHANGELOG entry. Tests in `scripts/test_validate.py`.
+- GitHub Actions workflow runs the tests, the validator, and `claude plugin validate ./ --strict` on every push to `main` and every PR.
+
+### Fixed — `design-brief` could not find its templates after install
+Templates lived at the repo root (`templates/`), but install only symlinked `skills/*`, so `design-brief` looked for `templates/...` inside the user's project. Moved to `skills/design-brief/templates/` and referenced via `${CLAUDE_SKILL_DIR}`. Each skill folder is now self-contained.
+
+### Fixed — `{{existing-design-tokens}}` placeholder was never filled
+The scenario-C template had the placeholder, but `design-brief` only said to "append" a section. Projects without tokens got the raw placeholder in their prompt. The skill now replaces it, or deletes it when there are no tokens.
+
+### Changed — README
+- Plugin install documented as the default. Clone URL fixed (was `<your-username>`). Release steps documented.
+
+---
+
 ## [0.1.4] — 2026-05-24
 
 ### Fixed — install verify regex missed the new skill

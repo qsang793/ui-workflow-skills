@@ -1,0 +1,15 @@
+{
+  "name": "ui-workflow-skills",
+  "description": "Marketplace for the ui-workflow-skills plugin.",
+  "owner": {
+    "name": "qsang793",
+    "url": "https://github.com/qsang793"
+  },
+  "plugins": [
+    {
+      "name": "ui-workflow-skills",
+      "source": "./",
+      "description": "Claude Code skills for non-technical stakeholders to drive UI improvement work via Lovable or Google AI Studio."
+    }
+  ]
+}

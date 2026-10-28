@@ -2,33 +2,34 @@
 
 Một bộ 8 Claude Code skills + 5 prompt templates cho Lovable / Google AI Studio, dùng để cải thiện UI cho **dự án bất kỳ**. Thiết kế để **non-technical stakeholder điều khiển**, developer chỉ can thiệp khi skill báo blocker.
 
-**Version: 0.1.4** — Bug fixes: (1) install verify regex giờ catch cả `ingest-lovable-export` (trước đó bị miss → boss nghĩ install lỗi), (2) LICENSE copyright về đúng `qsang793` (trước đó là `koliaphan` do lệch git config lúc commit đầu). Xem `CHANGELOG.md`.
+**Version: 0.2.0**: đóng gói thành Claude Code plugin, templates nằm trong skill `design-brief`, thêm CI kiểm tra skill. Xem `CHANGELOG.md`.
 
 ---
 
 ## Cài đặt
 
-```bash
-# 1. Clone repo về máy
-git clone git@github.com:<your-username>/ui-workflow-skills.git ~/projects/ui-workflow-skills
+### Cách 1: plugin (khuyên dùng)
 
-# 2. Symlink skills vào Claude Code
+Trong Claude Code (2.1.275 trở lên):
+
+```
+/plugin install ui-workflow-skills --marketplace qsang793/ui-workflow-skills
+```
+
+Khi cài qua plugin, mỗi skill có tiền tố tên plugin, ví dụ `/ui-workflow-skills:ui-scenario-picker`. Thường chỉ cần nói "tôi muốn cải thiện UI", Claude tự chọn skill.
+
+Cập nhật: `/plugin marketplace update ui-workflow-skills`.
+
+### Cách 2: symlink (giữ tên lệnh ngắn như `/ui-scenario-picker`)
+
+```bash
+git clone https://github.com/qsang793/ui-workflow-skills.git ~/projects/ui-workflow-skills
 mkdir -p ~/.claude/skills
 ln -sf ~/projects/ui-workflow-skills/skills/* ~/.claude/skills/
-
-# 3. Verify
 ls ~/.claude/skills/ | grep -E '^(ui-|design-|ingest-|integration-|preview-)'
 ```
 
-Cần thấy 8 skills: `design-brief`, `ingest-lovable-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`.
-
-**Updates về sau**:
-
-```bash
-cd ~/projects/ui-workflow-skills && git pull
-```
-
-Symlinks tự pick up — không cần re-install.
+Cần thấy 8 skills: `design-brief`, `ingest-lovable-export`, `integration-planner`, `integration-wire`, `preview-deploy`, `ui-audit`, `ui-scenario-picker`, `ui-translator`. Cập nhật bằng `git pull`, symlink tự nhận bản mới.
 
 ---
 
@@ -54,21 +55,24 @@ ui-workflow-skills/
 ├── CHANGELOG.md                       ← version history
 ├── LICENSE                            ← MIT
 ├── .gitignore
-├── skills/
-│   ├── ui-scenario-picker/SKILL.md     quyết định kịch bản A / B / C
-│   ├── ui-audit/SKILL.md               map stack + pain points
-│   ├── design-brief/SKILL.md           phỏng vấn user → prompt Lovable
-│   ├── ingest-lovable-export/SKILL.md  stage Lovable output vào lovable-export/
-│   ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
-│   ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
-│   ├── ui-translator/SKILL.md          dịch React → stack cũ (kịch bản C)
-│   └── preview-deploy/SKILL.md         deploy Vercel preview
-└── templates/
-    ├── prompt-scenario-A.md
-    ├── prompt-scenario-B.md
-    ├── prompt-scenario-C.md            (cấm React — critical lockdown)
-    ├── brand-block.md
-    └── constraints-block.md
+├── .claude-plugin/
+│   ├── plugin.json                    ← tên, version (nguồn version duy nhất)
+│   └── marketplace.json
+├── .github/workflows/validate.yml     ← CI
+├── scripts/
+│   ├── validate.py                    ← kiểm tra skill, template, link, version
+│   └── test_validate.py
+└── skills/
+    ├── ui-scenario-picker/SKILL.md     quyết định kịch bản A / B / C
+    ├── ui-audit/SKILL.md               map stack + pain points
+    ├── design-brief/
+    │   ├── SKILL.md                    phỏng vấn user → prompt Lovable
+    │   └── templates/                  5 prompt templates (scenario A/B/C, brand, constraints)
+    ├── ingest-lovable-export/SKILL.md  stage Lovable output vào lovable-export/
+    ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
+    ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
+    ├── ui-translator/SKILL.md          dịch React → stack cũ (kịch bản C)
+    └── preview-deploy/SKILL.md         deploy Vercel preview
 ```
 
 ---
@@ -148,7 +152,18 @@ git commit -m "ui-audit: <change description>"
 git push
 ```
 
-Bump version trong README + thêm entry vào `CHANGELOG.md` khi ship thay đổi đáng kể. Sếp nên `git pull` sau mỗi bump.
+Trước khi push, chạy kiểm tra (CI cũng chạy trên mỗi PR):
+
+```bash
+python3 scripts/validate.py
+claude plugin validate ./ --strict
+```
+
+Phát hành bản mới:
+1. Bump `version` trong `.claude-plugin/plugin.json` và thêm mục cùng số version vào đầu `CHANGELOG.md`. CI báo lỗi nếu hai số lệch nhau.
+2. Commit, rồi tag: `git tag -a v<version> -m "v<version>" && git push --tags`.
+
+Người dùng plugin chỉ nhận bản mới khi `version` thay đổi.
 
 ---
 
