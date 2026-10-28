@@ -25,7 +25,7 @@ File: `.ui-workflow/state.md`. One `- Key: value` line per field. Keys and step 
 
 - Scenario: C
 - Scenario reason: FastAPI serves Jinja templates with vanilla JS; Stakeholder wants to keep the stack.
-- Maturity: Production
+- Maturity: Beta
 - Design tool: none
 - Current step: audit
 - Completed steps: picker
@@ -39,7 +39,7 @@ File: `.ui-workflow/state.md`. One `- Key: value` line per field. Keys and step 
 |---|---|
 | Scenario | `A`, `B`, `C`, or `none` |
 | Scenario reason | One sentence citing what the picker saw in the files |
-| Maturity | `Production` for C, `Beta` for A and B, `none` with no Scenario |
+| Maturity | `Beta` for every Scenario until Scenario C passes its end-to-end pilot, then `Production` for C; `none` with no Scenario |
 | Design tool | `Lovable`, `Google AI Studio`, or `none` |
 | Current step | The step to run next, the step that stopped, or `done` once the Preview is approved |
 | Completed steps | Comma-separated step names in run order, or `none` |
@@ -67,7 +67,7 @@ So the order is:
 
 - A (Beta): picker → brief → ingest → wire → preview
 - B (Beta): picker → audit → brief → ingest → planner → wire → preview
-- C (Production): picker → audit → brief → ingest → planner → port → preview
+- C (Beta until its pilot passes): picker → audit → brief → ingest → planner → port → preview
 
 Scenario A skips audit and planner by design. A skipped step is never reported as missing.
 

@@ -80,7 +80,7 @@ Create `.ui-workflow/state.md` at the project root (create the folder if missing
 
 - Scenario: <A | B | C>
 - Scenario reason: <one sentence citing what you saw in the files>
-- Maturity: <Production for C | Beta for A and B>
+- Maturity: Beta
 - Design tool: none
 - Current step: <audit for B and C | brief for A>
 - Completed steps: picker
@@ -97,7 +97,7 @@ On escalation, write the same file with `Scenario: none`, `Maturity: none`, `Cur
 Return this block, translated into the Stakeholder's language except the commands:
 
 ```
-Scenario: <A | B | C> (<Production | Beta>)
+Scenario: <A | B | C> (Beta)
 Why: <one sentence justification, referencing what you saw on the filesystem>
 Next step: <B, C: /ui-workflow-skills:ui-audit | A: /ui-workflow-skills:design-brief>
 Saved: .ui-workflow/state.md

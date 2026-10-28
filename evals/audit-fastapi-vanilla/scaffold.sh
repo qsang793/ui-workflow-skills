@@ -7,7 +7,7 @@ cat > .ui-workflow/state.md <<'STATE'
 
 - Scenario: C
 - Scenario reason: FastAPI serves a Jinja template with vanilla JS; the Stakeholder wants to keep the stack.
-- Maturity: Production
+- Maturity: Beta
 - Design tool: none
 - Current step: audit
 - Completed steps: picker

@@ -6,7 +6,7 @@
   "costUsd": 2.5459609999999997,
   "partial": false,
   "suite": {
-    "root": "/Users/apple/Documents/chill/ui-workflow-skills",
+    "root": ".",
     "ablation": "none",
     "threshold": 1,
     "concurrency": 4,
@@ -14,7 +14,7 @@
       {
         "name": "ui-workflow-skills",
         "version": "0.2.0",
-        "path": "/Users/apple/Documents/chill/ui-workflow-skills"
+        "path": "."
       }
     ]
   },
