@@ -12,6 +12,7 @@ One folder at the project root:
   audit.md              written by ui-audit (committed)
   design-prompt.md      written by design-brief (committed)
   integration-plan.md   written by integration-planner (committed)
+  preview.md            written by preview-deploy (git-ignored)
   export/               Design export, staged by ingest-design-export (git-ignored)
   export-backup-*/      earlier Design exports (git-ignored)
 ```
@@ -202,3 +203,19 @@ Rules for each Screen:
 - A value that cannot be resolved statically is replaced by the project's default token for that role (for example the body text colour) and reported as a substitute for the Stakeholder to approve. When it affects layout or usability (widths, breakpoints, contrast, hit areas) and no screenshot settles it, `design-port` asks before going on.
 - After each Screen, `design-port` starts or reloads the app with the audit's `Run` command and gives the Stakeholder the local URL of that Screen. It never deploys per Screen. If the app cannot run locally, it stops and escalates to the Developer.
 - Each Screen's report, in the Stakeholder's language, lists substitutes, what was not reproduced visually, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed.
+
+### Preview record (`.ui-workflow/preview.md`)
+
+```markdown
+# Preview
+
+- Host: <vercel | tunnel | staging>
+- Host reason: <one sentence citing what preview-deploy saw in the files>
+- Run: <command> → <local URL> | none
+- URL: <the link given to the Stakeholder> | none
+- Processes: <app pid, tunnel pid> | none
+- Status: <chosen | open | failed: <reason> | closed>
+- Updated: <yyyy-mm-dd> by preview-deploy
+```
+
+`preview-deploy` writes it as soon as it has chosen the host, before checking any tool or account, and updates it as the Preview opens and closes. The host follows the project's shape (ADR-0003): `vercel` only for a static frontend whose backend is public or absent, never a production deploy; `tunnel` (local run with the audit's `Run` command, exposed through a temporary tunnel) when the backend serves the frontend, or when a static frontend reaches a local backend through the same origin; `staging` only when the project has one and the Developer confirms it. It is git-ignored because it holds a shareable link and local process ids. After approval the tunnel is stopped or the Developer confirms the shareable link is revoked, and Status is `closed`. Any stop before the link is verified sets Status `failed: <reason>`.

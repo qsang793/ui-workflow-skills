@@ -35,6 +35,11 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - Scenario B keeps the API-call and auth diff; Scenario A skips the step. The "fewer than three issues" rule is gone; the plan lists what was not checked. Output follows the planner verdict in `docs/workflow-contract.md`.
 - Evals: `planner-missing-field`, `planner-missing-required-action`, `planner-design-only-action`, `planner-matching-backend`.
 
+### Changed — host-agnostic Preview
+- `preview-deploy` picks the host by project shape (ADR-0003): a Vercel preview, never production, for a static frontend with a public backend; otherwise the app runs locally with the audit's `Run` command behind a temporary Cloudflare quick tunnel, or on the project's own staging. Vercel is detected by capability, not by tool name.
+- The link is checked from outside before it is shown; a Deployment Protection login page needs a Shareable Link, and a failure is reported. Tunnels come with a public-link and real-data warning and are closed after approval, which needs the completed click-test checklist.
+- The choice and the open Preview are recorded in `.ui-workflow/preview.md` (git-ignored). Evals `preview-server-rendered` and `preview-static`, with a static Vite fixture.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging

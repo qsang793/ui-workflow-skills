@@ -26,7 +26,7 @@
 5. /ingest-design-export   →  Bỏ code Lovable vào .ui-workflow/export/
 6. /integration-planner    →  Kiểm tra Lovable có khớp với BE không
 7. /integration-wire (A/B)  HOẶC  /design-port (C)
-8. /preview-deploy         →  Link Vercel để click thử
+8. /preview-deploy         →  Link Preview để click thử (Vercel hoặc tunnel)
 ```
 
 ---
