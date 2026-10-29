@@ -31,19 +31,27 @@ The paste-ready prompt the bundle assembles for the Design tool.
 _Avoid_: Lovable prompt, brief (the interview is the brief; the prompt is its output)
 
 **Design export**:
-The code the Design tool returns, staged inside the project for the next steps.
-_Avoid_: Lovable export, output
+The code the Design tool returns, whatever its framework, staged inside the project for the next steps. In Scenario C it is a visual reference only: its look is Ported, its runtime is discarded.
+_Avoid_: Lovable export, output, mockup
+
+**Screen**:
+One page or route of the Design export, or one named view inside it, Ported as a unit.
+_Avoid_: Component, page (when a route holds several views)
 
 **Workflow state**:
 The persisted record of the chosen Scenario, the chosen Design tool and the current step, read by every skill before it acts.
 _Avoid_: Context, session
 
 **Blocker**:
-A mismatch between the Design export and the existing backend that would need a backend change; it stops the workflow until a Developer decides.
+Data a Screen displays, or Required behaviour, that the existing backend cannot supply; it stops the workflow until a Developer decides.
 _Avoid_: Error, issue
 
+**Required behaviour**:
+What a screen does today, plus the must-haves the Stakeholder named in the interview; it can never be dropped to fit the design.
+_Avoid_: Committed feature, core feature
+
 **Port**:
-Moving one screen of a Scenario C Design export into the project's existing templates, styles and data code.
+Rebuilding the look of one Screen of a Scenario C Design export in the project's existing templates, styles and data code.
 _Avoid_: Translate, convert
 
 **Work branch**:
