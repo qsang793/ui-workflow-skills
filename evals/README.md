@@ -9,6 +9,10 @@ Each folder here is one case for `claude plugin eval`: a `prompt.md` (what the S
 | `audit-fastapi-vanilla` | `ui-audit` writes `.ui-workflow/audit.md` with at most five items per severity and advances the Workflow state |
 | `brief-names-missing-audit` | `design-brief` under Scenario C without an audit names the audit step and its command, writes no Design prompt |
 | `brief-scenario-a-skips-audit` | `design-brief` under Scenario A does not report the skipped audit as missing |
+| `ingest-react-scenario-c` | `ingest-design-export` under Scenario C stages a React ZIP without installing it, reports the framework and its three Screens, completes the step |
+| `ingest-single-file-views` | Pasted single-file React export with three conditional views: one Screen per view, Export file with `#<view>` |
+| `ingest-no-screen` | Folder export with backend code only: Scenario mismatch, step not completed |
+| `ingest-traversal-zip` | ZIP with `..` entries: rejected whole, nothing written, step not completed |
 
 Fixtures live in `fixtures/`. The Workflow state format is in [the workflow contract](../docs/workflow-contract.md).
 
