@@ -15,6 +15,12 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - Every skill replies in the Stakeholder's language. The picker labels every Scenario Beta; Scenario C becomes Production once its end-to-end pilot passes.
 - Behavioural evals for `claude plugin eval` under `evals/`, with a FastAPI + vanilla JS fixture and a mixed framework/vanilla fixture. Run locally or via the manual `evals` workflow. Local run 2026-10-27: 5 cases × 3 runs, every run scored 1.0 (`evals/results/2026-10-27T09-39-42-094Z/`).
 
+### Changed — `ingest-design-export` takes any framework under Scenario C
+- Under Scenario C the Design export is a visual reference in any framework (ADR-0004). Ingest reports the framework and the Screens the export renders (routes, pages, conditional views; not file names), asks when it cannot tell, and stops with a mismatch only when no Screen exists.
+- Asks for one optional screenshot per Screen, saved to `.ui-workflow/export/screenshots/<Screen>.png`.
+- ZIPs are checked entry by entry before extraction: an absolute, `..` or symlink entry rejects the whole ZIP. Nested `.git` is removed for every source, and the export is never installed, built or run.
+- Evals `ingest-react-scenario-c`, `ingest-single-file-views`, `ingest-no-screen` and `ingest-traversal-zip`, with React and backend-only export fixtures. Not run yet.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging

@@ -162,7 +162,7 @@ The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` pl
 ### `design-port` input
 
 - `.ui-workflow/export/`: the Design export as staged by ingest, in any framework (TanStack Start, React + Vite, Next, Angular) or plain HTML + CSS. It is a visual reference (ADR-0004): `design-port` reads its source and never installs, builds or runs it.
-- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest. Used to check layout and resolve values the source does not settle.
+- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest. `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). Used to check layout and resolve values the source does not settle.
 - `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION`, no `pending` decision, and the Screens table naming, per Screen, the export file, the target template, the data and the actions.
 - `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen.
 
