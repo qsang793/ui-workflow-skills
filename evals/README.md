@@ -18,6 +18,8 @@ Each folder here is one case for `claude plugin eval`: a `prompt.md` (what the S
 | `planner-missing-required-action` | Same, with a Required behaviour action (delete) the backend lacks: STOP, not offered as a Stakeholder decision |
 | `planner-design-only-action` | A design-only action without backend: listed under Needs Stakeholder decision with the Stakeholder's answer (drop), no Blocker, step completed |
 | `planner-matching-backend` | Matching backend: PROCEED with no invented issues; a single-file React export with three views gives one Screen per view (`src/App.tsx#<view>`); the export is not installed |
+| `preview-server-rendered` | `preview-deploy` on the FastAPI + Jinja fixture chooses a local run plus tunnel, never calls Vercel, does not approve the Preview itself |
+| `preview-static` | `preview-deploy` on a static Vite frontend with a public API chooses a Vercel preview, never `--prod`, never a tunnel as a fallback |
 
 Fixtures live in `fixtures/`; the planner cases share `fixtures/stage-reminders-design.sh`, which stages `fixtures/reminders-design/` (a single-file React export, `design-prompt.md`, `audit.md`) on top of the FastAPI fixture. The Workflow state format is in [the workflow contract](../docs/workflow-contract.md).
 

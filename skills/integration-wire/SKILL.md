@@ -125,7 +125,7 @@ Do **NOT** declare complete on a failing build.
 - (or ❌ Build failed: <error excerpt>)
 
 ### Next step
-Invoke `/preview-deploy` to push to Vercel.
+Invoke `/preview-deploy` to open a Preview.
 ```
 
 ## Critical Rules

@@ -35,13 +35,16 @@ Cần thấy 8 skills: `design-brief`, `design-port`, `ingest-design-export`, `i
 
 ## Cần thêm (cho `preview-deploy` skill)
 
+Skill chọn nơi chạy Preview theo dạng project: frontend tĩnh gọi backend công khai → Vercel preview; backend render giao diện (FastAPI/Jinja, Flask, Django) → chạy local qua tunnel tạm.
+
 ```bash
-# Vercel CLI (fallback khi Vercel MCP không sẵn sàng)
+# Frontend tĩnh: Vercel CLI (bỏ qua nếu Claude đã có công cụ Vercel đăng nhập sẵn)
 npm i -g vercel
 vercel login
-```
 
-Nếu anh đã có Vercel MCP authenticated trong Claude → bỏ qua bước này.
+# Backend render giao diện: Cloudflare quick tunnel, không cần tài khoản
+brew install cloudflared
+```
 
 ---
 
@@ -72,7 +75,7 @@ ui-workflow-skills/
     ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
     ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
     ├── design-port/SKILL.md            dịch React → stack cũ (kịch bản C)
-    └── preview-deploy/SKILL.md         deploy Vercel preview
+    └── preview-deploy/SKILL.md         Preview: Vercel hoặc local + tunnel
 ```
 
 ---
@@ -96,11 +99,11 @@ User: "tôi muốn cải thiện UI"
    ↓
 /integration-wire (A/B)  hoặc  /design-port (C)
    ↓
-/preview-deploy       →  https://<branch>.vercel.app
+/preview-deploy       →  link Vercel preview hoặc tunnel tạm (đóng sau khi duyệt)
    ↓
 [user click-test trên điện thoại + laptop]
    ↓
-User: "preview approved, ship to prod"
+User: "preview approved"
 ```
 
 ---
