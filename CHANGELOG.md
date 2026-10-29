@@ -29,6 +29,12 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - A and B templates no longer pin Next.js 14.
 - New eval `brief-scenario-c-vietnamese`.
 
+### Changed — `integration-planner` checks displayed data and actions (Scenario C)
+- Scenario C: per Screen, compares the data the Design export displays and the actions it offers with the backend. Reads the export statically in any framework, never installs or runs it; mock data is a list of displayed fields. Screens come from what the export renders, with `#<view>` when one file renders several.
+- Missing backend for displayed data or Required behaviour (from `design-prompt.md`) is a Blocker → STOP for the Developer. A design-only action without backend goes under Needs Stakeholder decision (drop, the default, or disabled "coming soon"); the step completes only when none is pending.
+- Scenario B keeps the API-call and auth diff; Scenario A skips the step. The "fewer than three issues" rule is gone; the plan lists what was not checked. Output follows the planner verdict in `docs/workflow-contract.md`.
+- Evals: `planner-missing-field`, `planner-missing-required-action`, `planner-design-only-action`, `planner-matching-backend`.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging
