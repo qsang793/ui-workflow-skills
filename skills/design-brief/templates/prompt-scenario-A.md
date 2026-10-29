@@ -1,4 +1,4 @@
-<!-- Scenario A: Greenfield. Lovable is free to choose stack. -->
+<!-- Scenario A: Greenfield. The Design tool builds in its own default stack. -->
 <!-- Fill in <PLACEHOLDERS> from the design-brief interview answers. -->
 
 You are designing a complete web application from scratch.
@@ -28,7 +28,7 @@ You are designing a complete web application from scratch.
 {{constraints-block}}
 
 ## Deliverable
-- A complete, production-ready **Next.js 14 + Tailwind CSS** project (App Router)
+- A complete, production-ready project in your default stack (current stable versions)
 - All pages above implemented with real components
 - Responsive across mobile / tablet / desktop
 - Loading and error states for every async interaction

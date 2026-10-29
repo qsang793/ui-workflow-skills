@@ -13,6 +13,7 @@ Each folder here is one case for `claude plugin eval`: a `prompt.md` (what the S
 | `ingest-single-file-views` | Pasted single-file React export with three conditional views: one Screen per view, Export file with `#<view>` |
 | `ingest-no-screen` | Folder export with backend code only: Scenario mismatch, step not completed |
 | `ingest-traversal-zip` | ZIP with `..` entries: rejected whole, nothing written, step not completed |
+| `brief-scenario-c-vietnamese` | `design-brief` under Scenario C, interview in Vietnamese: English Design prompt that asks for the look only, does not forbid frameworks, reuses tokens, and lists Required behaviour; Design tool recorded |
 
 Fixtures live in `fixtures/`. The Workflow state format is in [the workflow contract](../docs/workflow-contract.md).
 
