@@ -135,6 +135,23 @@ At most five bullets under each severity. An empty severity has the single bulle
 
 Besides the paste-ready prompt, it contains a `## Required behaviour` section: per existing screen, what it does today, plus the must-haves the Stakeholder named in the interview. The planner reads it.
 
+```markdown
+=== COPY EVERYTHING BELOW INTO <Design tool> ===
+<paste-ready Design prompt>
+=== END COPY ===
+
+## Required behaviour
+
+### <Screen> — <template file>[#<view>]
+- Shows: <data displayed today, with real field names and their source>
+- Does: <each action today and the endpoint or code that serves it> | none
+
+### Stakeholder must-haves
+- <must-have> | none
+```
+
+The section follows `=== END COPY ===`, so it is never pasted into the Design tool. A screen left out of the redesign keeps its entry, marked `(not redesigned)` after the template file. Scenario A has no existing screens and omits the section.
+
 ### Planner verdict (`.ui-workflow/integration-plan.md`)
 
 ```markdown

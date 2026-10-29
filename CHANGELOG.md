@@ -21,6 +21,14 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - ZIPs are checked entry by entry before extraction: an absolute, `..` or symlink entry rejects the whole ZIP. Nested `.git` is removed for every source, and the export is never installed, built or run.
 - Evals `ingest-react-scenario-c`, `ingest-single-file-views`, `ingest-no-screen` and `ingest-traversal-zip`, with React and backend-only export fixtures. Not run yet.
 
+### Changed — `design-brief` follows ADR-0004
+- The Scenario C Design prompt asks for the look only (layout, spacing, colours, fonts, component states), one page or route per Screen, the project's real copy and field names, and reuses existing tokens. It prefers plain HTML + one CSS file with CSS variables but no longer forbids frameworks.
+- `design-prompt.md` gets a `## Required behaviour` section after the copy block: per existing screen, what it does today, plus the Stakeholder's must-haves. `integration-planner` reads it.
+- The interview runs in the Stakeholder's language; the Design prompt is always English. The chosen Design tool is recorded in the Workflow state.
+- Design tool recommendation and export steps follow the 2026-10-27 research: Lovable for A/B, either tool for C; AI Studio is told to pick plain HTML or the lightest framework in Settings (untested).
+- A and B templates no longer pin Next.js 14.
+- New eval `brief-scenario-c-vietnamese`.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging
