@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.307</span>
+<span class="num">2026-10-30 04:11 UTC</span>
+<span class="num">2m 14s</span>
+<span class="num">$1.40</span>
+<span class="num">12 runs</span>
+<span class="num">3 in flight</span>
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+<span>filtered: --case planner-*</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">99%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">4</span><span class="sub">4 of 4 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">91.7%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>planner-design-only-action</h2>
+<span class="muted mono">evals/planner-design-only-action</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 04:11:48 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">decision-drop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched decision:\s*drop</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">email-is-decision</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The backend supplies every field and every Required behaviour of the three redesigned Screens. There are 0 Blockers. The one design-only action (&quot;Email me&quot;) is dropped, as the Stakeholder already instructed.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- Today / All reminders / Done: &quot;Email me&quot; button (per reminder) | backend missing (no email or notification endpoint) | decision: drop
+
+## Not checked
+- The export&apos;s styling (Tailwind classes) was not compared with the existing CSS tokens; that is a port concern, not a backend one.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done` |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `src/App.tsx#done` | `app/templates/index.html` (new tab, no existing view) | title, due | none | `GET /api/reminders` (filter `done == true` in the frontend) |
+
+Settings is not redesigned and gets no row.
+
+## Next step
+Run `/ui-workflow-skills:design-port`. Leave out the &quot;Email me&quot; button.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-pending</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 04:11:48 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">decision-drop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched decision:\s*drop</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">email-is-decision</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The design shows only `id`, `title`, `due` and `done`, and the backend returns all four from `GET /api/reminders`. The Done button maps to `POST /api/reminders/{id}/done`. The Stakeholder&apos;s &quot;Done&quot; view is a filter on `done`, so the backend already supplies it. There are 0 Blockers. One design-only action (&quot;Email me&quot;) has no backend; the Stakeholder said to leave such buttons out, so it is dropped.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- Today / All reminders / Done: &quot;Email me&quot; button on every row | backend missing (no email or notification endpoint) | decision: drop
+
+## Not checked
+- The design has no Settings tab. Settings is &quot;not redesigned&quot; in the brief, so it stays as the existing template; the port must keep that tab working.
+- The existing &quot;Hello {{ owner }}&quot; header and logo are absent from the design. They are not listed in Required behaviour, so I did not treat them as required. Confirm that is intended.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html` (`#today`) | title, due | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done` |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html` (`#all`) | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `src/App.tsx#done` | `app/templates/index.html` (new view) | title, due, done | none | `GET /api/reminders` (filter `done == true` in the browser) |
+
+## Next step
+Run `/ui-workflow-skills:design-port`. Leave out the &quot;Email me&quot; button.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-pending</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.12 · 04:11:48 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">decision-drop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched decision:\s*drop</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">email-is-decision</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The design needs nothing the backend cannot do. 0 Blockers. Every field shown (`title`, `due`, `done`) comes from `GET /api/reminders`, and the Done button maps to `POST /api/reminders/{id}/done`. The new Done view only filters `done === true` on the same list, so it needs no new endpoint. One design-only button (&quot;Email me&quot;) has no backend and is dropped, as the Stakeholder asked.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- Today, All reminders, Done: &quot;Email me&quot; button on every row | backend missing (no email or notification endpoint) | decision: drop
+
+## Not checked
+- none
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `.ui-workflow/export/src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done` false client-side); `POST /api/reminders/{id}/done` |
+| All reminders | `.ui-workflow/export/src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `.ui-workflow/export/src/App.tsx#done` | none yet: new tab in `app/templates/index.html` | title, due | none | `GET /api/reminders` (filter `done` true client-side) |
+
+Settings is not redesigned and keeps working as it is.
+
+## Next step
+Run `/ui-workflow-skills:design-port`. Leave the &quot;Email me&quot; button out of the port.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-pending</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new design is staged. Check it against our backend before we port it. If the design has buttons our backend can't do yet, just leave them out for now.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">decision-drop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;decision:\\s*drop&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">email-is-decision</span><span class="badge">llm</span></div>
+<div class="md"><p>The plan lists the "Email me" action under Needs Stakeholder decision with the decision to drop it, and does not list it, or anything else, as a Blocker.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-port</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*port\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-blockers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Blockers\\s*\\n\\s*-\\s*[Nn]one&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-pending</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;decision:\\s*pending&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Verdict:\\s*STOP&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">planner-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>planner-matching-backend</h2>
+<span class="muted mono">evals/planner-matching-backend</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:95.8%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">95.8%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:95.8%"></span></span>
+<span class="num">95.8%</span>
+<span class="muted num">66.7% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.13 · 04:12:18 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">export-not-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Needs Stakeholder decision\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-per-view</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=[\s\S]*App\.tsx#today)(?=[\s\S]*App\.tsx#all)(?=[\s\S]*App\.tsx#done)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screens-and-no-invented-issues</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The design shows only `title`, `due` and `done` (plus `id` for the Done button), and every one comes from `GET /api/reminders`. The only action, Done, is served by `POST /api/reminders/{id}/done`. The new Done view only filters `done === true` in the frontend, so it needs no new endpoint. This satisfies the Stakeholder must-have. Blockers: 0. Design-only actions: 0. Adapters: 0.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- The backend was read statically and not run. The API only serves an in-memory list and has no auth.
+- Settings was not compared: it is &quot;not redesigned&quot; and the export does not render it.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (frontend keeps `done` false); `POST /api/reminders/{id}/done` |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `src/App.tsx#done` | `app/templates/index.html` (new `#done` view) | title, due | none | `GET /api/reminders` (frontend keeps `done` true) |
+
+## Notes for design-port
+- The design has no Settings tab, but Settings is not redesigned and must stay reachable. Keep its tab and view as they are.
+- The design drops the &quot;Hello {{ owner }}&quot; greeting and the logo. Neither is listed in Required behaviour, but check with the Stakeholder if it should stay.
+- The third mock row (&quot;Renew passport&quot;) is sample data only. Do not carry it over.
+
+## Next step
+Run `/ui-workflow-skills:design-port`.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-proceed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*PROCEED(?! WITH)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.12 · 04:12:20 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">export-not-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Needs Stakeholder decision\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-per-view</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=[\s\S]*App\.tsx#today)(?=[\s\S]*App\.tsx#all)(?=[\s\S]*App\.tsx#done)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screens-and-no-invented-issues</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The design shows three Screens (Today, All reminders, Done). Every field it displays (`title`, `due`, `done`) is returned by `GET /api/reminders`, and its only action (Done) is served by `POST /api/reminders/{id}/done`. The Stakeholder&apos;s must-have, a Done view, is a filter on `done` that the frontend can compute from the same endpoint. Blockers: 0. Design-only actions: 0.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- Settings: the export has no Settings tab. It is marked &quot;not redesigned&quot;, so it keeps its current template section and was not compared.
+- The export&apos;s page heading &quot;Reminders&quot; is static text; the backend&apos;s `owner` template variable (&quot;Lan&quot;) is not used by the design. Nothing to supply.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done` |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done (shown as strike-through, no Done button) | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `src/App.tsx#done` | `app/templates/index.html` (new `#done` view) | title, due | none | `GET /api/reminders` (filter `done == true` in the frontend) |
+
+## Next step
+Run `/ui-workflow-skills:design-port`.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-proceed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*PROCEED(?! WITH)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:87.5%"></span></span>
+<span class="num">87.5%</span>
+<span class="muted num">9 turns · $0.12 · 04:12:21 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">export-not-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-port</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*port\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-blockers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Blockers\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Needs Stakeholder decision\s*\n\s*-\s*[Nn]one</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief,\s*ingest,\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-per-view</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=[\s\S]*App\.tsx#today)(?=[\s\S]*App\.tsx#all)(?=[\s\S]*App\.tsx#done)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">screens-and-no-invented-issues</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: PROCEED
+
+The design shows only `title`, `due` and `done`, and its only action is &quot;Done&quot;. The backend already supplies all of these through `GET /api/reminders` and `POST /api/reminders/{id}/done`. The new &quot;Done&quot; view (Stakeholder must-have) is a frontend filter on `done === true` from the same endpoint. Blockers: 0. Design-only actions: 0.
+
+## Blockers
+- none
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- The export has no Settings tab. Settings is &quot;(not redesigned)&quot; and must stay as it is in `app/templates/index.html#settings`, so the port must keep that tab and not drop it.
+- The design does not show the &quot;Hello {{ owner }}&quot; greeting that the current page renders from the server. The brief lists it as neither Required behaviour nor a must-have. Confirm with the Stakeholder if it should stay.
+- The export was read statically only (not installed, built or run). I did not look at styling or responsive behaviour.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html` (`#today`) | title, due (undone reminders only) | Done | `GET /api/reminders` (filter `!done` in the frontend); `POST /api/reminders/{id}/done` |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html` (`#all`) | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |
+| Done | `src/App.tsx#done` | new view in `app/templates/index.html` (no existing template) | title, due (finished reminders only) | none | `GET /api/reminders` (filter `done` in the frontend) |
+
+## Next step
+Run `/ui-workflow-skills:design-port`.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-proceed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*PROCEED(?! WITH)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new design is staged. Check it against our backend before we port it.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">export-not-installed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;files&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;node_modules&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-port</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*port\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-blockers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Blockers\\s*\\n\\s*-\\s*[Nn]one&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-decisions</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">planner-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">screen-per-view</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">screens-and-no-invented-issues</span><span class="badge">llm</span></div>
+<div class="md"><p>The Screens table has one row for each of the Today, All reminders and Done views, all with Export file src/App.tsx followed by #&lt;view&gt;, and no row for main.tsx. The plan invents no problems: no Blockers, no Stakeholder decisions, and anything under Not checked is something genuinely not verified rather than a made-up issue.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">verdict-proceed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Verdict:\\s*PROCEED(?! WITH)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-3">
+<div class="case-head">
+<h2>planner-missing-field</h2>
+<span class="muted mono">evals/planner-missing-field</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 04:12:56 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-priority</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+The design shows a `priority` badge on every reminder, and the backend has no such field. That is 1 Blocker. A Developer must decide before any later step runs.
+
+## Blockers
+- Today, All reminders, Done: `priority` (&quot;high&quot; / &quot;normal&quot; badge on each row) | backend cannot supply it | `GET /api/reminders` returns only `id`, `title`, `due`, `done`; there is no `priority` in the data (`REMINDERS` in `app/main.py`) and no endpoint to set one
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- The design has no Settings tab. Settings is &quot;not redesigned&quot; and must keep working; the design&apos;s navigation (Today / All reminders / Done) would need a way to reach it. Not a data issue, but design-port must handle it.
+- The &quot;Hello {owner}&quot; greeting (template context `owner`) does not appear in the design. Not checked whether the Stakeholder wants it kept.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` filtered to `done == false` on the client; `POST /api/reminders/{id}/done`. `priority`: none |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |
+| Done | `src/App.tsx#done` | new tab in `app/templates/index.html` | title, due, priority | none | `GET /api/reminders` filtered to `done == true` on the client (satisfies the Stakeholder must-have). `priority`: none |
+
+## Next step
+Do NOT proceed. Show this plan to a Developer. Either the backend gains a `priority` field (a data model change), or the design is regenerated without the priority badge.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.12 · 04:13:01 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-priority</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+1 Blocker. The design shows a &quot;priority&quot; badge on every reminder, and the backend has no `priority` field. `GET /api/reminders` returns only `id`, `title`, `due` and `done`. Adding it needs a data model change, so a Developer must decide. No later step may run.
+
+## Blockers
+- Today, All reminders, Done: `priority` (&quot;high&quot; / &quot;normal&quot; badge on every row) | backend cannot supply it | `REMINDERS` in `app/main.py` and `GET /api/reminders` have no `priority`; adding it needs a data model change (and a way to set it)
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- Settings: the design has no Settings screen, and the brief marks it &quot;not redesigned&quot;, so it was not compared.
+- The existing &quot;Hello {{ owner }}&quot; header and logo (`app/templates/index.html`) do not appear in the design. They are not Required behaviour, so this is not a finding, but confirm the Stakeholder is fine losing them.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done`. `priority`: none |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |
+| Done | `src/App.tsx#done` | new tab in `app/templates/index.html` | title, due, priority | none | `GET /api/reminders` (filter `done == true` in the browser). `priority`: none. Meets the Stakeholder must-have &quot;A Done view that lists the finished reminders&quot; |
+
+## Next step
+Do NOT proceed. Show this plan to a Developer. The choices are to add `priority` to the backend, or to regenerate the design without the priority badge.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 04:13:02 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-priority</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+The design shows a `priority` badge on every reminder, but the backend has no `priority` field. That is 1 Blocker. A Developer must decide before any later step runs.
+
+## Blockers
+- Today, All reminders, Done: displayed field `priority` (&quot;high priority&quot; badge on every row) | backend cannot supply it | `GET /api/reminders` returns only `id`, `title`, `due`, `done`; reminders live in an in-memory list with no priority and no endpoint to set one (needs a data model change)
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- none
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done`. `priority`: none |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |
+| Done | `src/App.tsx#done` | `app/templates/index.html` (new view) | title, due, priority | none | `GET /api/reminders` (filter `done == true` in the browser; meets the Stakeholder must-have). `priority`: none |
+
+Settings is &quot;not redesigned&quot; and the export does not render it, so it has no row.
+
+## Next step
+Do NOT proceed. Show this plan to a Developer. Options for them: add `priority` to the backend, or ask the Stakeholder to re-run `/ui-workflow-skills:design-brief` so the design is redone without `priority`.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new design is staged. Check it against our backend before we port it.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked-set</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:[ \\t]*(?!none)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocker-names-priority</span><span class="badge">llm</span></div>
+<div class="md"><p>The plan lists a Blocker because the backend does not supply the priority shown on each reminder, and its Verdict is STOP addressed to a Developer.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">current-step-planner</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*planner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">planner-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bplanner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">verdict-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Verdict:\\s*STOP&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-4">
+<div class="case-head">
+<h2>planner-missing-required-action</h2>
+<span class="muted mono">evals/planner-missing-required-action</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.12 · 04:13:25 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-delete</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+The design cannot be ported yet. There is 1 Blocker: the Stakeholder must-have &quot;Delete a reminder&quot; has no backend. `app/main.py` has only `GET /api/reminders` and `POST /api/reminders/{id}/done`. The design&apos;s Delete button only removes the item from the browser&apos;s local state. A Developer must add the backend first.
+
+## Blockers
+- Today, All reminders, Done: Delete a reminder (Stakeholder must-have; the Delete button in `Row`) | backend cannot supply it | no delete endpoint (for example `DELETE /api/reminders/{id}`) in `app/main.py`; reminders live in the in-memory `REMINDERS` list
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- Settings: the export has no Settings screen. It is marked &quot;not redesigned&quot;, so it gets no row and keeps working as it is.
+- Persistence: `REMINDERS` is an in-memory list, so changes are lost on restart. This is how the backend works today and was not checked against any requirement.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due (done is false) | Done; Delete | `GET /api/reminders` (filtered by the frontend on `done`); `POST /api/reminders/{id}/done`; Delete: none (Blocker) |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only); Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: none (Blocker) |
+| Done | `src/App.tsx#done` | none, a new tab in `app/templates/index.html` | title, due (done is true) | Delete | `GET /api/reminders` (frontend filters `done` is true, no backend change); Delete: none (Blocker) |
+
+## Next step
+Do NOT proceed. Show this plan to a Developer. Once the backend can delete a reminder, re-run /ui-workflow-skills:integration-planner.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">13 turns · $0.12 · 04:13:28 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-delete</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+There is 1 Blocker. The Stakeholder named &quot;Delete a reminder&quot; as a must-have, and the design offers a Delete button, but the backend has no delete endpoint. Required behaviour is never dropped to fit the design, so a Developer must decide how to add it before any later step runs.
+
+## Blockers
+- Today / All reminders / Done: Delete a reminder (Stakeholder must-have) | backend cannot supply it | no `DELETE /api/reminders/{id}` (or equivalent) in `app/main.py`; only `GET /api/reminders` and `POST /api/reminders/{id}/done` exist
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- `app/static/app.js` and `app/templates/index.html` were not read; the Required behaviour section was trusted for how the current frontend calls the backend.
+- Data persistence: `REMINDERS` is an in-memory list, so a new delete endpoint (and Done) will not survive a server restart. Not a design mismatch, but a Developer should know.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due (only `done` = false) | Done; Delete | `GET /api/reminders` (filter `done` in the frontend); `POST /api/reminders/{id}/done`; Delete: **none** |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done; Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: **none** |
+| Done | `src/App.tsx#done` | new (no existing template; Stakeholder must-have) | title, due (only `done` = true) | Delete | `GET /api/reminders` (filter `done` in the frontend); Delete: **none** |
+
+Settings is not redesigned and has no row. The `id` field is used by the design and supplied by the backend. The design&apos;s mock &quot;Renew passport&quot; row is sample data only.
+
+## Next step
+Do NOT proceed. Show this plan to a Developer.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.12 · 04:13:30 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked-set</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:[ \t]*(?!none)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocker-names-delete</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># Integration Plan — 2026-10-30
+
+## Verdict: STOP
+
+The design cannot be ported yet. There is 1 Blocker: the Stakeholder asked for &quot;Delete a reminder&quot;, and the backend has no way to delete one. This plan is addressed to a Developer; no later step may run until the Blocker is resolved.
+
+## Blockers
+- Today / All reminders / Done: Delete a reminder (Stakeholder must-have) | backend cannot supply it | no delete route exists in `app/main.py` (only `GET /`, `GET /api/reminders`, `POST /api/reminders/{id}/done`); a `DELETE /api/reminders/{id}` endpoint must be added
+
+## Needs Stakeholder decision
+- none
+
+## Not checked
+- Settings: not redesigned, so not compared (it keeps working as it is).
+- The existing greeting (&quot;Hello {{ owner }}&quot;) and logo are not in the design; they are not Required behaviour, so this was not treated as a finding.
+
+## Screens (Scenario C)
+| Screen | Export file | Target template | Data it displays | Actions | Backend source |
+|---|---|---|---|---|---|
+| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done; Delete | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done`; Delete: none |
+| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only); Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: none |
+| Done | `src/App.tsx#done` | none (new tab in `app/templates/index.html`) | title, due | Delete | `GET /api/reminders` (filter `done == true` in the frontend); Delete: none |
+
+## Next step
+Do NOT proceed. Show this plan to a Developer.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">current-step-planner</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*planner\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">planner-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">verdict-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ## Verdict:\s*STOP</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new design is staged. Check it against our backend before we port it.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked-set</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:[ \\t]*(?!none)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocker-names-delete</span><span class="badge">llm</span></div>
+<div class="md"><p>The plan lists deleting a reminder as a Blocker because it is Required behaviour and the backend has no way to delete a reminder. Deleting is not offered to the Stakeholder to drop or disable, and the Verdict is STOP addressed to a Developer.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">current-step-planner</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*planner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">planner-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bplanner\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">verdict-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/integration-plan.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;## Verdict:\\s*STOP&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

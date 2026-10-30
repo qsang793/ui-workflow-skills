@@ -13,13 +13,13 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 ### Added — Workflow state and behavioural evals
 - `.ui-workflow/state.md` records Scenario, Design tool, current step, completed steps, Work branch, Stakeholder language and any Blocker. `ui-scenario-picker` writes it; every skill reads it first and names the missing step and its command instead of guessing. Contract, step order per Scenario and handoff formats: `docs/workflow-contract.md`.
 - Every skill replies in the Stakeholder's language. The picker labels every Scenario Beta; Scenario C becomes Production once its end-to-end pilot passes.
-- Behavioural evals for `claude plugin eval` under `evals/`, with a FastAPI + vanilla JS fixture and a mixed framework/vanilla fixture. Run locally or via the manual `evals` workflow. Local run 2026-10-27: 5 cases × 3 runs, every run scored 1.0 (`evals/results/2026-10-27T09-39-42-094Z/`).
+- Behavioural evals for `claude plugin eval` under `evals/`, with a FastAPI + vanilla JS fixture and a mixed framework/vanilla fixture. Run locally or via the manual `evals` workflow. Local run 2026-10-27: 5 cases × 3 runs, every run scored 1.0 (`evals/results/2026-10-27T09-39-42-094Z/`). Full suite 2026-10-30 with `--model sonnet`: 16 cases × 3 runs, every case ≥ 0.92 (`evals/results/2026-10-30T03-27-46-868Z/`). A run works on a Claude subscription when `claude` is started from a plain terminal, not from inside another Claude Code session.
 
 ### Changed — `ingest-design-export` takes any framework under Scenario C
 - Under Scenario C the Design export is a visual reference in any framework (ADR-0004). Ingest reports the framework and the Screens the export renders (routes, pages, conditional views; not file names), asks when it cannot tell, and stops with a mismatch only when no Screen exists.
 - Asks for one optional screenshot per Screen, saved to `.ui-workflow/export/screenshots/<Screen>.png`.
 - ZIPs are checked entry by entry before extraction: an absolute, `..` or symlink entry rejects the whole ZIP. Nested `.git` is removed for every source, and the export is never installed, built or run.
-- Evals `ingest-react-scenario-c`, `ingest-single-file-views`, `ingest-no-screen` and `ingest-traversal-zip`, with React and backend-only export fixtures. Not run yet.
+- Evals `ingest-react-scenario-c`, `ingest-single-file-views`, `ingest-no-screen` and `ingest-traversal-zip`, with React and backend-only export fixtures.
 
 ### Changed — `design-brief` follows ADR-0004
 - The Scenario C Design prompt asks for the look only (layout, spacing, colours, fonts, component states), one page or route per Screen, the project's real copy and field names, and reuses existing tokens. It prefers plain HTML + one CSS file with CSS variables but no longer forbids frameworks.
@@ -34,6 +34,7 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - Missing backend for displayed data or Required behaviour (from `design-prompt.md`) is a Blocker → STOP for the Developer. A design-only action without backend goes under Needs Stakeholder decision (drop, the default, or disabled "coming soon"); the step completes only when none is pending.
 - Scenario B keeps the API-call and auth diff; Scenario A skips the step. The "fewer than three issues" rule is gone; the plan lists what was not checked. Output follows the planner verdict in `docs/workflow-contract.md`.
 - Evals: `planner-missing-field`, `planner-missing-required-action`, `planner-design-only-action`, `planner-matching-backend`.
+- Screens are named by their label in the UI (tab text, page title), not their code key. `planner-matching-backend` went from 1 of 3 runs passing to 2 of 3 with Sonnet (`evals/results/2026-10-30T04-11-48-346Z/`).
 
 ### Changed — host-agnostic Preview
 - `preview-deploy` picks the host by project shape (ADR-0003): a Vercel preview, never production, for a static frontend with a public backend; otherwise the app runs locally with the audit's `Run` command behind a temporary Cloudflare quick tunnel, or on the project's own staging. Vercel is detected by capability, not by tool name.

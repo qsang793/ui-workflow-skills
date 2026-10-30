@@ -49,7 +49,7 @@ List what the existing backend provides, from its source:
 
 ### 3. Scenario C: Screens, displayed data and actions
 
-**Find the Screens from what the export renders**: routes, pages, and named views shown conditionally (tabs, steps, `view === 'x'` branches). Never from folder or file names. Export file is the source file that renders the Screen, followed by `#<view>` when that file renders several Screens (`src/routes/dashboard.tsx`, `src/App.tsx#settings`, `dashboard.html`). If you cannot tell what the Screens are, ask the Stakeholder which screens the design has before going on. Never guess.
+**Find the Screens from what the export renders**: routes, pages, and named views shown conditionally (tabs, steps, `view === 'x'` branches). Never from folder or file names. Export file is the source file that renders the Screen, followed by `#<view>` when that file renders several Screens (`src/routes/dashboard.tsx`, `src/App.tsx#settings`, `dashboard.html`). Name each Screen as the export labels it in the UI (tab text, page title, route name), not by its code key: `view === "acct"` shown under the tab "My account" is the Screen "My account", Export file `src/App.tsx#acct`. If you cannot tell what the Screens are, ask the Stakeholder which screens the design has before going on. Never guess.
 
 For each Screen, list:
 
