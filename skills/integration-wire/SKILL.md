@@ -17,7 +17,7 @@ After `integration-planner` returns PROCEED, this skill actually performs the wi
 
 ## When NOT to Use
 
-- Scenario C — use `design-port` instead (it does both translation and wiring)
+- Scenario C — use `design-port` instead (it Ports each Screen and wires its data)
 - `integration-planner` returned STOP — escalate to developer, do NOT proceed
 
 ## Process

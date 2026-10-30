@@ -41,6 +41,13 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - The link is checked from outside before it is shown; a Deployment Protection login page needs a Shareable Link, and a failure is reported. Tunnels come with a public-link and real-data warning and are closed after approval, which needs the completed click-test checklist.
 - The choice and the open Preview are recorded in `.ui-workflow/preview.md` (git-ignored). Evals `preview-server-rendered` and `preview-static`, with a static Vite fixture.
 
+### Changed — `design-port` works one Screen per turn on a Work branch (Scenario C, part of #9)
+- Rewritten around ADR-0004: the Design export is read as a visual reference, never installed, built or run. The extraction rules (style values, Tailwind, tokens, substitutes) wait on spike #18 and are marked as pending in the skill.
+- Work branch: creates `ui-workflow/<yyyy-mm-dd>` or reuses the one in the Workflow state and records it at once; never commits to the main branch, never pushes or merges. One commit per Stakeholder-approved Screen, staged by path, holding only that Screen and its `.ui-workflow` documents, never the Stakeholder's own uncommitted changes. Contract: `docs/workflow-contract.md`, section Work branch.
+- Each Screen is shown in the locally running app with the audit's `Run` command, then waits for approval; no deploy per Screen. An app that cannot start, or a non-git project, is escalated to the Developer.
+- `ui-audit` records `- Run: <command> → <local URL> | unknown` under Stack, read from the files, never run.
+- Evals `port-first-screen` and `port-approve-commits-screen`; `audit-fastapi-vanilla` checks the `Run` line. Run 2026-10-30 with `--model sonnet`, 3 runs each: `port-first-screen` 1.00, `port-approve-commits-screen` 0.97, the miss an LLM `reply` judgement (`evals/results/2026-10-30T07-33-16-157Z/`), `audit-fastapi-vanilla` 1.00 (`evals/results/2026-10-30T04-48-55-769Z/`). In the sandbox the app cannot start (no `uvicorn`), so the runs cover the escalation path, not a Screen viewed in the browser.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging
