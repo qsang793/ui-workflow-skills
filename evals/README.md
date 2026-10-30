@@ -25,7 +25,7 @@ Fixtures live in `fixtures/`; the planner cases share `fixtures/stage-reminders-
 
 ## Run locally
 
-From the repo root (needs a Claude login or `ANTHROPIC_API_KEY`):
+From the repo root (needs a Claude login or `ANTHROPIC_API_KEY`). Start it from a plain terminal: run from inside a Claude Code session, the child `claude` inherits that session's environment and a subscription login can fail with "organization has disabled Claude subscription access". Add `--model sonnet` to keep the cost down:
 
 ```bash
 claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --ablation none

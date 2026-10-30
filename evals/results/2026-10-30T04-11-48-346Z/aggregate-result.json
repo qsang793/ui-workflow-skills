@@ -1,0 +1,1290 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.307",
+  "startedAt": "2026-10-30T04:11:48.346Z",
+  "durationSeconds": 134,
+  "costUsd": 1.3984067,
+  "partial": false,
+  "suite": {
+    "root": ".",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "planner-*",
+    "threshold": 0.8,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "."
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "planner-design-only-action",
+      "dir": "evals/planner-design-only-action",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it. If the design has buttons our backend can't do yet, just leave them out for now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "decision-drop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*drop",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "email-is-decision",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The plan lists the \"Email me\" action under Needs Stakeholder decision with the decision to drop it, and does not list it, or anything else, as a Blocker.",
+          "config": {
+            "criteria": "The plan lists the \"Email me\" action under Needs Stakeholder decision with the decision to drop it, and does not list it, or anything else, as a Blocker.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "next-is-port",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*port\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-blockers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-pending",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*pending",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "not-stop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*STOP",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "planner-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.10945239999999999,
+            "judgeCostUsd": 0.0007430000000000001,
+            "durationSeconds": 30,
+            "startedAt": "2026-10-30T04:11:48.480Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ghTw0J/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "decision-drop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched decision:\\s*drop",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "email-is-decision",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe backend supplies every field and every Required behaviour of the three redesigned Screens. There are 0 Blockers. The one design-only action (\"Email me\") is dropped, as the Stakeholder already instructed.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- Today / All reminders / Done: \"Email me\" button (per reminder) | backend missing (no email or notification endpoint) | decision: drop\n\n## Not checked\n- The export's styling (Tailwind classes) was not compared with the existing CSS tokens; that is a port concern, not a backend one.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new tab, no existing view) | title, due | none | `GET /api/reminders` (filter `done == true` in the frontend) |\n\nSettings is not redesigned and gets no row.\n\n## Next step\nRun `/ui-workflow-skills:design-port`. Leave out the \"Email me\" button.\n"
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pending",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "not-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11461130000000001,
+            "judgeCostUsd": 0.0010903,
+            "durationSeconds": 33,
+            "startedAt": "2026-10-30T04:11:48.480Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-9MnvGh/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "decision-drop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched decision:\\s*drop",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "email-is-decision",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe design shows only `id`, `title`, `due` and `done`, and the backend returns all four from `GET /api/reminders`. The Done button maps to `POST /api/reminders/{id}/done`. The Stakeholder's \"Done\" view is a filter on `done`, so the backend already supplies it. There are 0 Blockers. One design-only action (\"Email me\") has no backend; the Stakeholder said to leave such buttons out, so it is dropped.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- Today / All reminders / Done: \"Email me\" button on every row | backend missing (no email or notification endpoint) | decision: drop\n\n## Not checked\n- The design has no Settings tab. Settings is \"not redesigned\" in the brief, so it stays as the existing template; the port must keep that tab working.\n- The existing \"Hello {{ owner }}\" header and logo are absent from the design. They are not listed in Required behaviour, so I did not treat them as required. Confirm that is intended.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html` (`#today`) | title, due | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html` (`#all`) | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new view) | title, due, done | none | `GET /api/reminders` (filter `done == true` in the browser) |\n\n## Next step\nRun `/ui-workflow-skills:design-port`. Leave out the \"Email me\" button.\n"
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pending",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "not-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.1155313,
+            "judgeCostUsd": 0.0009062,
+            "durationSeconds": 32,
+            "startedAt": "2026-10-30T04:11:48.480Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-rHrn44/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "decision-drop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched decision:\\s*drop",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "email-is-decision",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe design needs nothing the backend cannot do. 0 Blockers. Every field shown (`title`, `due`, `done`) comes from `GET /api/reminders`, and the Done button maps to `POST /api/reminders/{id}/done`. The new Done view only filters `done === true` on the same list, so it needs no new endpoint. One design-only button (\"Email me\") has no backend and is dropped, as the Stakeholder asked.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- Today, All reminders, Done: \"Email me\" button on every row | backend missing (no email or notification endpoint) | decision: drop\n\n## Not checked\n- none\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `.ui-workflow/export/src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done` false client-side); `POST /api/reminders/{id}/done` |\n| All reminders | `.ui-workflow/export/src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `.ui-workflow/export/src/App.tsx#done` | none yet: new tab in `app/templates/index.html` | title, due | none | `GET /api/reminders` (filter `done` true client-side) |\n\nSettings is not redesigned and keeps working as it is.\n\n## Next step\nRun `/ui-workflow-skills:design-port`. Leave the \"Email me\" button out of the port.\n"
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pending",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "not-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "planner-matching-backend",
+      "dir": "evals/planner-matching-backend",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "export-not-installed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "files",
+            "pattern": "node_modules",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "next-is-port",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*port\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-blockers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-decisions",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "planner-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "screen-per-view",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "screens-and-no-invented-issues",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The Screens table has one row for each of the Today, All reminders and Done views, all with Export file src/App.tsx followed by #<view>, and no row for main.tsx. The plan invents no problems: no Blockers, no Stakeholder decisions, and anything under Not checked is something genuinely not verified rather than a made-up issue.",
+          "config": {
+            "criteria": "The Screens table has one row for each of the Today, All reminders and Done views, all with Export file src/App.tsx followed by #<view>, and no row for main.tsx. The plan invents no problems: no Blockers, no Stakeholder decisions, and anything under Not checked is something genuinely not verified rather than a made-up issue.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "verdict-proceed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*PROCEED(?! WITH)",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 9,
+            "costUsd": 0.12713919999999998,
+            "judgeCostUsd": 0.0027643999999999993,
+            "durationSeconds": 43,
+            "startedAt": "2026-10-30T04:12:18.133Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-EqiMvs/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "export-not-installed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-decisions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screen-per-view",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screens-and-no-invented-issues",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe design shows only `title`, `due` and `done` (plus `id` for the Done button), and every one comes from `GET /api/reminders`. The only action, Done, is served by `POST /api/reminders/{id}/done`. The new Done view only filters `done === true` in the frontend, so it needs no new endpoint. This satisfies the Stakeholder must-have. Blockers: 0. Design-only actions: 0. Adapters: 0.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- The backend was read statically and not run. The API only serves an in-memory list and has no auth.\n- Settings was not compared: it is \"not redesigned\" and the export does not render it.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (frontend keeps `done` false); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new `#done` view) | title, due | none | `GET /api/reminders` (frontend keeps `done` true) |\n\n## Notes for design-port\n- The design has no Settings tab, but Settings is not redesigned and must stay reachable. Keep its tab and view as they are.\n- The design drops the \"Hello {{ owner }}\" greeting and the logo. Neither is listed in Required behaviour, but check with the Stakeholder if it should stay.\n- The third mock row (\"Renew passport\") is sample data only. Do not carry it over.\n\n## Next step\nRun `/ui-workflow-skills:design-port`.\n"
+              },
+              {
+                "name": "verdict-proceed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*PROCEED(?! WITH)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.11575629999999999,
+            "judgeCostUsd": 0.0018751999999999998,
+            "durationSeconds": 36,
+            "startedAt": "2026-10-30T04:12:20.665Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-remKTL/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "export-not-installed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-decisions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screen-per-view",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screens-and-no-invented-issues",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe design shows three Screens (Today, All reminders, Done). Every field it displays (`title`, `due`, `done`) is returned by `GET /api/reminders`, and its only action (Done) is served by `POST /api/reminders/{id}/done`. The Stakeholder's must-have, a Done view, is a filter on `done` that the frontend can compute from the same endpoint. Blockers: 0. Design-only actions: 0.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- Settings: the export has no Settings tab. It is marked \"not redesigned\", so it keeps its current template section and was not compared.\n- The export's page heading \"Reminders\" is static text; the backend's `owner` template variable (\"Lan\") is not used by the design. Nothing to supply.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done (shown as strike-through, no Done button) | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new `#done` view) | title, due | none | `GET /api/reminders` (filter `done == true` in the frontend) |\n\n## Next step\nRun `/ui-workflow-skills:design-port`.\n"
+              },
+              {
+                "name": "verdict-proceed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*PROCEED(?! WITH)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.875,
+            "passed": false,
+            "turns": 9,
+            "costUsd": 0.1248731,
+            "judgeCostUsd": 0.0031411999999999994,
+            "durationSeconds": 41,
+            "startedAt": "2026-10-30T04:12:21.574Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-PCnKQM/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "export-not-installed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-decisions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screen-per-view",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screens-and-no-invented-issues",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: PROCEED\n\nThe design shows only `title`, `due` and `done`, and its only action is \"Done\". The backend already supplies all of these through `GET /api/reminders` and `POST /api/reminders/{id}/done`. The new \"Done\" view (Stakeholder must-have) is a frontend filter on `done === true` from the same endpoint. Blockers: 0. Design-only actions: 0.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- The export has no Settings tab. Settings is \"(not redesigned)\" and must stay as it is in `app/templates/index.html#settings`, so the port must keep that tab and not drop it.\n- The design does not show the \"Hello {{ owner }}\" greeting that the current page renders from the server. The brief lists it as neither Required behaviour nor a must-have. Confirm with the Stakeholder if it should stay.\n- The export was read statically only (not installed, built or run). I did not look at styling or responsive behaviour.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html` (`#today`) | title, due (undone reminders only) | Done | `GET /api/reminders` (filter `!done` in the frontend); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html` (`#all`) | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | new view in `app/templates/index.html` (no existing template) | title, due (finished reminders only) | none | `GET /api/reminders` (filter `done` in the frontend) |\n\n## Next step\nRun `/ui-workflow-skills:design-port`.\n"
+              },
+              {
+                "name": "verdict-proceed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*PROCEED(?! WITH)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.9583333333333334,
+        "passRate": 0.6666666666666666
+      }
+    },
+    {
+      "name": "planner-missing-field",
+      "dir": "evals/planner-missing-field",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "blocked-set",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Blocked:[ \\t]*(?!none)\\S",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "blocker-names-priority",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The plan lists a Blocker because the backend does not supply the priority shown on each reminder, and its Verdict is STOP addressed to a Developer.",
+          "config": {
+            "criteria": "The plan lists a Blocker because the backend does not supply the priority shown on each reminder, and its Verdict is STOP addressed to a Developer.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "current-step-planner",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "planner-not-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:[^\\n]*\\bplanner\\b",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "verdict-stop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*STOP",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11435060000000001,
+            "judgeCostUsd": 0.0007526,
+            "durationSeconds": 29,
+            "startedAt": "2026-10-30T04:12:56.663Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ncK4sm/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-priority",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\nThe design shows a `priority` badge on every reminder, and the backend has no such field. That is 1 Blocker. A Developer must decide before any later step runs.\n\n## Blockers\n- Today, All reminders, Done: `priority` (\"high\" / \"normal\" badge on each row) | backend cannot supply it | `GET /api/reminders` returns only `id`, `title`, `due`, `done`; there is no `priority` in the data (`REMINDERS` in `app/main.py`) and no endpoint to set one\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- The design has no Settings tab. Settings is \"not redesigned\" and must keep working; the design's navigation (Today / All reminders / Done) would need a way to reach it. Not a data issue, but design-port must handle it.\n- The \"Hello {owner}\" greeting (template context `owner`) does not appear in the design. Not checked whether the Stakeholder wants it kept.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` filtered to `done == false` on the client; `POST /api/reminders/{id}/done`. `priority`: none |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |\n| Done | `src/App.tsx#done` | new tab in `app/templates/index.html` | title, due, priority | none | `GET /api/reminders` filtered to `done == true` on the client (satisfies the Stakeholder must-have). `priority`: none |\n\n## Next step\nDo NOT proceed. Show this plan to a Developer. Either the backend gains a `priority` field (a data model change), or the design is regenerated without the priority badge.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11570140000000001,
+            "judgeCostUsd": 0.0009906000000000012,
+            "durationSeconds": 29,
+            "startedAt": "2026-10-30T04:13:01.334Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-CendsY/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-priority",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\n1 Blocker. The design shows a \"priority\" badge on every reminder, and the backend has no `priority` field. `GET /api/reminders` returns only `id`, `title`, `due` and `done`. Adding it needs a data model change, so a Developer must decide. No later step may run.\n\n## Blockers\n- Today, All reminders, Done: `priority` (\"high\" / \"normal\" badge on every row) | backend cannot supply it | `REMINDERS` in `app/main.py` and `GET /api/reminders` have no `priority`; adding it needs a data model change (and a way to set it)\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- Settings: the design has no Settings screen, and the brief marks it \"not redesigned\", so it was not compared.\n- The existing \"Hello {{ owner }}\" header and logo (`app/templates/index.html`) do not appear in the design. They are not Required behaviour, so this is not a finding, but confirm the Stakeholder is fine losing them.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done`. `priority`: none |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |\n| Done | `src/App.tsx#done` | new tab in `app/templates/index.html` | title, due, priority | none | `GET /api/reminders` (filter `done == true` in the browser). `priority`: none. Meets the Stakeholder must-have \"A Done view that lists the finished reminders\" |\n\n## Next step\nDo NOT proceed. Show this plan to a Developer. The choices are to add `priority` to the backend, or to regenerate the design without the priority badge.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.10929490000000001,
+            "judgeCostUsd": 0.0008544000000000008,
+            "durationSeconds": 27,
+            "startedAt": "2026-10-30T04:13:02.105Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-eapnfB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-priority",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\nThe design shows a `priority` badge on every reminder, but the backend has no `priority` field. That is 1 Blocker. A Developer must decide before any later step runs.\n\n## Blockers\n- Today, All reminders, Done: displayed field `priority` (\"high priority\" badge on every row) | backend cannot supply it | `GET /api/reminders` returns only `id`, `title`, `due`, `done`; reminders live in an in-memory list with no priority and no endpoint to set one (needs a data model change)\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- none\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due, priority | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done`. `priority`: none |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done, priority | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done`. `priority`: none |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new view) | title, due, priority | none | `GET /api/reminders` (filter `done == true` in the browser; meets the Stakeholder must-have). `priority`: none |\n\nSettings is \"not redesigned\" and the export does not render it, so it has no row.\n\n## Next step\nDo NOT proceed. Show this plan to a Developer. Options for them: add `priority` to the backend, or ask the Stakeholder to re-run `/ui-workflow-skills:design-brief` so the design is redone without `priority`.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "planner-missing-required-action",
+      "dir": "evals/planner-missing-required-action",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "blocked-set",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Blocked:[ \\t]*(?!none)\\S",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "blocker-names-delete",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The plan lists deleting a reminder as a Blocker because it is Required behaviour and the backend has no way to delete a reminder. Deleting is not offered to the Stakeholder to drop or disable, and the Verdict is STOP addressed to a Developer.",
+          "config": {
+            "criteria": "The plan lists deleting a reminder as a Blocker because it is Required behaviour and the backend has no way to delete a reminder. Deleting is not offered to the Stakeholder to drop or disable, and the Verdict is STOP addressed to a Developer.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "current-step-planner",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "planner-not-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:[^\\n]*\\bplanner\\b",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "verdict-stop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*STOP",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11600729999999998,
+            "judgeCostUsd": 0.0008272999999999996,
+            "durationSeconds": 32,
+            "startedAt": "2026-10-30T04:13:25.918Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-aIGxlZ/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-delete",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\nThe design cannot be ported yet. There is 1 Blocker: the Stakeholder must-have \"Delete a reminder\" has no backend. `app/main.py` has only `GET /api/reminders` and `POST /api/reminders/{id}/done`. The design's Delete button only removes the item from the browser's local state. A Developer must add the backend first.\n\n## Blockers\n- Today, All reminders, Done: Delete a reminder (Stakeholder must-have; the Delete button in `Row`) | backend cannot supply it | no delete endpoint (for example `DELETE /api/reminders/{id}`) in `app/main.py`; reminders live in the in-memory `REMINDERS` list\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- Settings: the export has no Settings screen. It is marked \"not redesigned\", so it gets no row and keeps working as it is.\n- Persistence: `REMINDERS` is an in-memory list, so changes are lost on restart. This is how the backend works today and was not checked against any requirement.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due (done is false) | Done; Delete | `GET /api/reminders` (filtered by the frontend on `done`); `POST /api/reminders/{id}/done`; Delete: none (Blocker) |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only); Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: none (Blocker) |\n| Done | `src/App.tsx#done` | none, a new tab in `app/templates/index.html` | title, due (done is true) | Delete | `GET /api/reminders` (frontend filters `done` is true, no backend change); Delete: none (Blocker) |\n\n## Next step\nDo NOT proceed. Show this plan to a Developer. Once the backend can delete a reminder, re-run /ui-workflow-skills:integration-planner.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 13,
+            "costUsd": 0.11804429999999999,
+            "judgeCostUsd": 0.0014029000000000003,
+            "durationSeconds": 33,
+            "startedAt": "2026-10-30T04:13:28.841Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Q3cV7v/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-delete",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\nThere is 1 Blocker. The Stakeholder named \"Delete a reminder\" as a must-have, and the design offers a Delete button, but the backend has no delete endpoint. Required behaviour is never dropped to fit the design, so a Developer must decide how to add it before any later step runs.\n\n## Blockers\n- Today / All reminders / Done: Delete a reminder (Stakeholder must-have) | backend cannot supply it | no `DELETE /api/reminders/{id}` (or equivalent) in `app/main.py`; only `GET /api/reminders` and `POST /api/reminders/{id}/done` exist\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- `app/static/app.js` and `app/templates/index.html` were not read; the Required behaviour section was trusted for how the current frontend calls the backend.\n- Data persistence: `REMINDERS` is an in-memory list, so a new delete endpoint (and Done) will not survive a server restart. Not a design mismatch, but a Developer should know.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due (only `done` = false) | Done; Delete | `GET /api/reminders` (filter `done` in the frontend); `POST /api/reminders/{id}/done`; Delete: **none** |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done; Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: **none** |\n| Done | `src/App.tsx#done` | new (no existing template; Stakeholder must-have) | title, due (only `done` = true) | Delete | `GET /api/reminders` (filter `done` in the frontend); Delete: **none** |\n\nSettings is not redesigned and has no row. The `id` field is used by the design and supplied by the backend. The design's mock \"Renew passport\" row is sample data only.\n\n## Next step\nDo NOT proceed. Show this plan to a Developer.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.1176446,
+            "judgeCostUsd": 0.0013734000000000003,
+            "durationSeconds": 32,
+            "startedAt": "2026-10-30T04:13:30.145Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-7Efi6b/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "blocked-set",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Blocked:[ \\t]*(?!none)\\S",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "blocker-names-delete",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-10-30\n\n## Verdict: STOP\n\nThe design cannot be ported yet. There is 1 Blocker: the Stakeholder asked for \"Delete a reminder\", and the backend has no way to delete one. This plan is addressed to a Developer; no later step may run until the Blocker is resolved.\n\n## Blockers\n- Today / All reminders / Done: Delete a reminder (Stakeholder must-have) | backend cannot supply it | no delete route exists in `app/main.py` (only `GET /`, `GET /api/reminders`, `POST /api/reminders/{id}/done`); a `DELETE /api/reminders/{id}` endpoint must be added\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- Settings: not redesigned, so not compared (it keeps working as it is).\n- The existing greeting (\"Hello {{ owner }}\") and logo are not in the design; they are not Required behaviour, so this was not treated as a finding.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done; Delete | `GET /api/reminders` (filter `done == false` in the frontend); `POST /api/reminders/{id}/done`; Delete: none |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only); Delete | `GET /api/reminders`; `POST /api/reminders/{id}/done`; Delete: none |\n| Done | `src/App.tsx#done` | none (new tab in `app/templates/index.html`) | title, due | Delete | `GET /api/reminders` (filter `done == true` in the frontend); Delete: none |\n\n## Next step\nDo NOT proceed. Show this plan to a Developer.\n"
+              },
+              {
+                "name": "current-step-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-not-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "verdict-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*STOP",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 4,
+    "casesPassed": 4,
+    "overallScore": 0.9895833333333334,
+    "overallPassRate": 0.9166666666666666
+  }
+}
