@@ -40,6 +40,7 @@ Read in this order:
 - File extensions across the repo: `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html`, `.ejs`, `.hbs`
 - Build config: `vite.config.*`, `next.config.*`, `webpack.config.*`, or none (raw HTML)
 - CSS approach: Tailwind config present? CSS modules? SCSS? Bootstrap? Plain CSS?
+- Run command: how the app starts locally and the URL it answers on, from `package.json` scripts (`dev`, `start`), `README`, `Procfile`, or the `uvicorn`/`flask`/`manage.py` entry point. Read it from the files; do not run it. `design-port` and `preview-deploy` use it to show the Stakeholder the running app. When the files do not settle it, write `unknown`.
 
 ### 2. Map the structure
 
@@ -92,6 +93,7 @@ In `.ui-workflow/state.md`: append `audit` to `Completed steps`, set `Current st
 - CSS: <e.g. plain CSS in src/styles.css, or Tailwind, or CSS modules>
 - State: <e.g. Redux / global window vars / none>
 - Design tokens: <file holding the `:root { --... }` block | none>
+- Run: <command that starts the app locally> → <local URL> | unknown
 
 ## Pages / Routes (top 10)
 - `/` — `<path-to-entry-template>`

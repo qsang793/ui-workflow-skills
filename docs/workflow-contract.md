@@ -78,10 +78,21 @@ Scenario A skips audit and planner by design. A skipped step is never reported a
 |---|---|
 | `ui-scenario-picker` | Creates the file. Sets every field: Scenario, Scenario reason, Maturity, Stakeholder language, Completed steps `picker`, Current step = the next step for the Scenario, the rest `none`. |
 | `design-brief` | Design tool |
-| First skill that changes project code (`design-port`, `integration-wire`) | Work branch |
+| First skill that changes project code (`design-port`, `integration-wire`) | Work branch, as soon as it creates or reuses the branch |
 | Every skill, on success | Appends its step to Completed steps, sets Current step to the next step for the Scenario, sets Blocked to `none`, updates Stakeholder language if the Stakeholder switched, sets Updated |
 
 A STOP, a Scenario mismatch or an escalation never marks a step as completed. The skill leaves Completed steps as they were, sets Current step to its own step and writes the reason in Blocked. When the picker escalates (for example, a half-finished framework migration), it still writes the file, with Scenario `none`, Maturity `none`, Completed steps `none`, Current step `picker` and the reason in Blocked, so a new session sees why the workflow stopped.
+
+## Work branch
+
+Every code change of one workflow run lives on one Work branch, `ui-workflow/<yyyy-mm-dd>`.
+
+- The first skill that changes project code creates it from the current commit, or switches to the one named in the Workflow state, and records it there before changing anything. Uncommitted changes the Stakeholder already had come along untouched.
+- Nothing is ever committed to the main branch. Skills never push, merge, rebase or open a pull request; the Developer does.
+- One commit per Stakeholder-approved Screen, `ui-workflow: port <Screen>`, staged by path: the files of that Screen and the `.ui-workflow` documents that are new or changed (`state.md`, `audit.md`, `design-prompt.md`, `integration-plan.md`). Never the Stakeholder's pre-existing uncommitted changes, which are the paths outside `.ui-workflow/` that `git status --porcelain` lists before the first change (except the `.ui-workflow/` lines earlier steps added to `.gitignore`; in later turns, those that are not files of the Screen awaiting approval) and are never staged, stashed or reset. A Screen that needs a file the Stakeholder had already changed stops and asks.
+- A project that is not a git repository stops and escalates to the Developer.
+
+`design-port` follows this section. `integration-wire` does not yet: it records the branch it works on when it succeeds and has no per-Screen commit.
 
 ## Before acting
 
@@ -184,7 +195,7 @@ The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` pl
 - `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION`, no `pending` decision, and the Screens table naming, per Screen, the export file, the target template, the data and the actions.
 - `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen.
 
-What `design-port` extracts from each Screen:
+What `design-port` extracts from each Screen (the skill carries these rules only once spike #18 has tested them; until then it marks them pending):
 
 - Markup structure: element tree, semantic tags, order. Components defined inside the export (for example `components/ui/button.tsx`) are read to see what they render.
 - Style values: Tailwind classes resolved through the export's own Tailwind config and CSS variables, then Tailwind's default scale; plain CSS read as is.
@@ -201,8 +212,8 @@ Rules for each Screen:
 - Output is CSS in the project's existing stylesheet structure. Tailwind classes stay only when the project already uses Tailwind.
 - Required behaviour is Ported in the project's existing style, with the data from the Screens table through the project's existing fetch code. Design-only actions follow the recorded decision: dropped, or shown disabled with a "coming soon" label. No control looks active without working. An action the plan does not list stops the Screen: `design-port` asks, never classifies it itself.
 - A value that cannot be resolved statically is replaced by the project's default token for that role (for example the body text colour) and reported as a substitute for the Stakeholder to approve. When it affects layout or usability (widths, breakpoints, contrast, hit areas) and no screenshot settles it, `design-port` asks before going on.
-- After each Screen, `design-port` starts or reloads the app with the audit's `Run` command and gives the Stakeholder the local URL of that Screen. It never deploys per Screen. If the app cannot run locally, it stops and escalates to the Developer.
-- Each Screen's report, in the Stakeholder's language, lists substitutes, what was not reproduced visually, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed.
+- After each Screen, `design-port` starts or reloads the app with the audit's `Run` command and gives the Stakeholder the local URL of that Screen. When the line says `unknown`, it detects the command from the project and asks the Developer to confirm it. It never deploys per Screen. If the app cannot run locally, it stops and escalates to the Developer.
+- Each Screen's report, in the Stakeholder's language, lists substitutes, what was not reproduced visually, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed. One Screen per turn: the next Screen starts only after the Stakeholder approves the last one.
 
 ### Preview record (`.ui-workflow/preview.md`)
 

@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.307</span>
+<span class="num">2026-10-30 04:48 UTC</span>
+<span class="num">36s</span>
+<span class="num">$0.35</span>
+<span class="num">3 runs</span>
+<span class="num">3 in flight</span>
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+<span>filtered: --case audit-fastapi-vanilla</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">1 of 1 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>audit-fastapi-vanilla</h2>
+<span class="muted mono">evals/audit-fastapi-vanilla</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.12 · 04:48:55 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-30)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja2 template (`app/templates/index.html`)
+- Build tool: none
+- CSS: plain CSS in `app/static/styles.css`, plus inline `style=` attributes in the template
+- State: none (the server holds an in-memory list; the page re-fetches and re-renders after each change)
+- Design tokens: `app/static/styles.css` (`:root` block with 4 variables)
+- Run: `uvicorn app.main:app --reload` (run from the project root; inferred from `app/main.py` and `requirements.txt`, no README or Procfile) → http://127.0.0.1:8000
+
+## Pages / Routes (top 10)
+Single-page app: one route, three tabs switched client-side.
+- `/` — `app/templates/index.html` (route in `app/main.py`)
+- Tab &quot;Today&quot; (`#today`) — not-done reminders
+- Tab &quot;All reminders&quot; (`#all`) — every reminder
+- Tab &quot;Settings&quot; (`#settings`) — notification time field and Save button
+- `/api/reminders` (GET) — `app/main.py`
+- `/api/reminders/{id}/done` (POST) — `app/main.py`
+
+Components: no component files. Largest file is 35 lines, so no oversized-file issues (nothing over 500 lines).
+
+## Style approach
+Styling is split between a small stylesheet and inline `style=` attributes on the body, header, tabs, views and settings form. A `:root` token block exists, but nothing uses it (0 `var(--` references); every color is a hard-coded hex, about 19 unique values, mostly near-duplicate blues and grays.
+
+## Pain points
+
+### 🔴 High
+- Not responsive: `&lt;body&gt;` is fixed at `width: 800px`, `.view` at 760px, the input at 300px. There is no `&lt;meta name=&quot;viewport&quot;&gt;` and no media queries, so it breaks on phones.
+- Tokens exist but are unused: `--color-primary`, `--color-success` etc. are defined, yet the same colors are repeated as raw hex (`#2b6cb0`, `#38a169`) inline and in the CSS. This is the highest-leverage fix for a redesign.
+- Broken, inaccessible logo: `&lt;img src=&quot;/static/logo.png&quot;&gt;` has no `alt`, and `logo.png` does not exist in `app/static/`, so it renders as a broken image.
+- Unescaped text injected with `innerHTML` (`app/static/app.js`): reminder titles are inserted as raw HTML, so a title containing markup would break the layout or run script. Must be kept in mind when porting the design.
+- Settings does nothing real: Save only shows a browser `alert()`; there is no backend endpoint for the notification time. The design must not promise it works.
+
+### 🟡 Medium
+- No loading state: both `fetch` calls (`loadReminders`, `markDone`) have no spinner, skeleton or disabled button, and no error handling.
+- Tabs lack semantics and feedback: no active-tab highlight, no `role=&quot;tablist&quot;`/`aria-selected`, no `aria-` attributes at all; no `&lt;header&gt;`, `&lt;nav&gt;` or `&lt;main&gt;`; no `lang` on `&lt;html&gt;`; the settings input has no `&lt;label&gt;`.
+- No empty state: `.empty` is styled but never used, so an empty Today tab is just blank.
+- Done reminders still show a &quot;Done&quot; button, and &quot;Today&quot; means &quot;not done&quot;, not &quot;due today&quot;.
+- Inline `style=` used 10 times in a 26-line template, with mixed grays (`#333`, `#444`, `#555`, `#777`) for the same kind of text.
+
+### 🟢 Low
+- Hardcoded English text and owner name (&quot;Lan&quot;) with no i18n markers.
+- `.reminder button` uses `#3182ce`, a third blue next to `#2b6cb0`.
+- Inline `onclick=&quot;markDone(...)&quot;` handlers instead of event listeners.
+
+## Recommendation
+Confirm scenario C: the app is tiny and server-rendered, so keep FastAPI + Jinja and restyle it in place; the design must cover the three tabs, empty/loading states, and the Settings screen&apos;s missing backend.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">run-line</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched -\s*Run:[^\n]*\buvicorn\b[^\n]*app\.main:app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 04:48:55 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-30)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja template (`app/templates/index.html`)
+- Build tool: none
+- CSS: plain CSS in `app/static/styles.css`, plus inline `style=` attributes in the template
+- State: none (DOM is re-rendered from `/api/reminders` after each change)
+- Design tokens: `app/static/styles.css` (`:root` block, 4 tokens)
+- Run: `uvicorn app.main:app --reload` (from project root; inferred from `app/main.py`, no README or script) → http://127.0.0.1:8000
+
+## Pages / Routes (top 10)
+- `/` — `app/templates/index.html` (single page, 3 client-side tabs)
+  - Tab &quot;Today&quot; — `#today` view, filled by `app/static/app.js`
+  - Tab &quot;All reminders&quot; — `#all` view, filled by `app/static/app.js`
+  - Tab &quot;Settings&quot; — `#settings` view in `index.html` (notification time + Save)
+- `/api/reminders` — `app/main.py` (JSON, not a page)
+- `/api/reminders/{id}/done` — `app/main.py` (JSON, not a page)
+
+## Style approach
+Styling is split between a small stylesheet (13 lines) and inline `style=` attributes on 9 elements in the template. A `:root` token block exists but nothing uses `var(--…)`; every colour is hard-coded, and the page is fixed at 800px wide.
+
+## Pain points
+
+### 🔴 High
+- Not responsive: `&lt;body&gt;` is fixed at `width: 800px`, `.view` at `760px`, the input at `300px`. There is no `&lt;meta name=&quot;viewport&quot;&gt;` and no media queries, so the page breaks on phones.
+- Tokens exist but are unused: 4 tokens are defined (`--color-primary`, `--color-success`, `--color-text`, `--space-2`) but `var(` appears 0 times. There are 17 distinct hard-coded colours (e.g. blue `#2b6cb0` and `#3182ce`, three greys for the tab labels). Wiring the tokens in is the highest-leverage redesign step.
+- Broken logo and no alt text: `/static/logo.png` does not exist in `app/static/`, and the `&lt;img&gt;` has no `alt`.
+- Tabs are not accessible: they are plain `&lt;button&gt;`s with no `role=&quot;tablist&quot;`/`role=&quot;tab&quot;`, no `aria-selected`, and no visible active-tab state. There is no `&lt;header&gt;`, `&lt;nav&gt;` or `&lt;main&gt;`, no `lang` on `&lt;html&gt;`, and 0 `aria-` attributes.
+- Unescaped data in `innerHTML`: `app.js` inserts `r.title` into HTML without escaping. This is a bug and a security risk, not only a UI one, so a Developer should look at it before the port.
+
+### 🟡 Medium
+- No loading or error state: both `fetch()` calls (`loadReminders`, `markDone`) show nothing while waiting and nothing on failure. The lists start blank.
+- &quot;Today&quot; is not by date: it shows every not-done reminder, the same as &quot;All reminders&quot; minus the done ones. The `.empty` style is defined but never used, so there is no empty-state message.
+- Settings Save does nothing real: it shows a browser `alert()` and does not persist. The input has no `&lt;label&gt;` and no time type.
+- Done items still show an active &quot;Done&quot; button, and the button has no accessible name beyond &quot;Done&quot; (the row title is not linked to it).
+- Inline `style=` on 9 elements overrides the stylesheet (tab text colours, hide/show of views), so changes to the CSS will not take effect everywhere.
+
+### 🟢 Low
+- Missing `&lt;meta charset&gt;` and a generic `&lt;title&gt;` (&quot;Reminders&quot;).
+- Hard-coded English text (no i18n markers found), which is fine unless more languages are planned.
+- Tab buttons and the Done button have different padding and border styles from the Save button.
+
+## Recommendation
+Confirm scenario C: the app is tiny (about 100 lines in total), the stack is simple, and a restyle in the existing Jinja template and CSS is enough, with no migration needed.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">run-line</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched -\s*Run:[^\n]*\buvicorn\b[^\n]*app\.main:app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.12 · 04:48:55 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">audit-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">max-five-per-tier</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">names-next-command</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /ui-workflow-skills:design-brief</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-brief</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence"># UI Audit — Reminders (2026-10-30)
+
+## Stack
+- Framework: Vanilla JS + FastAPI serving one Jinja template
+- Build tool: none
+- CSS: plain CSS in `app/static/styles.css`, plus inline `style=` in the template
+- State: none (DOM is re-rendered from `/api/reminders` after each action)
+- Design tokens: `app/static/styles.css` (`:root` with 4 variables)
+- Run: `uvicorn app.main:app` from the project root → http://127.0.0.1:8000 (inferred from the entry point; no README or script confirms it)
+
+## Pages / Routes (top 10)
+Single-page app: one template, three client-side tabs.
+- `/` — `app/templates/index.html` (page shell, &quot;Hello {{ owner }}&quot; header)
+- Tab &quot;Today&quot; — `#today` in `app/templates/index.html`, filled by `app/static/app.js`
+- Tab &quot;All reminders&quot; — `#all`, filled by `app/static/app.js`
+- Tab &quot;Settings&quot; — `#settings` (notification time field)
+- `/api/reminders` — `app/main.py` (GET, data only)
+- `/api/reminders/{id}/done` — `app/main.py` (POST, data only)
+
+Size: 3 front-end files (`index.html` 26, `app.js` 35, `styles.css` 13 lines). Nothing is above 500 lines.
+
+## Style approach
+Styling is split between a tiny stylesheet and inline `style=` attributes (11 in the template). The stylesheet defines 4 design tokens, but nothing uses them; every colour is a raw hex value (about 17 unique). The page is a fixed 800px column.
+
+## Pain points
+
+### 🔴 High
+- **Not responsive:** `body` is fixed at `width: 800px`, `.view` at `760px`, and the Settings input at `300px`. There is no `&lt;meta viewport&gt;` and no media queries, so the page breaks on phones.
+- **Tokens exist but are unused:** `--color-primary`, `--color-success`, `--color-text` and `--space-2` are defined but never referenced. The same blue and green are repeated as hex in inline styles and CSS, along with greys such as #333, #444 and #555. This is the highest-leverage fix for a redesign.
+- **Broken logo and no accessibility basics:** `/static/logo.png` does not exist (the file is missing from `app/static`). The `&lt;img&gt;` also has no `alt`. The page has no `lang` attribute and no `&lt;header&gt;`, `&lt;nav&gt;` or `&lt;main&gt;`. Tabs are plain buttons with no `role=&quot;tab&quot;` or `aria-selected`, and the active tab is never highlighted.
+- **Unsafe rendering:** `app.js` inserts `r.title` into `innerHTML` without escaping, so a reminder title containing HTML would run as markup. Developer attention is needed before the design port.
+
+### 🟡 Medium
+- **No loading, empty or error states:** the two `fetch` calls (list, mark done) show nothing while waiting or on failure. An empty list is a blank area (the `.empty` class exists but is never used).
+- **Settings does not save:** the Save button only shows an `alert()`. The backend has no settings endpoint, and the time input has no label or type. The design port must not promise a working Settings screen.
+- **&quot;Today&quot; is not by date:** it lists every not-done reminder, regardless of its due date.
+- **Inline style sprawl:** 11 `style=` attributes in a 26-line template (below the 50 threshold, but they override the stylesheet).
+
+### 🟢 Low
+- **Small tap targets and no focus styling:** buttons use `6px 10px` padding, and the Done button remains on completed items.
+- **Hardcoded English text:** there are no i18n markers. This matters only if more languages are planned.
+- **Alerts and `onclick=` attributes:** these are inline handlers and a browser `alert()`. They are worth replacing during the port, but they are not blocking.
+
+## Recommendation
+Confirm scenario C: the app is tiny, the stack is simple, and a visual port into the existing template and stylesheet is quick. Tell the designer that Settings has no backend, and fix the unescaped `innerHTML` first.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/audit.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">run-line</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched -\s*Run:[^\n]*\buvicorn\b[^\n]*app\.main:app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">severity-tiers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ### 🔴[\s\S]*### 🟡[\s\S]*### 🟢</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The scenario is picked. Please audit the current UI now.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">audit-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">max-five-per-tier</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/audit.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;### [^\\n]*\\n(?:[ \\t]*\\n)*(?:[ \\t]*[-*] [^\\n]*\\n(?:[ \\t]+(?![-*] )\\S[^\\n]*\\n|[ \\t]*\\n)*){6}&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">names-next-command</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;/ui-workflow-skills:design-brief&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-brief</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*brief\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-content</span><span class="badge">llm</span></div>
+<div class="md"><p>This UI audit lists the Today, All reminders and Settings tabs (or views) as pages, and reports that design tokens exist in a <code>:root</code> block but are mostly bypassed by hard-coded colours or inline styles.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.ui-workflow/audit.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">run-line</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/audit.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;-\\s*Run:[^\\n]*\\buvicorn\\b[^\\n]*app\\.main:app&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">severity-tiers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/audit.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

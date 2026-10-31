@@ -74,7 +74,7 @@ ui-workflow-skills/
     ├── ingest-design-export/SKILL.md   stage Lovable output vào .ui-workflow/export/
     ├── integration-planner/SKILL.md    diff Lovable vs BE (read-only guardrail)
     ├── integration-wire/SKILL.md       thực thi tích hợp (kịch bản A/B)
-    ├── design-port/SKILL.md            dịch React → stack cũ (kịch bản C)
+    ├── design-port/SKILL.md            port từng Screen vào stack cũ (kịch bản C)
     └── preview-deploy/SKILL.md         Preview: Vercel hoặc local + tunnel
 ```
 
