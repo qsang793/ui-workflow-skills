@@ -82,7 +82,7 @@ Find the API calls in the export: `fetch(`, `axios.`, `useSWR(`, `useQuery(`, UR
 | `POST /api/auth/login` (JWT bearer) | `POST /login` (session cookie) | auth pattern: Blocker |
 | `GET /api/habits` → `{title, done}` | `GET /api/habits` → `{name, completed}` | shape differs: adapter |
 
-Always check auth, even when every endpoint matches: what the export assumes (cookie, JWT in `Authorization`, session) against what the backend does (`Depends(get_current_user)`, Flask-Login, middleware). Incompatible auth, a missing endpoint the backend cannot add without a data model change, or a breaking schema is a Blocker. A rename or a shape map is an adapter.
+Always check auth, even when every endpoint matches: what the export assumes (cookie, JWT in `Authorization`, session) against what the backend does (`Depends(get_current_user)`, Flask-Login, middleware). Incompatible auth (including a backend that expects an API key or other shared secret from its callers, which cannot go in a browser), a missing endpoint the backend cannot add without a data model change, or a breaking schema is a Blocker. A rename or a shape map is an adapter.
 
 ### 5. Verdict
 

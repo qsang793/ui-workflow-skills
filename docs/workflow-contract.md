@@ -12,6 +12,7 @@ One folder at the project root:
   audit.md              written by ui-audit (committed)
   design-prompt.md      written by design-brief (committed)
   integration-plan.md   written by integration-planner (committed)
+  wiring.md             written by integration-wire (committed)
   preview.md            written by preview-deploy (git-ignored)
   export/               Design export, staged by ingest-design-export (git-ignored)
   export-backup-*/      earlier Design exports (git-ignored)
@@ -90,9 +91,10 @@ Every code change of one workflow run lives on one Work branch, `ui-workflow/<yy
 - The first skill that changes project code creates it from the current commit, or switches to the one named in the Workflow state, and records it there before changing anything. Uncommitted changes the Stakeholder already had come along untouched.
 - Nothing is ever committed to the main branch. Skills never push, merge, rebase or open a pull request; the Developer does.
 - One commit per Stakeholder-approved Screen, `ui-workflow: port <Screen>`, staged by path: the files of that Screen and the `.ui-workflow` documents that are new or changed (`state.md`, `audit.md`, `design-prompt.md`, `integration-plan.md`). Never the Stakeholder's pre-existing uncommitted changes, which are the paths outside `.ui-workflow/` that `git status --porcelain` lists before the first change (except the `.ui-workflow/` lines earlier steps added to `.gitignore`; in later turns, those that are not files of the Screen awaiting approval) and are never staged, stashed or reset. A Screen that needs a file the Stakeholder had already changed stops and asks.
+- `integration-wire` has no Screens: one commit per Stakeholder-approved wiring, `ui-workflow: wire` (a later fix: `ui-workflow: wire <what changed>`), made once the build passes and staged the same way, with the frontend's paths and `wiring.md`. The Stakeholder's pre-existing changes are found the same way; in later turns, those outside the frontend folder, apart from the ignore lines this step added.
 - A project that is not a git repository stops and escalates to the Developer.
 
-`design-port` follows this section. `integration-wire` does not yet: it records the branch it works on when it succeeds and has no per-Screen commit.
+`design-port` and `integration-wire` both follow this section.
 
 ## Before acting
 
@@ -214,6 +216,29 @@ Rules for each Screen:
 - A value that cannot be resolved statically is replaced by the project's default token for that role (for example the body text colour) and reported as a substitute for the Stakeholder to approve. When it affects layout or usability (widths, breakpoints, contrast, hit areas) and no screenshot settles it, `design-port` asks before going on.
 - After each Screen, `design-port` starts or reloads the app with the audit's `Run` command and gives the Stakeholder the local URL of that Screen. When the line says `unknown`, it detects the command from the project and asks the Developer to confirm it. It never deploys per Screen. If the app cannot run locally, it stops and escalates to the Developer.
 - Each Screen's report, in the Stakeholder's language, lists substitutes, what was not reproduced visually, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed. One Screen per turn: the next Screen starts only after the Stakeholder approves the last one.
+
+### Wiring record (`.ui-workflow/wiring.md`)
+
+Scenarios A and B only. Written in English by `integration-wire`, read by `preview-deploy`.
+
+```markdown
+# Wiring
+
+- Frontend folder: <path from the project root, or . for the root>
+- Build command: <command> | unknown
+- Build: passed | not run | failed: <reason>
+- Run: <command that starts it locally, from its scripts> → <local URL> | unknown
+- Public env vars: <names> | none
+- Updated: <yyyy-mm-dd> by integration-wire
+```
+
+Rules for the wiring:
+
+- Scenario A: the Design export becomes the project, at the root when it holds nothing but `.git`, `.ui-workflow/`, `.gitignore`, a README, a LICENSE or an agent's or editor's config folder, else in a new folder the Stakeholder chooses. Mocks live only in `src/lib/mock/` (`lib/mock/` with no `src/`), read through its `index.ts`, each file marked as mock data. No backend call is invented.
+- Scenario B: the new frontend goes in its own folder (`frontend-new/` unless the Stakeholder names another). The old frontend and the backend stay untouched. All calls go through one module, `src/lib/api.ts`, using only what the plan names.
+- The backend's auth pattern is kept. No new login flow, auth library or provider.
+- Secrets stay server-side: no API key, service token, password or private key in frontend code or a public env var (`NEXT_PUBLIC_*`, `VITE_*`, `REACT_APP_*`, `PUBLIC_*`, `EXPO_PUBLIC_*`). The export's `.env*` files are never copied, `.env.example` aside. A backend that expects a shared secret from its callers stops the step until a Developer puts those calls behind a server-side route.
+- The step completes only when the frontend's own build has passed and the Stakeholder has approved the commit. A build that failed or could not run leaves `Blocked` set and nothing committed.
 
 ### Preview record (`.ui-workflow/preview.md`)
 

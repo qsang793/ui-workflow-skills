@@ -39,7 +39,7 @@ If `.ui-workflow/preview.md` exists with `Status: open`, a Preview is already ru
 
 ### 1. Choose the host by project shape
 
-Look at the files yourself; do not ask the Stakeholder. Decide from what the project is, before checking any tool or account:
+Look at the files yourself; do not ask the Stakeholder. Under Scenarios A and B the frontend to show is the `Frontend folder` of `.ui-workflow/wiring.md` (the project root when the file is absent): judge its shape, and build, run and deploy it from there, never the old frontend next to it. Decide from what the project is, before checking any tool or account:
 
 | Project shape | Host |
 |---|---|
@@ -55,7 +55,7 @@ From here on, whenever a step stops (the app does not start, no tunnel opens, Ve
 
 ### 2. Local run (host `tunnel`)
 
-Start the app with the `Run` line of `.ui-workflow/audit.md` (`- Run: <command> → <local URL>`), the same command `design-port` uses to show each Screen. When the audit is missing (Scenario A) or says `Run: unknown`, detect the command from the project (`package.json` scripts, `README`, `Procfile`, `uvicorn`/`flask`/`manage.py` entry points), tell the Developer the command you found and wait for them to confirm it before running it. Never guess silently.
+Start the app with the `Run` line of `.ui-workflow/audit.md` (`- Run: <command> → <local URL>`), the same command `design-port` uses to show each Screen. Under Scenario B that line starts the backend; the new frontend also runs, from the `Run` line of `wiring.md`, and its URL is what the Preview exposes. Under Scenario A the `Run` line of `wiring.md` is the command. When there is no line to use or it says `unknown`, detect the command from the project (`package.json` scripts, `README`, `Procfile`, `uvicorn`/`flask`/`manage.py` entry points), tell the Developer the command you found and wait for them to confirm it before running it. Never guess silently.
 
 Run it in the background, wait until the local URL answers, and note its process id. If it does not start, stop and show the Developer the error output.
 
