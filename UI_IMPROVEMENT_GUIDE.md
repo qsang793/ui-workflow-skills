@@ -147,7 +147,7 @@ Claude sẽ hỏi vài câu rồi chỉ cho anh kịch bản phù hợp.
 ```
 /integration-wire
 ```
-Claude lấy code từ Lovable, nối vào BE của anh.
+Kịch bản A: code từ Lovable trở thành project, chạy bằng dữ liệu mẫu cho đến khi có BE. Kịch bản B: FE mới nằm ở thư mục riêng và nối vào BE của anh, FE cũ giữ nguyên. Khi build qua, Claude hỏi anh trước khi lưu lên Work branch; không bao giờ tự push hay merge.
 
 **Kịch bản C** (giữ công nghệ cũ):
 ```

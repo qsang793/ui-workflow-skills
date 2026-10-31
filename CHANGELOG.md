@@ -48,6 +48,16 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - `ui-audit` records `- Run: <command> → <local URL> | unknown` under Stack, read from the files, never run.
 - Evals `port-first-screen` and `port-approve-commits-screen`; `audit-fastapi-vanilla` checks the `Run` line. Run 2026-10-30 with `--model sonnet`, 3 runs each: `port-first-screen` 1.00, `port-approve-commits-screen` 0.97, the miss an LLM `reply` judgement (`evals/results/2026-10-30T07-33-16-157Z/`), `audit-fastapi-vanilla` 1.00 (`evals/results/2026-10-30T04-48-55-769Z/`). In the sandbox the app cannot start (no `uvicorn`), so the runs cover the escalation path, not a Screen viewed in the browser.
 
+### Changed — `integration-wire` Beta fixes for Scenarios A and B (#10)
+- Scenario A: the Design export becomes the project, at the root of an empty repo or in a folder the Stakeholder chooses, and no longer asks for the planner. Mocks live in one marked layer, `src/lib/mock/`. Scenario B: the new frontend goes in its own folder (`frontend-new/`), all calls through `src/lib/api.ts`; the old frontend and the backend stay untouched.
+- Secrets stay server-side: the API-key-in-frontend row and the "Vercel project settings" env var advice are gone. The export's `.env*` files are never copied, and a secret found in the export is removed and reported by name. A backend that expects a shared secret from its callers stops the step until a Developer adds a server-side route.
+- The backend's auth pattern is kept; no new login flow, auth library or provider.
+- The step completes only after the frontend's own build passed and the Stakeholder approved the commit. A build that failed or could not run sets `Blocked` and commits nothing.
+- Follows the Work branch contract: creates or reuses `ui-workflow/<yyyy-mm-dd>` and records it at once, one commit per approved wiring (`ui-workflow: wire`), staged by path, never the Stakeholder's own changes, never pushes or merges.
+- New `.ui-workflow/wiring.md` records the frontend folder, build and run commands. `preview-deploy` reads it, so Scenario B previews the new frontend rather than the old one.
+- `integration-planner` names a backend that expects a shared secret from its callers as incompatible auth, a Blocker.
+- Evals `wire-a-promote`, `wire-a-folder`, `wire-b-new-folder`, `wire-b-api-key`, `wire-build-fails`, `wire-approve-commits`. Run 2026-10-31 with `--model sonnet`, 3 runs each: four cases 1.00, `wire-a-promote` 0.98, `wire-b-api-key` 0.97, both misses one LLM `reply` judgement (`evals/results/2026-10-31T15-54-35-988Z/`). The sandbox denies the npm registry, so the builds use a dependency-free stand-in script: no real framework was installed or built, and the app was never opened against a live backend.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added — Claude Code plugin packaging

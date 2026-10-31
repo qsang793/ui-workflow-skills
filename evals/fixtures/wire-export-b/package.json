@@ -1,0 +1,9 @@
+{
+  "name": "reminders-new",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/build.mjs --serve",
+    "build": "node scripts/build.mjs"
+  }
+}
