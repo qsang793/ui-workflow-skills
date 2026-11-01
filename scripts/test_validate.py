@@ -13,6 +13,9 @@ description: Use when testing.
 Read `${CLAUDE_SKILL_DIR}/templates/base.md`. Replace `{{extra}}` with notes.
 """
 
+EN_GUIDE = "docs/stakeholder-guide.md"
+VI_GUIDE = "docs/stakeholder-guide.vi.md"
+
 
 def make_repo(root, skill=SKILL, base="{{block}}\n{{extra}}\n", version="1.0.0", files=None):
     skill_dir = root / "skills/demo"
@@ -25,7 +28,10 @@ def make_repo(root, skill=SKILL, base="{{block}}\n{{extra}}\n", version="1.0.0",
     (root / ".claude-plugin/marketplace.json").write_text(json.dumps({"plugins": [{"name": "demo"}]}))
     (root / "CHANGELOG.md").write_text("## [1.0.0] — 2026-01-01\n")
     (root / "README.md").write_text("[log](./CHANGELOG.md)\n")
+    (root / "docs").mkdir()
+    (root / EN_GUIDE).write_text("# Guide\n")
     for rel, text in (files or {}).items():
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(text)
 
 
@@ -61,7 +67,7 @@ class ValidateTest(unittest.TestCase):
     def test_old_name_allowed_in_history(self):
         errors = self.run_case(files={
             "CHANGELOG.md": "## [1.0.0] — 2026-01-01\nRenamed `ui-translator`.\n",
-            "PILOT_RETROSPECTIVE.md": "Wrote `LOVABLE_PROMPT.md`.\n",
+            "docs/pilots/2026-05-21-retrospective.md": "Wrote `LOVABLE_PROMPT.md`.\n",
             "README.md": "# Demo\n\n## Migrating from 0.x\n\n```bash\n# move it\nmv lovable-export .ui-workflow/export\n```\n\n"
                          "`/ingest-lovable-export` is gone.\n",
         })
@@ -80,6 +86,57 @@ class ValidateTest(unittest.TestCase):
             "README.md": "## Migrating from 0.x\n\n`ui-translator` renamed.\n\n## Usage\n\nRun `/ui-translator`.\n",
         })
         self.assertTrue(any("README.md:7" in e and "ui-translator" in e for e in errors))
+
+    def test_guide_naming_missing_command_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "Run `/demo:demo`, then `/demo:gone`.\n"})
+        self.assertEqual(len(errors), 1)
+        self.assertIn(f"{EN_GUIDE}:1", errors[0])
+        self.assertIn("/demo:gone", errors[0])
+
+    def test_guide_command_at_end_of_sentence_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "Then run /demo:gone.\n"})
+        self.assertTrue(any("/demo:gone" in e for e in errors))
+
+    def test_guide_command_with_capitals_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "Run `/demo:Demo`.\n"})
+        self.assertTrue(any("/demo:Demo" in e for e in errors))
+
+    def test_missing_guide_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            make_repo(Path(tmp))
+            (Path(tmp) / EN_GUIDE).unlink()
+            self.assertTrue(any("no Stakeholder guide" in e for e in validate(tmp)))
+
+    def test_plugin_command_outside_guides_checked(self):
+        errors = self.run_case(skill=SKILL + "Next: `/demo:gone`.\n", files={"README.md": "Run `/demo:gone`, then `/plugin` or `/demo`.\n"})
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("/demo:gone" in e for e in errors))
+
+    def test_plugin_command_in_history_ignored(self):
+        self.assertEqual(self.run_case(files={"CHANGELOG.md": "## [1.0.0] — 2026-01-01\nRemoved `/demo:gone`.\n"}), [])
+
+    def test_guide_command_without_plugin_name_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "Run `/demo`.\n"})
+        self.assertTrue(any("/demo " in e for e in errors))
+
+    def test_guide_paths_and_urls_are_not_commands(self):
+        text = "Scenarios A/B read `.ui-workflow/state.md`, `/api/users` and https://example.com/docs. Run /demo:demo.\n"
+        self.assertEqual(self.run_case(files={EN_GUIDE: text}), [])
+
+    def test_guides_with_same_outline_pass(self):
+        errors = self.run_case(files={
+            EN_GUIDE: "# Guide\n\n## Start\n\nRun `/demo:demo`.\n",
+            VI_GUIDE: "# Hướng dẫn\n\n## Bắt đầu\n\nChạy `/demo:demo`.\n",
+        })
+        self.assertEqual(errors, [])
+
+    def test_guides_naming_different_commands_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "Run `/demo:demo`.\n", VI_GUIDE: "Chưa có lệnh.\n"})
+        self.assertTrue(any(VI_GUIDE in e and "differs from" in e for e in errors))
+
+    def test_guides_with_different_headings_reported(self):
+        errors = self.run_case(files={EN_GUIDE: "## Start\n", VI_GUIDE: "### Bắt đầu\n"})
+        self.assertTrue(any(VI_GUIDE in e and "differs from" in e for e in errors))
 
 
 if __name__ == "__main__":

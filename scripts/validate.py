@@ -3,6 +3,7 @@
 import json
 import re
 import sys
+from itertools import zip_longest
 from pathlib import Path
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -13,6 +14,9 @@ MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:|#)([^)#\s]+)")
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.M)
 OLD_NAME_RE = re.compile(r"ingest-lovable-export|lovable-export|LOVABLE_PROMPT|ui-translator")
 HEADING_RE = re.compile(r"(#+) ")
+GUIDE_GLOB = "docs/stakeholder-guide*.md"
+# A slash command as typed, /name or /plugin:name; not a path, a URL or A/B.
+COMMAND_RE = re.compile(r"(?<![\w./:~-])/([\w-]+(?::[\w-]+)?)(?![\w/-]|\.\w)")
 
 
 def parse_frontmatter(text):
@@ -96,11 +100,15 @@ def active_lines(text):
             yield n, line
 
 
+def is_history(md):
+    return md.name == "CHANGELOG.md" or "retrospective" in md.name.lower()
+
+
 def check_old_names(root):
     # 0.x names may stay only in historical text: the changelog, retrospectives, migration sections.
     errors = []
     for md in markdown_files(root):
-        if md.name == "CHANGELOG.md" or "retrospective" in md.name.lower():
+        if is_history(md):
             continue
         for n, line in active_lines(md.read_text(encoding="utf-8")):
             for old in OLD_NAME_RE.findall(line):
@@ -126,15 +134,53 @@ def check_manifests(root, skill_names):
     return errors
 
 
+def guide_outline(guide):
+    outline = []
+    for line in guide.read_text(encoding="utf-8").splitlines():
+        heading = HEADING_RE.match(line)
+        if heading:
+            outline.append(heading.group(1))
+        outline += COMMAND_RE.findall(line)
+    return outline
+
+
+def check_commands(root, plugin, skill_names):
+    known = {f"{plugin}:{name}" for name in skill_names}
+    guides = sorted(root.glob(GUIDE_GLOB))
+    errors = [] if guides else [f"no Stakeholder guide matches {GUIDE_GLOB}"]
+    for md in markdown_files(root):
+        if is_history(md):
+            continue
+        for n, line in active_lines(md.read_text(encoding="utf-8")):
+            for command in COMMAND_RE.findall(line):
+                # Guides name only plugin commands; elsewhere /plugin or a short symlink name may appear.
+                if command not in known and (md in guides or command.startswith(f"{plugin}:")):
+                    errors.append(f"{md}:{n}: /{command} is not an existing skill, as /{plugin}:<skill>")
+
+    # Each language has its own source, so they must share headings and commands, in order.
+    for guide in guides[1:]:
+        for ours, theirs in zip_longest(guide_outline(guide), guide_outline(guides[0])):
+            if ours != theirs:
+                errors.append(f"{guide}: outline differs from {guides[0].name}: {ours} where it has {theirs}")
+                break
+    return errors
+
+
 def validate(root):
     root = Path(root)
     skill_dirs = sorted(p for p in (root / "skills").iterdir() if p.is_dir())
+    skill_names = [d.name for d in skill_dirs]
     errors = []
     for d in skill_dirs:
         errors += check_skill(d)
     errors += check_links(root)
     errors += check_old_names(root)
-    errors += check_manifests(root, [d.name for d in skill_dirs])
+    errors += check_manifests(root, skill_names)
+    try:
+        plugin = json.loads((root / ".claude-plugin/plugin.json").read_text(encoding="utf-8")).get("name")
+    except (OSError, json.JSONDecodeError):
+        return errors  # check_manifests reported it
+    errors += check_commands(root, plugin, skill_names)
     return errors
 
 
