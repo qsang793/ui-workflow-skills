@@ -1,5 +1,7 @@
 # AGENTS.md
 
+This repo is public. Call any pilot project "a private project" in issues, PRs, commits and files, with no name, URL, content or deploy detail of it.
+
 ## Agent skills
 
 ### Issue tracker
