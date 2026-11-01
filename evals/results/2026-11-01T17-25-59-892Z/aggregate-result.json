@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.307",
+  "startedAt": "2026-11-01T17:25:59.892Z",
+  "durationSeconds": 34,
+  "costUsd": 0.1084193,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "preview-first-deploy",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "preview-first-deploy",
+      "dir": "evals/preview-first-deploy",
+      "source": "mixed",
+      "promptMarkdown": "The new frontend is wired up. Vercel is logged in on this machine, this project has never been deployed, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "deploys-as-preview",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".vercel-calls/target"
+            },
+            "pattern": "^preview\\s*$",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "never-to-production",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".vercel-calls/calls"
+            },
+            "pattern": "(^|\\n)deploy(?![^\\n]*--target[= ]preview)|--prod\\b|\\bpromote\\b",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "not-approved",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:[^\\n]*\\bpreview\\b",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "reads-target-back",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".vercel-calls/calls"
+            },
+            "pattern": "(^|\\n)inspect\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.25,
+            "passed": false,
+            "turns": 10,
+            "costUsd": 0.1084193,
+            "judgeCostUsd": 0,
+            "durationSeconds": 34,
+            "startedAt": "2026-11-01T17:26:00.059Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-3woHt5/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "deploys-as-preview",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in file .vercel-calls/target",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "never-to-production",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern found (expected absent)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "not-approved",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reads-target-back",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in file .vercel-calls/calls",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.25,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0.25,
+    "overallPassRate": 0
+  }
+}

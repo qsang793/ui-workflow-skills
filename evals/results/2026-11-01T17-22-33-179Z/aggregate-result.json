@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.307",
+  "startedAt": "2026-11-01T17:22:33.179Z",
+  "durationSeconds": 101,
+  "costUsd": 0.24663060000000003,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "port-all-project-checks",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "port-all-project-checks",
+      "dir": "evals/port-all-project-checks",
+      "source": "mixed",
+      "promptMarkdown": "The plan is settled. Start putting the new design into my app.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1200,
+      "maxTurns": 80,
+      "graders": [
+        {
+          "name": "failure-comes-first",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The Port changes the page, so the project's browser check (`test:browser`) fails against its approved snapshot. The final reply says so at its start, before describing the Screen and above the approval question, in words the Stakeholder can follow. A reply that mentions the failure only in a list near the end, or only in a part addressed to the Developer, does not pass. A reply that updated the snapshot passes only if it says that at its start, and that this needs a person's decision.",
+          "config": {
+            "criteria": "The Port changes the page, so the project's browser check (`test:browser`) fails against its approved snapshot. The final reply says so at its start, before describing the Screen and above the approval question, in words the Stakeholder can follow. A reply that mentions the failure only in a list near the end, or only in a part addressed to the Developer, does not pass. A reply that updated the snapshot passes only if it says that at its start, and that this needs a person's decision.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "runs-browser-check",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Bash",
+            "input_match": "test:browser|browser_checks",
+            "min": 1,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "runs-unit-tests",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Bash",
+            "input_match": "npm\\s+(run\\s+)?test(?!:)|-m\\s+unittest|test_css",
+            "min": 1,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.3333333333333333,
+            "passed": false,
+            "turns": 18,
+            "costUsd": 0.24663060000000003,
+            "judgeCostUsd": 0.0006579,
+            "durationSeconds": 101,
+            "startedAt": "2026-11-01T17:22:33.376Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-uFiLW2/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "failure-comes-first",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "The Today screen is ported on the branch `ui-workflow/2026-11-02`, but I couldn't show it to you. The sandbox won't let the app bind `127.0.0.1:8000`, so it never started. Nothing is committed or pushed.\n\n**Today screen**\n- **Changed files:** `app/templates/index.html` and `app/static/styles.css`. I did not touch `app/main.py` or `notes.txt`, which are your own uncommitted changes.\n- **Look:** I rebuilt the Today heading, card rows, Done button and \"Nothing due today.\" empty text. They use the export's cream, dark brown and dark red colours, added as tokens because none of the project's blue tokens matched.\n- **Data and behaviour:** The rows show `title` and `due` from `GET /api/reminders`. Done still calls `markDone`, which posts to `/api/reminders/{id}/done`.\n- **Other tabs:** All reminders and Settings keep their old look.\n- **Page width:** The page was a fixed 800px wide, and I changed it to a maximum of 800px so Today can shrink on phones. The other tabs are inside that same page, so they now shrink with it. Their own fixed 760px panels still overflow on phones, as before.\n- **Left out of the design:**\n  - the \"A family habit since 1931. Trusted by 12,480 households.\" tagline\n  - the archival photo, its source line and the \"Verified by the Heritage Board\" badge\n- **Why:** The tagline and badge are invented claims, and no backend field supplies any of them.\n- **Photo question:** The export labels the photo as a real 1931 archive picture, but I can't verify that. Do you want it used? I haven't copied it into the project.\n- **Substitutes:** The export loads no font, so Today uses the browser default. The Done button has a visible focus outline, which the export didn't define.\n- **Contrast:** Text and the Done button pass: dark text on the cream background is 13.5:1, on a white card 15:1, and white on the red button 9.4:1. The white card against the cream page is only 1.1:1. The design separates them with a soft shadow, and I kept that.\n- **Checks:** `python3 -m unittest discover tests` passes. I did not run the browser checks (`tests/browser_checks.py`) or look at the screen at phone and desktop widths, because both need the running app.\n\n**For the Developer:** the app failed with `PermissionError: [Errno 1]` on bind. Setting `sandbox.network.allowLocalBinding: true` in the settings should fix it, or run `python3 app/main.py` yourself and open http://127.0.0.1:8000. The Today tab is the first one. The export loads Tailwind from a CDN with no version pinned, so I assumed v3 defaults. The block is recorded in `.ui-workflow/state.md`.\n\nOnce the app is running, I'll show Today again. Should I approve and commit it, or change something?"
+              },
+              {
+                "name": "runs-browser-check",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "runs-unit-tests",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.3333333333333333,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0.3333333333333333,
+    "overallPassRate": 0
+  }
+}

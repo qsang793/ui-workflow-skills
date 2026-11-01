@@ -44,6 +44,12 @@ class ValidateTest(unittest.TestCase):
     def test_valid_repo_passes(self):
         self.assertEqual(self.run_case(), [])
 
+    def test_eval_results_must_not_hold_a_home_path(self):
+        files = {"evals/results/run/aggregate-result.json": '{"cwd": "/Users/someone/repo"}'}
+        self.assertTrue(any("local home path" in e for e in self.run_case(files=files)))
+        clean = {"evals/results/run/aggregate-result.json": '{"cwd": "~/repo"}'}
+        self.assertEqual(self.run_case(files=clean), [])
+
     def test_name_must_match_directory(self):
         errors = self.run_case(skill=SKILL.replace("name: demo", "name: other"))
         self.assertTrue(any("must match directory" in e for e in errors))

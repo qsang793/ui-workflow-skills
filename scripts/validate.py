@@ -14,6 +14,7 @@ MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:|#)([^)#\s]+)")
 CHANGELOG_VERSION_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.M)
 OLD_NAME_RE = re.compile(r"ingest-lovable-export|lovable-export|LOVABLE_PROMPT|ui-translator")
 HEADING_RE = re.compile(r"(#+) ")
+LOCAL_PATH_RE = re.compile(r"/(?:Users|home)/[\w.-]+")
 GUIDE_GLOB = "docs/stakeholder-guide*.md"
 # A slash command as typed, /name or /plugin:name; not a path, a URL or A/B.
 COMMAND_RE = re.compile(r"(?<![\w./:~-])/([\w-]+(?::[\w-]+)?)(?![\w/-]|\.\w)")
@@ -116,6 +117,15 @@ def check_old_names(root):
     return errors
 
 
+def check_local_paths(root):
+    # Eval results get committed and this repo is public, so a home path must not reach them.
+    errors = []
+    for path in (root / "evals/results").rglob("*"):
+        if path.is_file() and LOCAL_PATH_RE.search(path.read_text(encoding="utf-8", errors="replace")):
+            errors.append(f"{path}: contains a local home path")
+    return errors
+
+
 def check_manifests(root, skill_names):
     errors = []
     try:
@@ -175,6 +185,7 @@ def validate(root):
         errors += check_skill(d)
     errors += check_links(root)
     errors += check_old_names(root)
+    errors += check_local_paths(root)
     errors += check_manifests(root, skill_names)
     try:
         plugin = json.loads((root / ".claude-plugin/plugin.json").read_text(encoding="utf-8")).get("name")

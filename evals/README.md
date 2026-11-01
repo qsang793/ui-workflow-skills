@@ -30,18 +30,20 @@ Each folder here is one case for `claude plugin eval`: a `prompt.md` (what the S
 | `wire-approve-commits` | The Stakeholder approves a built wiring: one commit on the Work branch with the frontend and workflow documents, none of the Stakeholder's changes, step completed, no push |
 | `preview-server-rendered` | `preview-deploy` on the FastAPI + Jinja fixture chooses a local run plus tunnel, never calls Vercel, does not approve the Preview itself |
 | `preview-static` | `preview-deploy` on a static Vite frontend with a public API chooses a Vercel preview, never `--prod`, never a tunnel as a fallback |
+| `preview-first-deploy` | Same project, never deployed, with a stand-in Vercel CLI (`fixtures/vercel-stub`) that sends a deploy without `--target preview` to production, as the real one did in the pilot: the deploy lands on preview and the run reads the target back |
+| `port-all-project-checks` | A project with two checks, the second named `test:browser` and failing on any Port: both run, and the failure comes first in the reply |
 
 Fixtures live in `fixtures/`; the planner cases share `fixtures/stage-reminders-design.sh`, which stages `fixtures/reminders-design/` (a single-file React export, `design-prompt.md`, `audit.md`) on top of the FastAPI fixture. The port cases share `fixtures/stage-reminders-port.sh`, which adds a PROCEED plan, makes the project a git repo on `main` with the Stakeholder's own uncommitted changes; graders read the branch reflogs in `.git/logs/` and the `git add` commands, since hooks do not run in the eval sandbox. The extraction cases share `fixtures/stage-port-extraction.sh`, which swaps in `fixtures/port-app/`, a standard-library server, and keeps a Screen's markup and script in `index.html` because a regex grader reads one file. The eval sandbox refuses local ports, so these runs take the escalation path of the viewing step. No grader runs code, so "Required behaviour works" is a regex on the endpoint call; a run kept with `--keep-temp` starts by hand with no install and can be clicked. The wire cases share `fixtures/stage-wire-a.sh` and `fixtures/stage-wire-b.sh`; their exports (`fixtures/wire-export-*`) have no dependencies, and a small `scripts/build.mjs` stands in for the bundler that fails on a broken import, so the build runs with no network. It does not prove a real framework build passes. `tool_used` missed a `git add` after a long heredoc in one Bash call, so these cases read `.git/logs/HEAD` and `.git/index` where they can. `file_exists` sees new files only, never an edit to a file the scaffold left. The key in `fixtures/wire-export-a/.env` is fake. The Workflow state format is in [the workflow contract](../docs/workflow-contract.md).
 
 ## Run locally
 
-From the repo root (needs a Claude login or `ANTHROPIC_API_KEY`). Start it from a plain terminal: run from inside a Claude Code session, the child `claude` inherits that session's environment and a subscription login can fail with "organization has disabled Claude subscription access". Add `--model sonnet` to keep the cost down:
+Needs a Claude login or `ANTHROPIC_API_KEY`. The script works from a plain terminal or inside a Claude Code session, runs on Sonnet unless you pass `--model`, and takes the home path out of the results:
 
 ```bash
-claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --ablation none
+scripts/eval.sh
 ```
 
-`--scaffold` runs the case scripts in this folder. They copy fixtures, and some patch the copy; each patch is followed by a check that fails the scaffold if it did not apply. Add `--case <name>` for one case and `--runs 1` for a quick check. One run of every case costs about 1 USD. Results land in `evals/results/<timestamp>/`; keep the run you cite in the changelog.
+`--scaffold`, which the script passes, runs the case scripts in this folder. They copy fixtures, and some patch the copy; each patch is followed by a check that fails the scaffold if it did not apply. Add `--case <name>` for one case and `--runs 1` for a quick check. One run of every case costs about 1 USD. Results land in `evals/results/<timestamp>/`; keep the run you cite in the changelog.
 
 ## Run in CI
 
