@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- PROTOTYPE, throwaway. Five abstract directions for the plugin icon, switchable via ?variant=A..E. Not part of the plugin. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin Icon Prototype</title>
+<style>
+  :root { color-scheme: light; --ink:#1b1b1f; --mute:#6b6a66; --line:#dedbd3; --page:#f6f4ef; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; padding:24px 16px 96px; }
+  main { max-width:960px; margin:auto; display:grid; gap:24px; }
+  .tag { font-size:12px; letter-spacing:.06em; color:var(--mute); margin:0; }
+  .strip { display:flex; flex-wrap:wrap; gap:12px; }
+  .strip button { background:none; border:2px solid transparent; border-radius:18px; padding:6px; cursor:pointer; font:inherit; font-size:12px; color:var(--mute); text-align:center; }
+  .strip button[aria-current=true] { border-color:var(--ink); color:var(--ink); }
+  .strip button:focus-visible, .bar button:focus-visible { outline:2px solid #1f3fa8; outline-offset:2px; }
+  .strip img { display:block; width:72px; height:72px; border-radius:22%; margin-bottom:4px; }
+  .hero { display:grid; grid-template-columns:minmax(0,280px) minmax(0,1fr); gap:28px; align-items:center; }
+  .hero > img { width:100%; aspect-ratio:1; border-radius:22%; display:block; }
+  h1 { margin:0 0 8px; font-size:30px; line-height:1.15; letter-spacing:-.01em; }
+  .hero p { margin:0 0 10px; max-width:58ch; }
+  .sw { display:flex; flex-wrap:wrap; gap:8px; font:12px ui-monospace,Menlo,monospace; color:var(--mute); }
+  .sw span::before { content:""; display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-1px; background:var(--c); outline:1px solid #0002; }
+  .ctx { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr)); gap:16px; }
+  .panel { border-radius:14px; padding:18px; display:grid; gap:18px; border:1px solid var(--line); min-width:0; }
+  .panel.light { background:#fff; color:#1f2328; }
+  .panel.dark { background:#1e1e1e; color:#e8e6e1; border-color:#333; }
+  .row { display:flex; gap:12px; align-items:center; }
+  .row img { width:40px; height:40px; border-radius:22%; flex:none; }
+  .row b { display:block; font-size:14px; }
+  .row small { display:block; opacity:.65; font-size:12px; line-height:1.35; }
+  .readme { display:flex; gap:12px; align-items:center; font-size:22px; font-weight:600; }
+  .readme img { width:48px; height:48px; flex:none; }
+  .ladder { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; font-size:11px; }
+  .ladder figure { margin:0; text-align:center; opacity:1; }
+  .ladder img { display:block; margin:0 auto 4px; border-radius:22%; }
+  .bar { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); display:flex; align-items:center; gap:6px; background:#111; color:#fff; padding:6px; border-radius:999px; box-shadow:0 6px 20px #0005; max-width:calc(100vw - 32px); font-size:13px; white-space:nowrap; }
+  .bar button { all:unset; cursor:pointer; width:32px; height:32px; text-align:center; line-height:32px; border-radius:50%; }
+  .bar button:hover { background:#333; }
+  .bar span { padding:0 8px; }
+  @media (max-width:640px) { .hero { grid-template-columns:1fr; } .hero > img { max-width:220px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="tag">PROTOTYPE · ICON PLUGIN · BẢN THỬ, SẼ BỎ</p>
+  <div class="strip" id="strip"></div>
+  <section class="hero" id="hero"></section>
+  <section class="ctx" id="ctx"></section>
+</main>
+<div class="bar"><button id="prev" aria-label="Hướng trước">←</button><span id="label"></span><button id="next" aria-label="Hướng sau">→</button></div>
+
+<script>
+const svg = (body, defs = '') =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>${defs}</defs>${body}</svg>`;
+
+function bars(fill) {
+  const spec = [[80,8],[106,12],[134,18],[166,26],[203,38],[249,200]];
+  return spec.map(([x, w]) => `<rect x="${x}" y="60" width="${w}" height="392" fill="${fill}"/>`).join('');
+}
+
+function enso() {
+  const pts = (fn, n = 160) => Array.from({ length: n + 1 }, (_, i) => fn(i / n));
+  const at = (u, r) => {
+    const a = (-20 + 320 * u) * Math.PI / 180;
+    return [256 + r * Math.cos(a), 262 + r * Math.sin(a)];
+  };
+  const mid = u => 166 + 7 * Math.sin(u * 6.28 + 1);
+  const width = u => 86 * Math.pow(1 - u, 0.6) * Math.pow(Math.min(1, u * 16), 0.5) + 5;
+  const outer = pts(u => at(u, mid(u) + width(u) / 2));
+  const inner = pts(u => at(u, mid(u) - width(u) / 2)).reverse();
+  const toPath = p => p.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join('');
+  const dry = (from, off) => toPath(pts(u => at(from + (1 - from) * u, mid(from + (1 - from) * u) + off * width(from + (1 - from) * u)), 40));
+  const streaks = [[.34,-.2],[.46,.14],[.58,-.05],[.66,.26]]
+    .map(([f, o]) => `<path d="${dry(f, o)}" fill="none" stroke="#F2ECDF" stroke-width="3.5" stroke-linecap="round"/>`).join('');
+  return `<path d="${toPath(outer)}${toPath(inner).replace('M', 'L')}Z" fill="#17171B"/>${streaks}`;
+}
+
+const V = {
+  A: {
+    name: 'Giao thoa', file: 'circle × frame',
+    idea: 'Một hình tròn (ý tưởng của người không biết code) gặp một hình vuông (khung giao diện). Phần chồng lên nhau chính là kết quả.',
+    risk: 'Dễ đọc nhất ở cỡ nhỏ. Đơn giản đến mức có thể bị thấy là "logo công ty" chung chung.',
+    colors: ['#F1E9DA', '#1F3FA8', '#E8482A', '#14163A'],
+    svg: svg(`<rect width="512" height="512" fill="#F1E9DA"/>
+      <rect x="66" y="66" width="256" height="256" rx="26" fill="#1F3FA8"/>
+      <circle cx="312" cy="312" r="134" fill="#E8482A"/>
+      <circle cx="312" cy="312" r="134" fill="#14163A" clip-path="url(#f)"/>`,
+      `<clipPath id="f"><rect x="66" y="66" width="256" height="256" rx="26"/></clipPath>`),
+  },
+  B: {
+    name: 'Hiện hình', file: 'op-art emergence',
+    idea: 'Một đĩa tròn hiện dần từ các vạch rời rạc sang khối đặc: từ bản nháp thô đến giao diện hoàn chỉnh. Lấy cảm hứng từ op-art.',
+    risk: 'Đẹp nhất ở cỡ lớn. Xuống 24px trở xuống, các vạch nhoè thành một đĩa chuyển sắc, giống pha mặt trăng.',
+    colors: ['#111318', '#F4A63C'],
+    svg: svg(`<rect width="512" height="512" fill="#111318"/><g clip-path="url(#d)">${bars('#F4A63C')}</g>`,
+      `<clipPath id="d"><circle cx="256" cy="256" r="186"/></clipPath>`),
+  },
+  C: {
+    name: 'Tầng lớp', file: 'colour field',
+    idea: 'Các lớp vuông lồng nhau, sáng dần vào trong: mỗi vòng làm việc đưa giao diện lại gần cái lõi hơn. Thuần màu sắc, theo tinh thần color field của Josef Albers.',
+    risk: 'Nhận ra ngay ở mọi cỡ và ấm nhất trên nền tối. Ít "câu chuyện" nhất nếu không có lời giải thích.',
+    colors: ['#AE2E1C', '#D9531F', '#EE8A2C', '#F9C74F'],
+    svg: svg(`<rect width="512" height="512" fill="#AE2E1C"/>
+      <rect x="56" y="84" width="400" height="400" fill="#D9531F"/>
+      <rect x="112" y="168" width="288" height="288" fill="#EE8A2C"/>
+      <rect x="168" y="252" width="176" height="176" fill="#F9C74F"/>`),
+  },
+  D: {
+    name: 'Nét cọ', file: 'gesture',
+    idea: 'Một nét cọ duy nhất, hơi lệch, khô dần về cuối; con dấu đỏ nằm ở chỗ nét cọ dừng lại. Gợi bàn tay con người hơn là một công cụ dev.',
+    risk: 'Mang tính nghệ thuật nhất. Ở 16px vẫn thấy vòng hở và con dấu, nhưng có thể bị đọc thành vòng loading; các vệt khô chỉ thấy từ 48px. Ý nghĩa ít gắn với UI nhất.',
+    colors: ['#F2ECDF', '#17171B', '#D63A22'],
+    svg: svg(`<rect width="512" height="512" fill="#F2ECDF"/>${enso()}
+      <rect x="362" y="92" width="60" height="60" rx="7" fill="#D63A22"/>`),
+  },
+  E: {
+    name: 'Mảnh ghép', file: 'bauhaus tiles',
+    idea: 'Bốn ô Bauhaus tràn viền ghép từ hình quạt, tròn và bán nguyệt: những khối cơ bản nhất của giao diện, xếp lại thành một bố cục.',
+    risk: 'Nổi bật nhất trong danh sách. Nhiều màu nhất, ở 16px khá rối, và trên nền tối góc navy chìm vào nền làm mẻ hình.',
+    colors: ['#1D2B53', '#F2B632', '#F3ECDD', '#E4472B'],
+    svg: svg(`<rect width="512" height="512" fill="#F3ECDD"/>
+      <rect width="256" height="256" fill="#1D2B53"/><path d="M256 0A256 256 0 0 0 0 256H256Z" fill="#F2B632"/>
+      <circle cx="384" cy="128" r="92" fill="#E4472B"/>
+      <rect y="256" width="256" height="256" fill="#E4472B"/><path d="M0 400A128 128 0 0 1 256 400Z" fill="#F3ECDD"/>
+      <rect x="256" y="256" width="256" height="256" fill="#F2B632"/><path d="M256 512A256 256 0 0 0 512 256H256Z" fill="#1D2B53"/>`),
+  },
+};
+
+const keys = Object.keys(V);
+const src = k => 'data:image/svg+xml,' + encodeURIComponent(V[k].svg);
+const SIZES = [64, 48, 32, 24, 16];
+
+function panel(k, theme) {
+  const s = src(k);
+  return `<div class="panel ${theme}">
+    <div class="row"><img src="${s}" alt=""><div><b>ui-workflow-skills <span style="opacity:.6;font-weight:400">0.2.0</span></b>
+      <small>Claude Code skills for non-technical stakeholders to drive UI improvement work.</small></div></div>
+    <div class="readme"><img src="${s}" alt=""><span>UI Workflow Skills</span></div>
+    <div class="ladder">${SIZES.map(n => `<figure><img src="${s}" width="${n}" height="${n}" alt="${n}px"><figcaption>${n}</figcaption></figure>`).join('')}</div>
+  </div>`;
+}
+
+function show(k, push = true) {
+  const v = V[k];
+  if (push) { try { history.replaceState(null, '', '?variant=' + k); } catch {} }
+  document.getElementById('strip').innerHTML = keys.map(x =>
+    `<button data-k="${x}" aria-current="${x === k}"><img src="${src(x)}" alt="">${x} · ${V[x].name}</button>`).join('');
+  document.getElementById('hero').innerHTML = `<img src="${src(k)}" alt="Icon hướng ${k}: ${v.name}">
+    <div><h1>${k} · ${v.name}</h1><p>${v.idea}</p><p style="color:var(--mute)">${v.risk}</p>
+    <div class="sw">${v.colors.map(c => `<span style="--c:${c}">${c}</span>`).join('')}</div></div>`;
+  document.getElementById('ctx').innerHTML = panel(k, 'light') + panel(k, 'dark');
+  document.getElementById('label').textContent = `${k} (${v.name})`;
+  document.title = 'Plugin Icon Prototype';
+  cur = k;
+}
+
+let cur;
+const step = d => show(keys[(keys.indexOf(cur) + d + keys.length) % keys.length]);
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('next').onclick = () => step(1);
+document.getElementById('strip').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.k); };
+addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea,[contenteditable]')) return;
+  if (e.key === 'ArrowLeft') step(-1);
+  if (e.key === 'ArrowRight') step(1);
+});
+const start = new URLSearchParams(location.search).get('variant');
+show(keys.includes(start) ? start : 'A', false);
+</script>
+</body>
+</html>

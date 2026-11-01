@@ -1,0 +1,216 @@
+<!doctype html>
+<!-- PROTOTYPE, throwaway. Round 2: five brush directions pushed for impact and recognition, switchable via ?variant=F..J. Round 1 is round-1.html. Not part of the plugin. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin Icon Prototype</title>
+<style>
+  :root { color-scheme: light; --ink:#1b1b1f; --mute:#6b6a66; --line:#dedbd3; --page:#f6f4ef; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; padding:24px 16px 96px; }
+  main { max-width:960px; margin:auto; display:grid; gap:24px; }
+  .tag { font-size:12px; letter-spacing:.06em; color:var(--mute); margin:0; }
+  .strip { display:flex; flex-wrap:wrap; gap:12px; }
+  .strip button { background:none; border:2px solid transparent; border-radius:18px; padding:6px; cursor:pointer; font:inherit; font-size:12px; color:var(--mute); text-align:center; }
+  .strip button[aria-current=true] { border-color:var(--ink); color:var(--ink); }
+  .strip button:focus-visible { outline:2px solid #1f3fa8; outline-offset:2px; }
+  .strip img { display:block; width:88px; height:88px; border-radius:22%; margin:0 auto 4px; }
+  .hero { display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:28px; align-items:center; }
+  .hero > img { width:100%; aspect-ratio:1; border-radius:22%; display:block; }
+  h1 { margin:0 0 8px; font-size:30px; line-height:1.15; letter-spacing:-.01em; }
+  .hero p { margin:0 0 10px; max-width:58ch; }
+  .sw { display:flex; flex-wrap:wrap; gap:8px; font:12px ui-monospace,Menlo,monospace; color:var(--mute); }
+  .sw span::before { content:""; display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-1px; background:var(--c); outline:1px solid #0002; }
+  .ctx { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr)); gap:16px; }
+  .panel { border-radius:14px; padding:18px; display:grid; gap:18px; border:1px solid var(--line); min-width:0; }
+  .panel.light { background:#fff; color:#1f2328; }
+  .panel.dark { background:#1e1e1e; color:#e8e6e1; border-color:#333; }
+  .h { font-size:11px; letter-spacing:.05em; opacity:.6; margin:0 0 8px; }
+  .row { display:flex; gap:12px; align-items:center; }
+  .row img { width:40px; height:40px; border-radius:22%; flex:none; }
+  .row b { display:block; font-size:14px; }
+  .row small { display:block; opacity:.65; font-size:12px; line-height:1.35; }
+  .crowd { display:flex; flex-wrap:wrap; gap:10px; }
+  .crowd img { width:44px; height:44px; border-radius:22%; display:block; }
+  .ladder { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; font-size:11px; }
+  .ladder figure { margin:0; text-align:center; }
+  .ladder img { display:block; margin:0 auto 4px; border-radius:22%; }
+  .squint img { filter:blur(3px); }
+  .bar { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); display:flex; align-items:center; gap:6px; background:#111; color:#fff; padding:6px; border-radius:999px; box-shadow:0 6px 20px #0005; max-width:calc(100vw - 32px); font-size:13px; white-space:nowrap; }
+  .bar button { all:unset; cursor:pointer; width:32px; height:32px; text-align:center; line-height:32px; border-radius:50%; }
+  .bar button:hover { background:#333; }
+  .bar button:focus-visible { outline:2px solid #fff; }
+  .bar span { padding:0 8px; }
+  @media (max-width:640px) { .hero { grid-template-columns:1fr; } .hero > img { max-width:240px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="tag">PROTOTYPE · ICON PLUGIN · VÒNG 2 · BẢN THỬ, SẼ BỎ</p>
+  <div class="strip" id="strip"></div>
+  <section class="hero" id="hero"></section>
+  <section class="ctx" id="ctx"></section>
+</main>
+<div class="bar"><button id="prev" aria-label="Hướng trước">←</button><span id="label"></span><button id="next" aria-label="Hướng sau">→</button></div>
+
+<script>
+const svg = (body, defs = '') =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>${defs}</defs>${body}</svg>`;
+
+const rand = seed => () => (seed = seed * 16807 % 2147483647) / 2147483647;
+const line = (a, b) => u => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+
+function spline(p) {
+  return u => {
+    const t = Math.min(u, .9999) * (p.length - 1), i = Math.floor(t), f = t - i;
+    const q = k => p[Math.max(0, Math.min(p.length - 1, k))];
+    const cr = d => {
+      const [a, b, c, e] = [q(i - 1)[d], q(i)[d], q(i + 1)[d], q(i + 2)[d]];
+      return .5 * (2 * b + (c - a) * f + (2 * a - 5 * b + 4 * c - e) * f * f + (3 * b - a - 3 * c + e) * f * f * f);
+    };
+    return [cr(0), cr(1)];
+  };
+}
+
+// One stroke drawn as many separate bristles, so the end of the stroke runs dry and breaks up.
+function brush({ c, w, color, seed = 7, n = 90, dry = .6, drop = .55, steps = 70, streak = 1 }) {
+  const r = rand(seed * 7919 + 13);
+  let W = 0;
+  for (let i = 0; i <= 40; i++) W = Math.max(W, w(i / 40));
+  const base = W / (n - 1) * 2.1;
+  let paths = '';
+  for (let i = 0; i < n; i++) {
+    const o = -1 + 2 * i / (n - 1) + (r() - .5) * .05;
+    const start = r() * .012;
+    const end = dry + (1 - dry) * (.5 + .5 * r());
+    let d = '', up = true, on = true, run = 0;
+    for (let s = 0; s <= steps; s++) {
+      const u = s / steps;
+      if (u < start || u > end) { up = true; continue; }
+      const pressure = Math.max(0, (u - dry) / (1 - dry));
+      if (run-- <= 0) { on = r() > pressure * drop; run = (2 + Math.floor(r() * 6)) * streak; }
+      if (!on) { up = true; continue; }
+      const [x, y] = c(u), [x2, y2] = c(Math.min(1, u + .004)), [x0, y0] = c(Math.max(0, u - .004));
+      const dx = x2 - x0, dy = y2 - y0, len = Math.hypot(dx, dy) || 1;
+      const off = o * w(u) / 2;
+      d += `${up ? 'M' : 'L'}${(x - dy / len * off).toFixed(1)} ${(y + dx / len * off).toFixed(1)}`;
+      up = false;
+    }
+    paths += `<path d="${d}" stroke-width="${(base * (.55 + .9 * r())).toFixed(1)}"/>`;
+  }
+  return `<g fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round">${paths}</g>`;
+}
+
+const INK = '#141216', BONE = '#F6EEDF', RED = '#E8391D';
+
+const V = {
+  F: {
+    name: 'Nét thành khung',
+    idea: 'Một vệt cọ thô đi dần sang phải rồi thành một khối bo góc sắc nét. Đây chính là việc plugin làm: từ ý tưởng phác tay đến giao diện hoàn chỉnh, gói trong một hình.',
+    risk: 'Câu chuyện đúng với sản phẩm nhất. Dưới 32px chỉ còn là một khối chữ nhật lệch, và nền xanh chìm trên nền tối.',
+    colors: ['#0B3A42', BONE],
+    svg: svg(`<rect width="512" height="512" fill="#0B3A42"/><g transform="rotate(-14 256 256)">
+      ${brush({ c: line([330, 256], [28, 256]), w: u => 216 + 34 * u, color: BONE, seed: 3, n: 170, dry: .2, drop: .62, steps: 110, streak: 3 })}
+      <rect x="236" y="143" width="238" height="226" rx="38" fill="${BONE}"/></g>`),
+  },
+  G: {
+    name: 'Con trỏ cọ',
+    idea: 'Con trỏ chuột, ký hiệu quen nhất của giao diện, được quét bằng hai nhát cọ mực trên nền đỏ. Một hình đọc được hai nghĩa: giao diện và bàn tay người.',
+    risk: 'Dễ nhận ra và dễ nhớ nhất, kể cả khi làm mờ. Ít trừu tượng hơn các hướng còn lại, và con trỏ là mô-típ hay gặp ở công cụ thiết kế.',
+    colors: [RED, INK],
+    svg: svg(`<rect width="512" height="512" fill="${RED}"/>
+      ${brush({ c: spline([[232, 296], [280, 384], [326, 486]]), w: u => 86 - 14 * u, color: INK, seed: 11, n: 50, dry: .38, drop: .68 })}
+      ${brush({ c: spline([[146, 40], [204, 186], [272, 346]]), w: u => Math.max(2, 268 * u * (1 + .025 * Math.sin(u * 11))), color: INK, seed: 5, n: 120, dry: .8, drop: .6 })}`),
+  },
+  H: {
+    name: 'Cửa sổ trong mực',
+    idea: 'Ba nhát cọ mực to phủ kín mặt, giữa đó là một ô vuông sắc cạnh màu cam. Sự đối lập giữa nét tay tự do và hình học chính xác tạo ra điểm nhìn.',
+    risk: 'Đậm ở cỡ lớn, nhưng từ 32px trở xuống giống hệt nút stop, nên đây là hướng yếu nhất.',
+    colors: [BONE, INK, '#FF6A1A'],
+    svg: svg(`<rect width="512" height="512" fill="${BONE}"/>
+      ${brush({ c: spline([[34, 150], [240, 132], [478, 148]]), w: () => 158, color: INK, seed: 2, dry: .72, drop: .7 })}
+      ${brush({ c: spline([[486, 262], [256, 250], [26, 268]]), w: () => 158, color: INK, seed: 9, dry: .76, drop: .7 })}
+      ${brush({ c: spline([[40, 376], [250, 388], [470, 366]]), w: () => 146, color: INK, seed: 4, dry: .66, drop: .75 })}
+      <rect x="172" y="172" width="168" height="168" rx="26" fill="#FF6A1A"/>`),
+  },
+  I: {
+    name: 'Chữ W thư pháp',
+    idea: 'Chữ W của Workflow viết bằng bốn nhát cọ, nét xuống đậm, nét lên mảnh như thư pháp, trên nền vàng. Bản thân chữ đã là một dấu hiệu riêng.',
+    risk: 'Rõ ở mọi cỡ và gắn thẳng với tên plugin. Ít trừu tượng nhất, và cần tránh gần với logo W của các hãng khác.',
+    colors: ['#F5B700', INK],
+    svg: svg(`<rect width="512" height="512" fill="#F5B700"/>
+      ${brush({ c: spline([[176, 432], [216, 300], [262, 150]]), w: u => 22 + 10 * u, color: INK, seed: 12, n: 26, dry: .8, drop: .5 })}
+      ${brush({ c: spline([[338, 434], [392, 262], [456, 62]]), w: u => 24 - 6 * u, color: INK, seed: 14, n: 26, dry: .55, drop: .75 })}
+      ${brush({ c: spline([[66, 76], [118, 256], [180, 440]]), w: u => 112 - 76 * u, color: INK, seed: 6, n: 90, dry: .86, drop: .55 })}
+      ${brush({ c: spline([[238, 142], [286, 288], [344, 442]]), w: u => 106 - 72 * u, color: INK, seed: 10, n: 90, dry: .86, drop: .55 })}`),
+  },
+  J: {
+    name: 'Vòng lớn',
+    idea: 'Vẫn là vòng nét cọ của hướng D, nhưng phóng lớn tràn ra ngoài khung, nét dày hơn hẳn, màu xương trên nền đỏ. Hướng này để kiểm tra: D thiếu wow là do màu và tỉ lệ, hay do chính ý tưởng?',
+    risk: 'Táo bạo hơn D nhiều và vẫn trừu tượng nhất. Nhưng đây vẫn là mô-típ ensō quen thuộc, và ở 16px trông giống chữ C.',
+    colors: [RED, BONE],
+    svg: svg(`<rect width="512" height="512" fill="${RED}"/>
+      ${brush({
+        c: u => { const a = (-34 + 322 * u) * Math.PI / 180, r = 178 + 8 * Math.sin(u * 6.28); return [254 + r * Math.cos(a), 268 + r * Math.sin(a)]; },
+        w: u => 168 * Math.pow(1 - u, .5) * Math.pow(Math.min(1, u * 14), .5) + 12,
+        color: BONE, seed: 8, n: 110, dry: .42, drop: .68, steps: 120,
+      })}`),
+  },
+};
+
+// Stand-ins for neighbouring plugins: generic marks, no real brands.
+const others = [
+  ['#2F6FED', '<circle cx="256" cy="256" r="120" fill="#fff"/>'],
+  ['#E9EBEF', '<path d="M136 170H376M136 256H376M136 342H300" stroke="#47505F" stroke-width="44" stroke-linecap="round"/>'],
+  ['#6D4AE8', '<path d="M256 96L296 216L416 256L296 296L256 416L216 296L96 256L216 216Z" fill="#fff"/>'],
+  ['#14A37F', '<path d="M140 262L226 348L376 170" fill="none" stroke="#fff" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>'],
+  ['#20242C', '<path d="M176 160L84 256L176 352M336 160L428 256L336 352" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>'],
+  ['#F2F3F5', '<rect x="126" y="126" width="260" height="260" rx="46" fill="#2F6FED"/>'],
+].map(([bg, body]) => 'data:image/svg+xml,' + encodeURIComponent(svg(`<rect width="512" height="512" fill="${bg}"/>${body}`)));
+
+const keys = Object.keys(V);
+const cache = {};
+const src = k => cache[k] ??= 'data:image/svg+xml,' + encodeURIComponent(V[k].svg);
+const SIZES = [64, 48, 32, 24, 16];
+
+function panel(k, theme) {
+  const s = src(k);
+  const crowd = [...others.slice(0, 3), s, ...others.slice(3)];
+  return `<div class="panel ${theme}">
+    <div><p class="h">GIỮA CÁC PLUGIN KHÁC (ICON GIẢ LẬP)</p><div class="crowd">${crowd.map(x => `<img src="${x}" alt="">`).join('')}</div></div>
+    <div class="row"><img src="${s}" alt=""><div><b>ui-workflow-skills <span style="opacity:.6;font-weight:400">0.2.0</span></b>
+      <small>Claude Code skills for non-technical stakeholders to drive UI improvement work.</small></div></div>
+    <div><p class="h">CÁC CỠ</p><div class="ladder">${SIZES.map(n => `<figure><img src="${s}" width="${n}" height="${n}" alt="${n}px"><figcaption>${n}</figcaption></figure>`).join('')}</div></div>
+    <div class="squint"><p class="h">THỬ LÀM MỜ: CÒN NHẬN RA HÌNH KHÔNG?</p><img src="${s}" width="64" height="64" alt="" style="border-radius:22%"></div>
+  </div>`;
+}
+
+let cur;
+function show(k, push = true) {
+  const v = V[k];
+  if (push) { try { history.replaceState(null, '', '?variant=' + k); } catch {} }
+  document.getElementById('strip').innerHTML = keys.map(x =>
+    `<button data-k="${x}" aria-current="${x === k}"><img src="${src(x)}" alt="">${x} · ${V[x].name}</button>`).join('');
+  document.getElementById('hero').innerHTML = `<img src="${src(k)}" alt="Icon hướng ${k}: ${v.name}">
+    <div><h1>${k} · ${v.name}</h1><p>${v.idea}</p><p style="color:var(--mute)">${v.risk}</p>
+    <div class="sw">${v.colors.map(c => `<span style="--c:${c}">${c}</span>`).join('')}</div></div>`;
+  document.getElementById('ctx').innerHTML = panel(k, 'light') + panel(k, 'dark');
+  document.getElementById('label').textContent = `${k} (${v.name})`;
+  cur = k;
+}
+
+const step = d => show(keys[(keys.indexOf(cur) + d + keys.length) % keys.length]);
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('next').onclick = () => step(1);
+document.getElementById('strip').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.k); };
+addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea,[contenteditable]')) return;
+  if (e.key === 'ArrowLeft') step(-1);
+  if (e.key === 'ArrowRight') step(1);
+});
+const start = new URLSearchParams(location.search).get('variant');
+show(keys.includes(start) ? start : 'F', false);
+</script>
+</body>
+</html>
