@@ -41,8 +41,14 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 - The link is checked from outside before it is shown; a Deployment Protection login page needs a Shareable Link, and a failure is reported. Tunnels come with a public-link and real-data warning and are closed after approval, which needs the completed click-test checklist.
 - The choice and the open Preview are recorded in `.ui-workflow/preview.md` (git-ignored). Evals `preview-server-rendered` and `preview-static`, with a static Vite fixture.
 
+### Added — `design-port` extraction rules (Scenario C, #9)
+- Step 3 now says how the look is read and rebuilt: sources, screenshot, markup, style values (Tailwind through the export's config, then the default scale), token mapping, copy, states, interaction intent, icons, images and values that cannot be resolved.
+- From the Stitch spike (`docs/research/2026-10-31-stitch-source-only-port-spike.md`): claims of fact in design copy are placeholders; an export's image is copied only after the Stakeholder says yes; contrast is computed after token mapping; fonts are checked by face; `design-port` views the Screen at phone and desktop width where it has a browser; Tailwind assumptions are stated; CSS the Port orphans is removed and the project's checks are run.
+- Tested on one Google Stitch Screen and on fixture exports, not on a real Lovable export. Pilot #13 checks that.
+- Evals `port-tailwind-screen` and `port-invented-provenance`. Run with `--model sonnet`, 3 runs each: `port-tailwind-screen` 0.97, `port-invented-provenance` 1.00, `port-first-screen` 0.96, `port-approve-commits-screen` 0.97, the misses LLM judgements and one width value (`evals/results/2026-10-31T18-23-24-756Z/`). The eval sandbox refuses local ports, so the runs cover the escalation path; one Port from them was started by hand and Done clicked.
+
 ### Changed — `design-port` works one Screen per turn on a Work branch (Scenario C, part of #9)
-- Rewritten around ADR-0004: the Design export is read as a visual reference, never installed, built or run. The extraction rules (style values, Tailwind, tokens, substitutes) wait on spike #18 and are marked as pending in the skill.
+- Rewritten around ADR-0004: the Design export is read as a visual reference, never installed, built or run.
 - Work branch: creates `ui-workflow/<yyyy-mm-dd>` or reuses the one in the Workflow state and records it at once; never commits to the main branch, never pushes or merges. One commit per Stakeholder-approved Screen, staged by path, holding only that Screen and its `.ui-workflow` documents, never the Stakeholder's own uncommitted changes. Contract: `docs/workflow-contract.md`, section Work branch.
 - Each Screen is shown in the locally running app with the audit's `Run` command, then waits for approval; no deploy per Screen. An app that cannot start, or a non-git project, is escalated to the Developer.
 - `ui-audit` records `- Run: <command> → <local URL> | unknown` under Stack, read from the files, never run.

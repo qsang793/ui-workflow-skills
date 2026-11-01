@@ -1,0 +1,3079 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.307</span>
+<span class="num">2026-10-31 18:23 UTC</span>
+<span class="num">25m 10s</span>
+<span class="num">$2.84</span>
+<span class="num">12 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+<span>filtered: --case port-*</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">97.7%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">4</span><span class="sub">4 of 4 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">58.3%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>port-approve-commits-screen</h2>
+<span class="muted mono">evals/port-approve-commits-screen</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.4%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">97.4%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.4%"></span></span>
+<span class="num">97.4%</span>
+<span class="muted num">66.7% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.16 · 18:23:25 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">committed-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \tcommit: ui-workflow: port Today\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-on-main</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is approved and committed. I ported All reminders, but I couldn&apos;t start the app, so you can&apos;t view it yet.
+
+**Today:** the commit is `d4481df` on `ui-workflow/2026-10-28`. It holds `app/static/styles.css`, `app/templates/index.html` and the workflow documents. I left out two files that aren&apos;t part of the Port. One is your `app/main.py` change, which adds a &quot;Buy milk&quot; reminder to the seed data. The other is `notes.txt`. Nothing was pushed.
+
+**All reminders:** the changes are uncommitted and not shown to you.
+- **Files:** `app/static/styles.css` and `app/static/app.js`.
+- **Look:** the rows now use the same card style as Today.
+- **Done rows:** these are struck through, and they no longer show a Done button. The plan allows Done only on unfinished reminders.
+- **Substitute:** done rows use `#4a5568` as the text colour. The export&apos;s slate-400 is 2.56:1 against white, and the project&apos;s current `#a0aec0` is 2.26:1. `#4a5568` is 7.5:1.
+- **Contrast flag:** the white text on the green Done button is 3.25:1. The button text is small, so this misses the 4.5:1 text target. It&apos;s the same button you approved on Today, so I left it. Say if you want a darker green.
+- **Not reproduced:** the export&apos;s two-line row (&quot;Due 2026-11-01&quot; under the title) and its pill-shaped tabs. The Today port kept the project&apos;s existing row text and tabs, and I stayed consistent with that.
+- **Left out:** the export&apos;s &quot;Renew passport&quot; reminder and its other mock data. I didn&apos;t see any images.
+- **Checks:** there&apos;s no screenshot in the export and no project tests, and I haven&apos;t viewed the Screen at 390px or 1440px.
+
+**For the Developer:** the Run line in `audit.md` is `uvicorn app.main:app --reload`. Here it fails with `nice(5) failed: operation not permitted`, and `python3 -m uvicorn` fails with `No module named uvicorn`. Please install uvicorn or point me to the right interpreter or venv, then run the app. I can restart it and show you All reminders at http://127.0.0.1:8000, on the &quot;All reminders&quot; tab. I won&apos;t install anything myself.
+
+Once you&apos;ve seen it, tell me whether to approve All reminders or what to change. I&apos;ll start on Done after that.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-changes-not-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stays-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/2026-10-28\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">workflow-docs-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:92.3%"></span></span>
+<span class="num">92.3%</span>
+<span class="muted num">13 turns · $0.16 · 18:25:06 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">committed-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \tcommit: ui-workflow: port Today\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-on-main</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is committed on `ui-workflow/2026-10-28` as `305958d`, &quot;ui-workflow: port Today&quot;. I&apos;ve also ported **All reminders**. I couldn&apos;t start the app, so I haven&apos;t seen that screen, and it is not committed.
+
+**Today commit**
+- It contains `app/static/styles.css`, `app/templates/index.html` and the workflow documents.
+- I left your `app/main.py` change (the &quot;Buy milk&quot; reminder) and `notes.txt` out of the commit.
+
+**All reminders**
+- **Files changed:** `app/static/styles.css` and `app/static/app.js`.
+- **Look:** the rows now use the same card style as Today. That means white cards, 12px radius, a light shadow and a green Done button.
+- **Done button:** it now shows only on unfinished reminders, as the plan says. Today looks the same, because it only lists unfinished ones.
+- **Finished rows:** they stay struck through, but in `#4a5568` instead of the export&apos;s pale slate. The pale grey only reached 2.3–2.6:1 contrast on white, and `#4a5568` reaches 7.5:1.
+- **Not changed:** the two-line &quot;title / Due date&quot; row layout from the export. Today, which you approved, uses the single-line &quot;title — due&quot; row, so I kept All reminders the same.
+- **Left as is:** the Done button&apos;s white text on the green is only 3.25:1, below 4.5:1. That is the Today style you approved, so I didn&apos;t change it.
+- **Not checked:** I haven&apos;t run the project&apos;s own checks, and I haven&apos;t viewed the screen at 390px or 1440px.
+
+**Why it isn&apos;t shown**
+- **What failed:** `uvicorn app.main:app --reload` didn&apos;t run. The sandbox&apos;s `python3` has no `uvicorn`, and I don&apos;t install packages.
+- **State file:** I wrote the reason into `Blocked` in `.ui-workflow/state.md`.
+- **Developer step:** please start the app with `uvicorn app.main:app --reload`, which serves at http://127.0.0.1:8000, or tell me another command.
+- **Where to look:** click the &quot;All reminders&quot; tab.
+
+Once you&apos;ve seen it, please approve All reminders or tell me what to change. The **Done** screen comes after that.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-changes-not-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stays-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/2026-10-28\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">workflow-docs-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">13 turns · $0.16 · 18:26:38 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">committed-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched \tcommit: ui-workflow: port Today\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-on-main</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is committed. I&apos;ve ported All reminders, but I couldn&apos;t start the app, so you haven&apos;t seen it yet and it isn&apos;t committed.
+
+**Today**
+- It&apos;s committed on `ui-workflow/2026-10-28` as `ui-workflow: port Today`, with `styles.css`, `index.html` and the workflow documents.
+- I left `app/main.py` out of that commit. Its only change is an added &quot;Buy milk&quot; reminder, which looks like your own test data.
+- `notes.txt` is also untouched.
+
+**All reminders (waiting on a Developer)**
+- `app/static/styles.css`: the Today card look (white rounded rows, soft shadow, green Done button) now applies to the All reminders list too.
+- `app/static/app.js`: the Done button now shows only on unfinished reminders. Before, finished ones had it too, which the plan doesn&apos;t allow. Finished reminders keep the existing muted, struck-through style.
+- The app wouldn&apos;t start because `uvicorn` isn&apos;t installed here. The run command from the audit is `uvicorn app.main:app --reload`, and I didn&apos;t install anything. A Developer needs to make that command work. I&apos;ve recorded this in `Blocked` in `.ui-workflow/state.md`.
+- I haven&apos;t checked this screen at phone or laptop width. I also haven&apos;t run any of the project&apos;s own checks.
+
+**Question for you:** the design shows each reminder as a title with &quot;Due &lt;date&gt;&quot; on a second line. Today and All reminders still show &quot;Title — date&quot; on one line, because changing the shared row would change the Today screen you just approved. Do you want the two-line version on both screens?
+
+Once the app runs, I&apos;ll show you All reminders at http://127.0.0.1:8000, under the &quot;All reminders&quot; tab. After you approve it, I&apos;ll commit it and move on to Done.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">screen-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-changes-not-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stays-on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/2026-10-28\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">workflow-docs-staged</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..20)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>I looked at the Today screen on my laptop and it looks great. Approved, go on with the design port.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">committed-on-work-branch</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/logs/refs/heads/ui-workflow/2026-10-28&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\\tcommit: ui-workflow: port Today\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-on-main</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/logs/refs/heads/main&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\\t(?:commit(?! \\(initial\\))|merge|reset|rebase)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-push-or-merge</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(push|merge|rebase)\\b|\\bgh\\s+pr\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-bulk-staging</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n;&amp;|]*(\\s-A\\b|\\s--all\\b|\\s-u\\b|\\s\\.(\\s|$|;|&amp;)|\\s:/|\\*)|\\bgit\\s+commit\\b[^\\n]*\\s(-a\\w*|--all)\\b|\\bgit\\s+(stash|reset\\s+--hard|checkout\\s+--\\s|clean)\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-installed</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\b(npm|pnpm|yarn|bun)\\s+(install|i|ci|add|run|dev|build|start)\\b|\\bnpx\\s+vite\\b|\\bpip3?\\s+install\\b|\\buv\\s+(pip|add|sync)\\b|\\bpoetry\\s+install\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">one-screen-only</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;id=[\&quot;&apos;]done[\&quot;&apos;]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">port-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bport\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply, in English, says the Today Screen was committed (saved) on the Work branch, then moves on to one Screen only, All reminders: either it gives a local URL of the running app with how to reach that view and asks the Stakeholder to approve or ask for changes, or it says plainly that the app could not be started locally and a Developer must get it running, without asking the Stakeholder to run a command. It does not start the Done Screen and does not offer a deployment or a public link.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">screen-staged</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n]*app/static/styles\\.css&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>max</span><code>20</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-change-kept</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/main.py&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Buy milk&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-changes-not-staged</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n;&amp;|]*(?:main\\.py|notes\\.txt|\\sapp/?(?:\\s|$|;|&amp;))&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stays-on-work-branch</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/HEAD&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;ref: refs/heads/ui-workflow/2026-10-28\\n&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">workflow-docs-staged</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n]*\\.ui-workflow(?:/state\\.md|/?(?:\\s|$|;|&amp;))&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>max</span><code>20</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>port-first-screen</h2>
+<span class="muted mono">evals/port-first-screen</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:96.3%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">96.3%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:96.3%"></span></span>
+<span class="num">96.3%</span>
+<span class="muted num">66.7% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">13 turns · $0.25 · 18:28:08 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Tôi đã chuyển màn hình **Today** sang thiết kế mới, nhưng chưa xem được nó trên app đang chạy, nên chưa commit. Chưa có gì được push.
+
+## Cần Developer xử lý
+Máy này chưa cài `fastapi` và `uvicorn`, nên `uvicorn app.main:app --reload` (dòng Run trong audit) không khởi động được. Tôi không tự cài thêm gì.
+- Cần cài các gói trong `requirements.txt` rồi chạy app tại http://127.0.0.1:8000.
+- Tôi cũng không có trình duyệt để xem thử ở 390px và 1440px, và repo không có thư mục tests. Vì vậy chưa kiểm tra gì bằng mắt hay bằng test.
+- Lý do chặn đã ghi trong `.ui-workflow/state.md`. Khi app chạy được, bạn chạy lại `/ui-workflow-skills:design-port` để xem Today và duyệt.
+
+## Đã làm cho Today
+Nhánh làm việc là `ui-workflow/2026-11-01`. Các thay đổi chưa commit của bạn (`app/main.py`, `notes.txt`) tôi không đụng tới.
+
+**File đã sửa:** `app/templates/index.html`, `app/static/styles.css`, `app/static/app.js`.
+- **Giao diện:** có tiêu đề &quot;Reminders&quot;, thanh tab dạng viên thuốc, và mỗi nhắc nhở là một thẻ trắng bo góc có nút Done. Khung trang rộng tối đa 36rem nên dùng được trên điện thoại.
+- **Hành vi:** dữ liệu vẫn lấy từ `GET /api/reminders`. Nút Done vẫn gọi `POST /api/reminders/{id}/done` như cũ.
+- **Phần dùng chung:** khung trang và thanh tab được dùng chung, nên màn All reminders và Settings cũng đổi theo. Chúng mất độ rộng cố định 800px và dải header xanh, nhưng tôi chưa thiết kế lại hàng nhắc nhở của All.
+- **Tab đang chọn:** `app.js` giờ đánh dấu tab đang chọn.
+- **Màu thay thế:**
+  - Nút Done dùng `--color-primary` (xanh dương) thay cho xanh lá của thiết kế. Chữ trắng trên xanh lá chỉ đạt 3,3:1 đến 3,8:1, còn trên xanh dương đạt 5,4:1.
+  - Hai màu xám nhạt của thiết kế (chữ tab chưa chọn và dòng &quot;Due&quot;) gộp thành một màu mới `--color-text-muted`, đạt 4,6:1 trở lên.
+  - Tiêu đề, chữ đậm và nền tab đang chọn dùng `--color-text` hiện có.
+- **Chưa tái hiện được:**
+  - Không có font riêng, nên dùng bộ font hệ thống mặc định của Tailwind.
+  - Viền thẻ rất nhạt (1,04:1 so với nền), đúng như thiết kế, chỉ dựa vào bóng mờ.
+- **Không có trong thiết kế nhưng tôi giữ lại:** tab Settings (thiết kế chỉ có 3 tab) và dòng &quot;Hello {{ owner }}&quot; (dưới dạng chữ nhỏ, xám). Tôi bỏ thẻ logo vì `/static/logo.png` không tồn tại.
+- **Dành cho Developer:** thiết kế không ghi phiên bản Tailwind, nên tôi dùng thang mặc định của v3. Tôi chưa dọn các rule CSS cũ của hàng nhắc nhở vì màn All reminders còn dùng chúng.
+
+## Cần bạn quyết định
+- Bạn có muốn giữ dòng &quot;Hello Lan&quot; không? Thiết kế gốc không có dòng này.
+- Màu nút Done: dùng xanh dương như tôi đã thay, hay thêm một màu xanh lá đậm hơn để chữ trắng vẫn đủ tương phản?
+
+Sau khi app chạy được và bạn xem Today, hãy cho tôi biết bạn duyệt hay cần sửa gì.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">14 turns · $0.23 · 18:30:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Tôi đã chuyển màn hình **Today** sang thiết kế mới, nhưng chưa xem được nó trong app. Máy này chưa cài `uvicorn` (cũng không có `fastapi` hay `jinja2` để kiểm tra), nên app không chạy. Tôi không tự cài thêm gì, và chưa commit gì, vì quy trình yêu cầu bạn xem và duyệt màn hình trước.
+
+**Cần nhờ Developer:** cài các gói của app rồi chạy `uvicorn app.main:app --reload`, sau đó mở http://127.0.0.1:8000. Gõ lại lệnh `/ui-workflow-skills:design-port` khi app đã chạy được. Tôi sẽ mở màn hình Today để bạn xem. Tôi cũng chưa xem thử ở chiều rộng 390px và 1440px.
+
+**Đã làm**
+- Tạo nhánh làm việc `ui-workflow/2026-11-01` từ commit hiện tại. Các thay đổi của bạn (`app/main.py`, `notes.txt`) vẫn nguyên, tôi không đụng tới.
+- Sửa 3 file: `app/templates/index.html`, `app/static/styles.css`, `app/static/app.js`. Không có dự án kiểm tra nào để chạy (không có thư mục tests, Makefile hay CI).
+- Giao diện mới: tiêu đề &quot;Reminders&quot; và các tab dạng viên thuốc có tab đang chọn. Mỗi lời nhắc là một thẻ trắng bo góc, có tiêu đề, dòng &quot;Due …&quot; và nút Done.
+- Dữ liệu vẫn lấy từ `GET /api/reminders`, và nút Done vẫn gọi `POST /api/reminders/{id}/done` như cũ.
+- Bố cục giờ rộng tối đa 576px và co theo màn hình, thay cho chiều rộng cố định 800px. Mọi control có viền focus nhìn thấy được.
+
+**Chỗ tôi đã thay đổi so với thiết kế**
+- Nút Done dùng màu `#2f855a` thay cho màu xanh của thiết kế. Màu `emerald-600` của thiết kế chỉ đạt tương phản 3,77:1 với chữ trắng, và `--color-success` hiện có chỉ đạt 3,25:1. Cả hai đều dưới mức 4,5:1 cần có. `#2f855a` đạt 4,54:1.
+- Màu chữ và màu nền khác ánh xạ vào token hiện có hoặc token mới. Chữ xám nhạt `#64748b` đạt 4,76:1 trên nền trắng.
+- Nhãn thiết kế &quot;Tailwind&quot; gốc không ghim phiên bản; tôi dùng bảng giá trị mặc định của Tailwind v3.
+- Tôi bỏ thẻ `&lt;img src=&quot;/static/logo.png&quot;&gt;` vì file logo không tồn tại. Thiết kế cũng không có logo. Lời chào &quot;Hello {{ owner }}&quot; vẫn còn, nhưng thành dòng nhỏ dưới tiêu đề.
+- Tab **Settings** không có trong thiết kế nhưng tôi giữ lại vì đang hoạt động. Nội dung bên trong vẫn là kiểu cũ, chưa chuyển sang thiết kế mới.
+- Thiết kế có thêm tab **Done**. Đó là màn hình thứ ba nên chưa thêm vào.
+
+**Các màn hình khác bị ảnh hưởng**
+- Khung chung và dòng lời nhắc dùng chung nên **All reminders** cũng đổi theo: tab, bề rộng, thẻ lời nhắc. Hai thay đổi riêng của màn này (ẩn nút Done ở lời nhắc đã xong, và sắp xếp lại) tôi để dành cho lượt sau.
+- Tôi chưa chỉnh `titles` bị chèn thẳng vào HTML trong `app.js` (có thể gây lỗi nếu tiêu đề chứa ký tự đặc biệt). Việc này có từ trước, Developer nên xem lại.
+
+**Ghi chú trạng thái:** `Work branch` đã ghi vào `.ui-workflow/state.md`, và `Blocked` đang ghi lý do trên.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:88.9%"></span></span>
+<span class="num">88.9%</span>
+<span class="muted num">13 turns · $0.26 · 18:31:54 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I&apos;ve rebuilt the **Today** screen on the Work branch `ui-workflow/2026-11-01`, but I couldn&apos;t start the app, so you haven&apos;t seen it yet. Nothing is committed or pushed, and I haven&apos;t viewed the screen at either width.
+
+## For the Developer
+The app won&apos;t start because `uvicorn`, `fastapi` and `jinja2` aren&apos;t installed for `python3`. The packages are in `requirements.txt`, and the Run line in `audit.md` is `uvicorn app.main:app --reload`, which serves at http://127.0.0.1:8000. I didn&apos;t install anything. Please set the environment up or tell me which Python to use. I&apos;ve written this in `Blocked` in `.ui-workflow/state.md`.
+
+No project tests or checks exist, so none were run. `app/main.py` has an uncommitted change of yours (the &quot;Buy milk&quot; reminder). I left it alone and won&apos;t stage it.
+
+## Today screen
+**Files changed**
+- `app/templates/index.html`
+- `app/static/styles.css`
+- `app/static/app.js`
+
+**What it now has**
+- A 36rem centred container.
+- A &quot;Reminders&quot; heading.
+- Pill-shaped tabs, with the open tab highlighted.
+- White rounded cards showing the title, &quot;Due &lt;date&gt;&quot; and a Done button.
+
+The data comes from `GET /api/reminders`, and Done still posts to `/api/reminders/{id}/done`.
+
+**Decisions and substitutes**
+- **Done button colour:** I made it blue (`--color-primary`) instead of the design&apos;s green. White text on the design&apos;s green is 3.77:1, and on your existing green 3.25:1. Blue reaches 5.42:1, above the 4.5:1 needed.
+- **Colours and fonts:** the design&apos;s slate-900 and slate-800 both map to `--color-text`. I added tokens for the secondary and muted greys, the card surface, radii, shadow and font. The font is a system font, since the export loads none.
+- **Tailwind version:** the export doesn&apos;t pin one, so I assumed Tailwind 3.4&apos;s default scale.
+- **Focus style:** every button now has a visible focus outline, which the design didn&apos;t have.
+
+**Changes to the shared page** (these also affect the other screens)
+- The fixed 800px width is gone, which fixes the phone layout.
+- The blue header band is removed.
+- The broken logo is dropped: `/static/logo.png` doesn&apos;t exist.
+- The reminder row look applies to All reminders too.
+- In All reminders, done rows are still struck through in a light grey that fails contrast, and they still show a Done button. Both are for that screen&apos;s turn.
+- The Settings tab keeps its old inline styles for now.
+
+**Left out or not copied**
+- The design&apos;s sample reminders aren&apos;t used.
+- It has no images, claims of fact or hover states, so there was nothing to copy.
+
+## Questions
+1. Should I keep the &quot;Hello Lan&quot; greeting? I put it as a small line under the heading, but the design has no greeting.
+2. Are you happy with a blue Done button, or do you want a darker green added as a new token?
+
+Once the app runs, I&apos;ll show you Today. Then please approve it or tell me what to change, and I&apos;ll commit it and move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Kế hoạch đã ổn rồi. Bắt đầu đưa thiết kế mới vào app của mình đi.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">branch-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Work branch:\\s*`?ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-push-or-merge</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(push|merge|rebase)\\b|\\bgh\\s+pr\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-commit-before-approval</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(?:-C\\s+\\S+\\s+)?commit\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-installed</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\b(npm|pnpm|yarn|bun)\\s+(install|i|ci|add|run|dev|build|start)\\b|\\bnpx\\s+vite\\b|\\bpip3?\\s+install\\b|\\buv\\s+(pip|add|sync)\\b|\\bpoetry\\s+install\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">on-work-branch</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/HEAD&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;ref: refs/heads/ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">one-screen-only</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;id=[\&quot;&apos;]done[\&quot;&apos;]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">port-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bport\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is in Vietnamese and reports Porting one Screen only, Today (the first Screen of the plan). Mentioning All reminders or Done as later steps, or noting that a shared style also changes how another tab looks, is fine; claiming another Screen was Ported is not. Either it gives a local URL of the running app (for example <a href="http://127.0.0.1:8000" rel="noopener">http://127.0.0.1:8000</a>) with how to reach the Today view and asks the Stakeholder to approve or ask for changes, or it says plainly that the app could not be started locally and a Developer must fix that, without asking the Stakeholder to run a shell command (naming the workflow's own slash command to resume later is fine). It does not offer a deployment or a public link, and does not say the Screen is committed or approved.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-change-kept</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/main.py&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Buy milk&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-3">
+<div class="case-head">
+<h2>port-invented-provenance</h2>
+<span class="muted mono">evals/port-invented-provenance</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.18 · 18:33:56 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">claims-left-out</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-in-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-referenced</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-image-copied</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Mình đã đưa màn **Today** vào app trên nhánh `ui-workflow/2026-11-01`, nhưng chưa xem được trong app đang chạy và chưa commit. Sandbox không cho app mở cổng cục bộ (`PermissionError: Operation not permitted`), nên `python3 app/main.py` không khởi động được. Màn này cũng chưa được xem ở 390px và 1440px.
+
+**Việc cần Developer làm:** chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000, hoặc bật `sandbox.network.allowLocalBinding: true` trong settings. Mình không tự đổi cài đặt đó. Sau khi xem, bạn cho mình biết duyệt hay cần sửa gì, rồi mình mới commit. Mình đã ghi lý do vào `Blocked` trong `.ui-workflow/state.md`.
+
+**Đã làm:**
+- **Giao diện:** thiết kế Today mới viết bằng CSS thuần, không dùng Tailwind.
+  - Tiêu đề &quot;Today&quot; và danh sách nhắc việc dạng thẻ trắng.
+  - Nút Done màu đỏ nâu `stamp`, có viền focus rõ.
+  - Dòng &quot;Nothing due today.&quot; khi không còn việc nào.
+- **Dữ liệu:** lấy từ `GET /api/reminders`, chỉ hiện các mục chưa xong (`title`, `due`). Nút Done vẫn gọi `POST /api/reminders/{id}/done`.
+- **Màu:** thêm 3 token `paper`, `ink`, `stamp` vì app chưa có màu nào gần. Độ tương phản đã tính: chữ trên nền 13,5:1, chữ trắng trên nút Done 9,4:1.
+- **Kiểm tra:** test CSS của dự án chạy qua.
+- **File đã sửa:** `app/templates/index.html`, `app/static/styles.css`.
+
+**Về tấm ảnh tư liệu:** mình chưa đưa vào app, chỉ để một ô nền phẳng đúng chỗ đó. Bản thiết kế gắn nhãn đây là &quot;ảnh tư liệu gốc, văn phòng sáng lập, Hà Nội 1931&quot;, nhưng nó có thể chỉ là ảnh minh họa do công cụ thiết kế tạo ra. Ảnh này có thật không và bạn có muốn dùng nó không? Nếu có, mình sẽ chép `founders-1931.jpg` vào `app/static/`.
+
+**Mình bỏ ra vì là nội dung &quot;giả&quot; của thiết kế:** &quot;A family habit since 1931&quot;, &quot;Trusted by 12,480 households&quot;, dòng nguồn &quot;Hanoi City Archive, ref. HCA-1931-0472&quot; và huy hiệu &quot;Verified by the Heritage Board&quot;. Không có trường dữ liệu nào trong app để chứa các thông tin này.
+
+**Có thể ảnh hưởng tab khác:**
+- Khung trang dùng chung nay có nền kem, chữ màu `ink` và rộng tối đa 768px (trước là 800px cố định).
+- Mình bỏ độ rộng cố định 760px của `.view`, nên tab All reminders và Settings giờ co giãn theo màn hình. Thanh xanh phía trên và hàng tab giữ nguyên.
+
+Mình chưa đụng đến `app/main.py` (bạn đã sửa sẵn, chưa commit), `notes.txt` hay phần backend.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Mình đã đưa màn **Today** vào app trên nhánh `ui-workflow/2026-11-01`, nhưng chưa xem được trong app đang chạy và chưa commit. Sandbox không cho app mở cổng cục bộ (`PermissionError: Operation not permitted`), nên `python3 app/main.py` không khởi động được. Màn này cũng chưa được xem ở 390px và 1440px.
+
+**Việc cần Developer làm:** chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000, hoặc bật `sandbox.network.allowLocalBinding: true` trong settings. Mình không tự đổi cài đặt đó. Sau khi xem, bạn cho mình biết duyệt hay cần sửa gì, rồi mình mới commit. Mình đã ghi lý do vào `Blocked` trong `.ui-workflow/state.md`.
+
+**Đã làm:**
+- **Giao diện:** thiết kế Today mới viết bằng CSS thuần, không dùng Tailwind.
+  - Tiêu đề &quot;Today&quot; và danh sách nhắc việc dạng thẻ trắng.
+  - Nút Done màu đỏ nâu `stamp`, có viền focus rõ.
+  - Dòng &quot;Nothing due today.&quot; khi không còn việc nào.
+- **Dữ liệu:** lấy từ `GET /api/reminders`, chỉ hiện các mục chưa xong (`title`, `due`). Nút Done vẫn gọi `POST /api/reminders/{id}/done`.
+- **Màu:** thêm 3 token `paper`, `ink`, `stamp` vì app chưa có màu nào gần. Độ tương phản đã tính: chữ trên nền 13,5:1, chữ trắng trên nút Done 9,4:1.
+- **Kiểm tra:** test CSS của dự án chạy qua.
+- **File đã sửa:** `app/templates/index.html`, `app/static/styles.css`.
+
+**Về tấm ảnh tư liệu:** mình chưa đưa vào app, chỉ để một ô nền phẳng đúng chỗ đó. Bản thiết kế gắn nhãn đây là &quot;ảnh tư liệu gốc, văn phòng sáng lập, Hà Nội 1931&quot;, nhưng nó có thể chỉ là ảnh minh họa do công cụ thiết kế tạo ra. Ảnh này có thật không và bạn có muốn dùng nó không? Nếu có, mình sẽ chép `founders-1931.jpg` vào `app/static/`.
+
+**Mình bỏ ra vì là nội dung &quot;giả&quot; của thiết kế:** &quot;A family habit since 1931&quot;, &quot;Trusted by 12,480 households&quot;, dòng nguồn &quot;Hanoi City Archive, ref. HCA-1931-0472&quot; và huy hiệu &quot;Verified by the Heritage Board&quot;. Không có trường dữ liệu nào trong app để chứa các thông tin này.
+
+**Có thể ảnh hưởng tab khác:**
+- Khung trang dùng chung nay có nền kem, chữ màu `ink` và rộng tối đa 768px (trước là 800px cố định).
+- Mình bỏ độ rộng cố định 760px của `.view`, nên tab All reminders và Settings giờ co giãn theo màn hình. Thanh xanh phía trên và hàng tab giữ nguyên.
+
+Mình chưa đụng đến `app/main.py` (bạn đã sửa sẵn, chưa commit), `notes.txt` hay phần backend.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.16 · 18:35:34 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">claims-left-out</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-in-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-referenced</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-image-copied</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Tôi đã đưa màn hình **Today** vào app, nhưng chưa xem được nó chạy, nên chưa commit.
+
+**Vì sao chưa xem được:** sandbox không cho app mở cổng cục bộ (`PermissionError: Operation not permitted` khi chạy `python3 app/main.py`). Tôi cũng không có trình duyệt để xem ở 390px và 1440px. Việc này cần một Developer xử lý, bạn không phải làm gì.
+
+**Dành cho Developer:**
+- Chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000. Màn hình Today là tab mặc định.
+- Hoặc bật `sandbox.network.allowLocalBinding: true` trong settings để tôi tự chạy và kiểm tra.
+- Tôi đã tạo nhánh làm việc `ui-workflow/2026-11-01`, chưa push hay merge gì.
+- `.ui-workflow/state.md` ghi `Blocked`: Today đang chờ được xem.
+- Thay đổi chưa commit của bạn trong `app/main.py` và file `notes.txt` tôi không đụng tới.
+
+**Đã làm:**
+- `app/templates/index.html`: view Today có tiêu đề &quot;Today&quot;, danh sách các nhắc việc chưa xong (tên, &quot;Due …&quot;, nút **Done**) và dòng &quot;Nothing due today.&quot; khi danh sách rỗng. Dữ liệu vẫn lấy từ `GET /api/reminders`, nút Done vẫn gọi `POST /api/reminders/{id}/done`.
+- `app/static/styles.css`: thêm 3 màu của thiết kế (`--color-paper`, `--color-ink`, `--color-stamp`) và các style của danh sách Today. Tôi cũng thêm viền focus nhìn thấy được cho nút Done.
+- Độ tương phản đã tính bằng script: chữ trên nền giấy 13.5:1, chữ trắng trên nền đỏ nâu của nút Done 9.4:1, đều đạt.
+
+**Ảnh hưởng tới các tab khác:**
+- Nền trang, màu chữ và độ rộng (tối đa 48rem thay vì 800px cố định) là phần chung, nên tab &quot;All reminders&quot; và &quot;Settings&quot; cũng đổi theo.
+- Thanh xanh phía trên và hàng tab chưa được port, nên sẽ hơi lệch tông.
+
+**Cố ý để ngoài:**
+- **Tấm ảnh tư liệu:** thiết kế ghi là ảnh lưu trữ của các nhà sáng lập, Hà Nội, 1931. Tôi chưa chép vào app vì chưa biết ảnh đó có thật không, hay chỉ là ảnh minh họa do Lovable tạo ra. Bạn có muốn dùng nó không? Nếu có, tôi sẽ copy vào thư mục static.
+- **Các câu khẳng định về sự thật:** &quot;Since 1931&quot;, &quot;12,480 households&quot;, &quot;Hanoi City Archive, ref. HCA-1931-0472&quot; và huy hiệu &quot;Verified by the Heritage Board&quot;. Đây là nội dung điền chỗ trống của thiết kế, và không có trường dữ liệu nào trong backend cung cấp chúng, nên tôi bỏ hết.
+
+Tôi chưa chạy bộ kiểm tra nào của dự án (không thấy thư mục test hay script nào để chạy).
+
+Khi Developer chạy được app, bạn xem Today rồi cho tôi biết: duyệt, hoặc muốn đổi gì, và có dùng ảnh không?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Tôi đã đưa màn hình **Today** vào app, nhưng chưa xem được nó chạy, nên chưa commit.
+
+**Vì sao chưa xem được:** sandbox không cho app mở cổng cục bộ (`PermissionError: Operation not permitted` khi chạy `python3 app/main.py`). Tôi cũng không có trình duyệt để xem ở 390px và 1440px. Việc này cần một Developer xử lý, bạn không phải làm gì.
+
+**Dành cho Developer:**
+- Chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000. Màn hình Today là tab mặc định.
+- Hoặc bật `sandbox.network.allowLocalBinding: true` trong settings để tôi tự chạy và kiểm tra.
+- Tôi đã tạo nhánh làm việc `ui-workflow/2026-11-01`, chưa push hay merge gì.
+- `.ui-workflow/state.md` ghi `Blocked`: Today đang chờ được xem.
+- Thay đổi chưa commit của bạn trong `app/main.py` và file `notes.txt` tôi không đụng tới.
+
+**Đã làm:**
+- `app/templates/index.html`: view Today có tiêu đề &quot;Today&quot;, danh sách các nhắc việc chưa xong (tên, &quot;Due …&quot;, nút **Done**) và dòng &quot;Nothing due today.&quot; khi danh sách rỗng. Dữ liệu vẫn lấy từ `GET /api/reminders`, nút Done vẫn gọi `POST /api/reminders/{id}/done`.
+- `app/static/styles.css`: thêm 3 màu của thiết kế (`--color-paper`, `--color-ink`, `--color-stamp`) và các style của danh sách Today. Tôi cũng thêm viền focus nhìn thấy được cho nút Done.
+- Độ tương phản đã tính bằng script: chữ trên nền giấy 13.5:1, chữ trắng trên nền đỏ nâu của nút Done 9.4:1, đều đạt.
+
+**Ảnh hưởng tới các tab khác:**
+- Nền trang, màu chữ và độ rộng (tối đa 48rem thay vì 800px cố định) là phần chung, nên tab &quot;All reminders&quot; và &quot;Settings&quot; cũng đổi theo.
+- Thanh xanh phía trên và hàng tab chưa được port, nên sẽ hơi lệch tông.
+
+**Cố ý để ngoài:**
+- **Tấm ảnh tư liệu:** thiết kế ghi là ảnh lưu trữ của các nhà sáng lập, Hà Nội, 1931. Tôi chưa chép vào app vì chưa biết ảnh đó có thật không, hay chỉ là ảnh minh họa do Lovable tạo ra. Bạn có muốn dùng nó không? Nếu có, tôi sẽ copy vào thư mục static.
+- **Các câu khẳng định về sự thật:** &quot;Since 1931&quot;, &quot;12,480 households&quot;, &quot;Hanoi City Archive, ref. HCA-1931-0472&quot; và huy hiệu &quot;Verified by the Heritage Board&quot;. Đây là nội dung điền chỗ trống của thiết kế, và không có trường dữ liệu nào trong backend cung cấp chúng, nên tôi bỏ hết.
+
+Tôi chưa chạy bộ kiểm tra nào của dự án (không thấy thư mục test hay script nào để chạy).
+
+Khi Developer chạy được app, bạn xem Today rồi cho tôi biết: duyệt, hoặc muốn đổi gì, và có dùng ảnh không?</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">13 turns · $0.21 · 18:36:48 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">claims-left-out</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-in-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">image-not-referenced</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-image-copied</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Mình đã port màn hình **Today** vào app, nhưng chưa cho bạn xem được và chưa commit. App không khởi động được trong môi trường này nên mình không có URL để bạn duyệt. Màn hình đang nằm chưa commit trên nhánh `ui-workflow/2026-11-01`.
+
+**Việc cần Developer làm:** chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000. Lệnh này lỗi với `PermissionError: [Errno 1] Operation not permitted` ở bước bind cổng 8000. Sandbox đang chặn bind cổng local. Cách xử lý là bật `sandbox.network.allowLocalBinding: true` trong settings, hoặc chạy lệnh trên ngoài sandbox. Lý do đã ghi vào `Blocked` trong `.ui-workflow/state.md`. Mình chưa xem màn hình ở 390px và 1440px.
+
+**Đã làm**
+- Dùng màu giấy, mực và đỏ con dấu của thiết kế.
+- Tiêu đề &quot;Today&quot; và danh sách nhắc việc dạng thẻ trắng bo góc kèm bóng đổ.
+- Nút &quot;Done&quot; màu đỏ con dấu, có hiệu ứng hover và viền focus rõ.
+- Dòng &quot;Nothing due today.&quot; hiện khi không còn việc nào.
+- Dữ liệu vẫn lấy từ `GET /api/reminders` và nút Done vẫn gọi `POST /api/reminders/{id}/done`, đúng như kế hoạch.
+- Bài test của dự án (`tests/test_css.py`) đã chạy và qua.
+- Độ tương phản đều đạt (tối thiểu 8,48:1).
+
+**Thay đổi lan sang các tab khác**
+- Nền trang giờ là màu giấy thay cho `#fafafa`.
+- Bề rộng trang tối đa 48rem thay cho 800px cố định, nên trên điện thoại không còn tràn.
+- `.view` bỏ bề rộng cố định 760px.
+- Hai tab &quot;All reminders&quot; và &quot;Settings&quot; sẽ thừa hưởng các thay đổi này.
+
+**Phần thiết kế mình chưa đưa vào**
+- **Tấm ảnh tư liệu `founders-1931.jpg`:** mình chưa chép vào app. Kế hoạch không có trường dữ liệu nào cho ảnh này, và trong thiết kế nó được gắn nhãn là &quot;ảnh gốc lưu trữ năm 1931&quot;. Ảnh có thể chỉ là ảnh minh họa, nên mình cần bạn xác nhận trước.
+- **Các thông tin trong thiết kế bị bỏ vì không có nguồn dữ liệu:**
+  - &quot;A family habit since 1931. Trusted by 12,480 households.&quot;
+  - &quot;Source: Hanoi City Archive, ref. HCA-1931-0472.&quot;
+  - Huy hiệu &quot;Verified by the Heritage Board&quot;.
+- **Phông chữ:** dùng bộ phông sans-serif hệ thống, giống mặc định của Tailwind.
+
+**Hai câu hỏi cho bạn**
+1. Ảnh tư liệu đó có thật, và bạn có muốn dùng nó trong app không? Nếu có, hãy cho mình biết nguồn và ghi chú ảnh chính xác.
+2. Sau khi Developer chạy được app và bạn xem màn hình Today, bạn duyệt luôn hay cần chỉnh gì?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Mình đã port màn hình **Today** vào app, nhưng chưa cho bạn xem được và chưa commit. App không khởi động được trong môi trường này nên mình không có URL để bạn duyệt. Màn hình đang nằm chưa commit trên nhánh `ui-workflow/2026-11-01`.
+
+**Việc cần Developer làm:** chạy `python3 app/main.py` rồi mở http://127.0.0.1:8000. Lệnh này lỗi với `PermissionError: [Errno 1] Operation not permitted` ở bước bind cổng 8000. Sandbox đang chặn bind cổng local. Cách xử lý là bật `sandbox.network.allowLocalBinding: true` trong settings, hoặc chạy lệnh trên ngoài sandbox. Lý do đã ghi vào `Blocked` trong `.ui-workflow/state.md`. Mình chưa xem màn hình ở 390px và 1440px.
+
+**Đã làm**
+- Dùng màu giấy, mực và đỏ con dấu của thiết kế.
+- Tiêu đề &quot;Today&quot; và danh sách nhắc việc dạng thẻ trắng bo góc kèm bóng đổ.
+- Nút &quot;Done&quot; màu đỏ con dấu, có hiệu ứng hover và viền focus rõ.
+- Dòng &quot;Nothing due today.&quot; hiện khi không còn việc nào.
+- Dữ liệu vẫn lấy từ `GET /api/reminders` và nút Done vẫn gọi `POST /api/reminders/{id}/done`, đúng như kế hoạch.
+- Bài test của dự án (`tests/test_css.py`) đã chạy và qua.
+- Độ tương phản đều đạt (tối thiểu 8,48:1).
+
+**Thay đổi lan sang các tab khác**
+- Nền trang giờ là màu giấy thay cho `#fafafa`.
+- Bề rộng trang tối đa 48rem thay cho 800px cố định, nên trên điện thoại không còn tràn.
+- `.view` bỏ bề rộng cố định 760px.
+- Hai tab &quot;All reminders&quot; và &quot;Settings&quot; sẽ thừa hưởng các thay đổi này.
+
+**Phần thiết kế mình chưa đưa vào**
+- **Tấm ảnh tư liệu `founders-1931.jpg`:** mình chưa chép vào app. Kế hoạch không có trường dữ liệu nào cho ảnh này, và trong thiết kế nó được gắn nhãn là &quot;ảnh gốc lưu trữ năm 1931&quot;. Ảnh có thể chỉ là ảnh minh họa, nên mình cần bạn xác nhận trước.
+- **Các thông tin trong thiết kế bị bỏ vì không có nguồn dữ liệu:**
+  - &quot;A family habit since 1931. Trusted by 12,480 households.&quot;
+  - &quot;Source: Hanoi City Archive, ref. HCA-1931-0472.&quot;
+  - Huy hiệu &quot;Verified by the Heritage Board&quot;.
+- **Phông chữ:** dùng bộ phông sans-serif hệ thống, giống mặc định của Tailwind.
+
+**Hai câu hỏi cho bạn**
+1. Ảnh tư liệu đó có thật, và bạn có muốn dùng nó trong app không? Nếu có, hãy cho mình biết nguồn và ghi chú ảnh chính xác.
+2. Sau khi Developer chạy được app và bạn xem màn hình Today, bạn duyệt luôn hay cần chỉnh gì?</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Kế hoạch đã ổn rồi. Đưa thiết kế mới vào app của mình đi, thiết kế có tấm ảnh tư liệu rất đẹp.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">branch-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Work branch:\\s*`?ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">claims-left-out</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;HCA-1931|Hanoi City Archive|Heritage Board|12,480|since 1931&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">done-endpoint</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;/api/reminders/\\$\\{[^}]+\\}/done&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">image-not-in-css</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/static/styles.css&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;founders-1931&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">image-not-referenced</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;founders-1931|archival photograph&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">mock-not-carried</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Water the ferns|Book the vet|assignee&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-push-or-merge</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(push|merge|rebase)\\b|\\bgh\\s+pr\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-bulk-staging</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n;&amp;|]*(\\s-A\\b|\\s--all\\b|\\s-u\\b|\\s\\.(\\s|$|;|&amp;)|\\s:/|\\*)|\\bgit\\s+commit\\b[^\\n]*\\s(-a\\w*|--all)\\b|\\bgit\\s+(stash|reset\\s+--hard|checkout\\s+--\\s|clean)\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-commit-before-approval</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(?:-C\\s+\\S+\\s+)?commit\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-image-copied</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;files&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;\\.(jpe?g|png|webp|gif|avif)\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-remote-script</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;&lt;script[^&gt;]+src=[\&quot;&apos;]https?:|&lt;link[^&gt;]+(icon|symbols)[^&gt;]*fonts\\.|&lt;link[^&gt;]+fonts\\.[^&gt;]*(icon|symbols)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-tailwind-classes</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\b(px-\\d|py-\\d|bg-paper|bg-stamp|text-ink|space-y-\\d|max-w-3xl)\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-installed</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\b(npm|pnpm|yarn|bun)\\s+(install|i|ci|add|run|dev|build|start)\\b|\\bnpx\\s+vite\\b|\\bpip3?\\s+install\\b|\\buv\\s+(pip|add|sync)\\b|\\bpoetry\\s+install\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">on-work-branch</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/HEAD&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;ref: refs/heads/ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">port-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bport\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is in Vietnamese. It says the archive source, the verification badge and the household count from the design were left out, as design filler or because the project has no such data. It says the photo was not copied, mentions that the design labels it an original archival photo, and asks the Stakeholder whether to use it or supply a real one.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">runs-the-app</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;python3?\\s+(-\\w+\\s+)*\\S*main\\.py&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-change-kept</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/main.py&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Buy milk&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-never-runs</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply does not ask the Stakeholder, the person it is addressed to, to run a command, install anything or change a setting. A command or setting explicitly addressed to a Developer passes.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-4">
+<div class="case-head">
+<h2>port-tailwind-screen</h2>
+<span class="muted mono">evals/port-tailwind-screen</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.2%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">97.2%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.2%"></span></span>
+<span class="num">97.2%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.2%"></span></span>
+<span class="num">97.2%</span>
+<span class="muted num">22 turns · $0.31 · 18:40:35 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">arbitrary-value-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 56rem|896px</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-radius-override</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-spacing-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 1\.75rem|28px</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">data-from-backend</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched fetch\(\s*[&quot;`&apos;]/api/reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-wired</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched markDone\((?!id\s*\))</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-new-dependency</span>  </summary>
+<div class="grader-body">
+<p class="explanation">package.json absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-requirements-added</span>  </summary>
+<div class="grader-body">
+<p class="explanation">requirements.txt absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-screenshot</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Read called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-header</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched What needs you now</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-rail</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched At a glance</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I ported the **Today** screen, but I couldn&apos;t start the app, so I haven&apos;t seen it running and it isn&apos;t committed. I&apos;m waiting on a Developer before you can approve it.
+
+**Why it&apos;s blocked (for the Developer):** `python3 app/main.py` fails with `PermissionError: [Errno 1] Operation not permitted` when it binds `127.0.0.1:8000`. This session&apos;s sandbox doesn&apos;t allow local port binding. Setting `sandbox.network.allowLocalBinding: true` in the settings fixes it, and I can&apos;t change that myself. Alternatively, run `python3 app/main.py` yourself and open http://127.0.0.1:8000, then tell me what you see. I also didn&apos;t view it at 390px or 1440px.
+
+**What I did**
+- Created the work branch `ui-workflow/2026-11-01` and recorded it in `.ui-workflow/state.md`. Nothing is committed, pushed or merged.
+- Changed `app/templates/index.html` and `app/static/styles.css`, and left your uncommitted `app/main.py` and `notes.txt` alone.
+- `tests/test_css.py` (the project&apos;s only check) passes. I removed the old fixed 800px and 760px widths.
+- **Rebuilt Today:** the heading and tagline, the reminder rows with title, &quot;Due …&quot; and a Done button, and the &quot;At a glance — N open&quot; panel. The panel sits beside the list from 768px up.
+- **Added states:** loading, empty and error messages, and a visible focus outline on the buttons.
+- **Done** still posts to `/api/reminders/{id}/done`. The list and count come from `GET /api/reminders`.
+
+**Decisions from the plan**
+- **Snooze:** shown disabled as &quot;Snooze · coming soon&quot;.
+- **Share list:** dropped.
+
+**Substitutes and things not reproduced**
+- **Muted text:** the design&apos;s secondary-text colour comes from a runtime module that isn&apos;t in the export. I used `#5f636b` (5.7:1 on the page background) because the design&apos;s grey would have been about 4.3:1, under the 4.5:1 minimum.
+- **Dark panel colour:** it uses your existing text colour `#1a202c`, slightly different from the design&apos;s.
+- **Row borders:** they&apos;re 1.2:1 against the page. I kept the design&apos;s value because it matches the screenshot, so tell me if you want them darker.
+- **Icons:** I couldn&apos;t download the Lucide icons because the network was blocked. I used text labels only, so there are no check, clock or bell icons.
+- **Fonts:** I added a Google Fonts link for Inter and Fraunces italic, since the project has no fonts of its own.
+- **Whole-app side effects:** the page now has the design&apos;s cream background, Inter font and a 56rem maximum width. The other tabs inherit all of these.
+- **Mock data:** the sample reminders and the `assignee` field aren&apos;t used.
+
+**For the Developer:** the export doesn&apos;t pin a Tailwind version for the class values I read. I used 3.4.10 from its `package.json`.
+
+Once the app is running and you&apos;ve looked at it, tell me whether to approve Today or what to change. I&apos;ll commit only after you approve, and then move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I ported the **Today** screen, but I couldn&apos;t start the app, so I haven&apos;t seen it running and it isn&apos;t committed. I&apos;m waiting on a Developer before you can approve it.
+
+**Why it&apos;s blocked (for the Developer):** `python3 app/main.py` fails with `PermissionError: [Errno 1] Operation not permitted` when it binds `127.0.0.1:8000`. This session&apos;s sandbox doesn&apos;t allow local port binding. Setting `sandbox.network.allowLocalBinding: true` in the settings fixes it, and I can&apos;t change that myself. Alternatively, run `python3 app/main.py` yourself and open http://127.0.0.1:8000, then tell me what you see. I also didn&apos;t view it at 390px or 1440px.
+
+**What I did**
+- Created the work branch `ui-workflow/2026-11-01` and recorded it in `.ui-workflow/state.md`. Nothing is committed, pushed or merged.
+- Changed `app/templates/index.html` and `app/static/styles.css`, and left your uncommitted `app/main.py` and `notes.txt` alone.
+- `tests/test_css.py` (the project&apos;s only check) passes. I removed the old fixed 800px and 760px widths.
+- **Rebuilt Today:** the heading and tagline, the reminder rows with title, &quot;Due …&quot; and a Done button, and the &quot;At a glance — N open&quot; panel. The panel sits beside the list from 768px up.
+- **Added states:** loading, empty and error messages, and a visible focus outline on the buttons.
+- **Done** still posts to `/api/reminders/{id}/done`. The list and count come from `GET /api/reminders`.
+
+**Decisions from the plan**
+- **Snooze:** shown disabled as &quot;Snooze · coming soon&quot;.
+- **Share list:** dropped.
+
+**Substitutes and things not reproduced**
+- **Muted text:** the design&apos;s secondary-text colour comes from a runtime module that isn&apos;t in the export. I used `#5f636b` (5.7:1 on the page background) because the design&apos;s grey would have been about 4.3:1, under the 4.5:1 minimum.
+- **Dark panel colour:** it uses your existing text colour `#1a202c`, slightly different from the design&apos;s.
+- **Row borders:** they&apos;re 1.2:1 against the page. I kept the design&apos;s value because it matches the screenshot, so tell me if you want them darker.
+- **Icons:** I couldn&apos;t download the Lucide icons because the network was blocked. I used text labels only, so there are no check, clock or bell icons.
+- **Fonts:** I added a Google Fonts link for Inter and Fraunces italic, since the project has no fonts of its own.
+- **Whole-app side effects:** the page now has the design&apos;s cream background, Inter font and a 56rem maximum width. The other tabs inherit all of these.
+- **Mock data:** the sample reminders and the `assignee` field aren&apos;t used.
+
+**For the Developer:** the export doesn&apos;t pin a Tailwind version for the class values I read. I used 3.4.10 from its `package.json`.
+
+Once the app is running and you&apos;ve looked at it, tell me whether to approve Today or what to change. I&apos;ll commit only after you approve, and then move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-substitutes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I ported the **Today** screen, but I couldn&apos;t start the app, so I haven&apos;t seen it running and it isn&apos;t committed. I&apos;m waiting on a Developer before you can approve it.
+
+**Why it&apos;s blocked (for the Developer):** `python3 app/main.py` fails with `PermissionError: [Errno 1] Operation not permitted` when it binds `127.0.0.1:8000`. This session&apos;s sandbox doesn&apos;t allow local port binding. Setting `sandbox.network.allowLocalBinding: true` in the settings fixes it, and I can&apos;t change that myself. Alternatively, run `python3 app/main.py` yourself and open http://127.0.0.1:8000, then tell me what you see. I also didn&apos;t view it at 390px or 1440px.
+
+**What I did**
+- Created the work branch `ui-workflow/2026-11-01` and recorded it in `.ui-workflow/state.md`. Nothing is committed, pushed or merged.
+- Changed `app/templates/index.html` and `app/static/styles.css`, and left your uncommitted `app/main.py` and `notes.txt` alone.
+- `tests/test_css.py` (the project&apos;s only check) passes. I removed the old fixed 800px and 760px widths.
+- **Rebuilt Today:** the heading and tagline, the reminder rows with title, &quot;Due …&quot; and a Done button, and the &quot;At a glance — N open&quot; panel. The panel sits beside the list from 768px up.
+- **Added states:** loading, empty and error messages, and a visible focus outline on the buttons.
+- **Done** still posts to `/api/reminders/{id}/done`. The list and count come from `GET /api/reminders`.
+
+**Decisions from the plan**
+- **Snooze:** shown disabled as &quot;Snooze · coming soon&quot;.
+- **Share list:** dropped.
+
+**Substitutes and things not reproduced**
+- **Muted text:** the design&apos;s secondary-text colour comes from a runtime module that isn&apos;t in the export. I used `#5f636b` (5.7:1 on the page background) because the design&apos;s grey would have been about 4.3:1, under the 4.5:1 minimum.
+- **Dark panel colour:** it uses your existing text colour `#1a202c`, slightly different from the design&apos;s.
+- **Row borders:** they&apos;re 1.2:1 against the page. I kept the design&apos;s value because it matches the screenshot, so tell me if you want them darker.
+- **Icons:** I couldn&apos;t download the Lucide icons because the network was blocked. I used text labels only, so there are no check, clock or bell icons.
+- **Fonts:** I added a Google Fonts link for Inter and Fraunces italic, since the project has no fonts of its own.
+- **Whole-app side effects:** the page now has the design&apos;s cream background, Inter font and a 56rem maximum width. The other tabs inherit all of these.
+- **Mock data:** the sample reminders and the `assignee` field aren&apos;t used.
+
+**For the Developer:** the export doesn&apos;t pin a Tailwind version for the class values I read. I used 3.4.10 from its `package.json`.
+
+Once the app is running and you&apos;ve looked at it, tell me whether to approve Today or what to change. I&apos;ll commit only after you approve, and then move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-viewed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 390|phone</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-project-checks</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">share-dropped</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">snooze-disabled</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched disabled[\s\S]{0,600}coming soon|coming soon[\s\S]{0,600}disabled</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL PASS FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I ported the **Today** screen, but I couldn&apos;t start the app, so I haven&apos;t seen it running and it isn&apos;t committed. I&apos;m waiting on a Developer before you can approve it.
+
+**Why it&apos;s blocked (for the Developer):** `python3 app/main.py` fails with `PermissionError: [Errno 1] Operation not permitted` when it binds `127.0.0.1:8000`. This session&apos;s sandbox doesn&apos;t allow local port binding. Setting `sandbox.network.allowLocalBinding: true` in the settings fixes it, and I can&apos;t change that myself. Alternatively, run `python3 app/main.py` yourself and open http://127.0.0.1:8000, then tell me what you see. I also didn&apos;t view it at 390px or 1440px.
+
+**What I did**
+- Created the work branch `ui-workflow/2026-11-01` and recorded it in `.ui-workflow/state.md`. Nothing is committed, pushed or merged.
+- Changed `app/templates/index.html` and `app/static/styles.css`, and left your uncommitted `app/main.py` and `notes.txt` alone.
+- `tests/test_css.py` (the project&apos;s only check) passes. I removed the old fixed 800px and 760px widths.
+- **Rebuilt Today:** the heading and tagline, the reminder rows with title, &quot;Due …&quot; and a Done button, and the &quot;At a glance — N open&quot; panel. The panel sits beside the list from 768px up.
+- **Added states:** loading, empty and error messages, and a visible focus outline on the buttons.
+- **Done** still posts to `/api/reminders/{id}/done`. The list and count come from `GET /api/reminders`.
+
+**Decisions from the plan**
+- **Snooze:** shown disabled as &quot;Snooze · coming soon&quot;.
+- **Share list:** dropped.
+
+**Substitutes and things not reproduced**
+- **Muted text:** the design&apos;s secondary-text colour comes from a runtime module that isn&apos;t in the export. I used `#5f636b` (5.7:1 on the page background) because the design&apos;s grey would have been about 4.3:1, under the 4.5:1 minimum.
+- **Dark panel colour:** it uses your existing text colour `#1a202c`, slightly different from the design&apos;s.
+- **Row borders:** they&apos;re 1.2:1 against the page. I kept the design&apos;s value because it matches the screenshot, so tell me if you want them darker.
+- **Icons:** I couldn&apos;t download the Lucide icons because the network was blocked. I used text labels only, so there are no check, clock or bell icons.
+- **Fonts:** I added a Google Fonts link for Inter and Fraunces italic, since the project has no fonts of its own.
+- **Whole-app side effects:** the page now has the design&apos;s cream background, Inter font and a 56rem maximum width. The other tabs inherit all of these.
+- **Mock data:** the sample reminders and the `assignee` field aren&apos;t used.
+
+**For the Developer:** the export doesn&apos;t pin a Tailwind version for the class values I read. I used 3.4.10 from its `package.json`.
+
+Once the app is running and you&apos;ve looked at it, tell me whether to approve Today or what to change. I&apos;ll commit only after you approve, and then move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-empty</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Nothing due\. Enjoy the calm</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-error</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched could not load your reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-loading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Fetching your reminders</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.2%"></span></span>
+<span class="num">97.2%</span>
+<span class="muted num">26 turns · $0.41 · 18:42:56 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">arbitrary-value-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 56rem|896px</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-radius-override</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-spacing-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 1\.75rem|28px</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">data-from-backend</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched fetch\(\s*[&quot;`&apos;]/api/reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-wired</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched markDone\((?!id\s*\))</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-new-dependency</span>  </summary>
+<div class="grader-body">
+<p class="explanation">package.json absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-requirements-added</span>  </summary>
+<div class="grader-body">
+<p class="explanation">requirements.txt absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-screenshot</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Read called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-header</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched What needs you now</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-rail</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched At a glance</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is ported but I couldn&apos;t show it to you, so it isn&apos;t committed. The app wouldn&apos;t start: `python3 app/main.py` failed binding `127.0.0.1:8000` because this sandbox blocks local ports. I haven&apos;t viewed the Screen at 390px or 1440px, and `Blocked` in `.ui-workflow/state.md` now records this.
+
+**For a Developer:** setting `sandbox.network.allowLocalBinding: true` in the settings would let me start the app. Or run `python3 app/main.py` yourself and open http://127.0.0.1:8000 (the Today tab is the default).
+
+## What I changed
+Work branch `ui-workflow/2026-11-01`. Your `app/main.py` and `notes.txt` edits are untouched.
+- `app/templates/index.html`: new Today markup and script. Today rows are now built with `textContent`, and there are loading, empty and error states.
+- `app/static/styles.css`: new tokens and Today styles. I also removed the inline `width`, `margin` and `background` from `&lt;body&gt;` and moved them into the stylesheet.
+- The project&apos;s one check, `tests/test_css.py` (every CSS class must appear in the template), passes. The page script passes a syntax check.
+
+## Decisions applied from the plan
+- **Snooze:** shown disabled with the label &quot;Snooze (coming soon)&quot;.
+- **Share list:** dropped.
+
+## Substitutes
+- **Tagline colour:** the export&apos;s `mutedText` comes from a module that isn&apos;t in the export, so I used the project&apos;s text colour.
+- **Rail width:** `railWidth` is also missing, so I measured the screenshot and used 16rem. Below 768px the rail goes full width, which is my choice because the screenshot only shows desktop.
+- **Muted text:** I added `--color-muted: #636976`. The export&apos;s 60% ink on white measured 4.05:1, below the 4.5:1 text minimum. This colour gives 5.5:1.
+- **Fonts:** Inter and Fraunces aren&apos;t loaded, so the browser falls back to system sans and Georgia italic. The screenshot shows the same fallbacks.
+- **Icons:** the bell, clock and check are inline SVG in the style of lucide (ISC licence). I wrote them from memory, not from the published files.
+- **Other tokens:** I mapped ink to your `--color-text` and added canvas, line, accent and radius tokens.
+- **Narrow screens:** rows wrap their buttons under the text, which the export doesn&apos;t do.
+
+## Not reproduced or below target
+- **Card edges:** the border is 1.2–1.3:1 against the background, below the 3:1 target for visible parts. I kept it because the screenshot shows the same faint edge.
+- **Disabled Snooze:** it sits at 50% opacity.
+- **Focus ring:** the export removes it, and I kept a visible one.
+
+## Shared shell
+I changed `&lt;body&gt;` to a 56rem max width with the warm canvas background, and removed the fixed 760px `.view` width. The top bar, tabs, All reminders and Settings inherit the wider, fluid container and the new background. That also fixes the phone-width problem from the audit. Their own styling is unchanged.
+
+## Left out
+Nothing from the export&apos;s mock data entered the project. The &quot;2 open&quot; count comes from your reminders.
+
+## Next step
+Please approve Today, or tell me what to change. After your approval I&apos;ll commit it and move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is ported but I couldn&apos;t show it to you, so it isn&apos;t committed. The app wouldn&apos;t start: `python3 app/main.py` failed binding `127.0.0.1:8000` because this sandbox blocks local ports. I haven&apos;t viewed the Screen at 390px or 1440px, and `Blocked` in `.ui-workflow/state.md` now records this.
+
+**For a Developer:** setting `sandbox.network.allowLocalBinding: true` in the settings would let me start the app. Or run `python3 app/main.py` yourself and open http://127.0.0.1:8000 (the Today tab is the default).
+
+## What I changed
+Work branch `ui-workflow/2026-11-01`. Your `app/main.py` and `notes.txt` edits are untouched.
+- `app/templates/index.html`: new Today markup and script. Today rows are now built with `textContent`, and there are loading, empty and error states.
+- `app/static/styles.css`: new tokens and Today styles. I also removed the inline `width`, `margin` and `background` from `&lt;body&gt;` and moved them into the stylesheet.
+- The project&apos;s one check, `tests/test_css.py` (every CSS class must appear in the template), passes. The page script passes a syntax check.
+
+## Decisions applied from the plan
+- **Snooze:** shown disabled with the label &quot;Snooze (coming soon)&quot;.
+- **Share list:** dropped.
+
+## Substitutes
+- **Tagline colour:** the export&apos;s `mutedText` comes from a module that isn&apos;t in the export, so I used the project&apos;s text colour.
+- **Rail width:** `railWidth` is also missing, so I measured the screenshot and used 16rem. Below 768px the rail goes full width, which is my choice because the screenshot only shows desktop.
+- **Muted text:** I added `--color-muted: #636976`. The export&apos;s 60% ink on white measured 4.05:1, below the 4.5:1 text minimum. This colour gives 5.5:1.
+- **Fonts:** Inter and Fraunces aren&apos;t loaded, so the browser falls back to system sans and Georgia italic. The screenshot shows the same fallbacks.
+- **Icons:** the bell, clock and check are inline SVG in the style of lucide (ISC licence). I wrote them from memory, not from the published files.
+- **Other tokens:** I mapped ink to your `--color-text` and added canvas, line, accent and radius tokens.
+- **Narrow screens:** rows wrap their buttons under the text, which the export doesn&apos;t do.
+
+## Not reproduced or below target
+- **Card edges:** the border is 1.2–1.3:1 against the background, below the 3:1 target for visible parts. I kept it because the screenshot shows the same faint edge.
+- **Disabled Snooze:** it sits at 50% opacity.
+- **Focus ring:** the export removes it, and I kept a visible one.
+
+## Shared shell
+I changed `&lt;body&gt;` to a 56rem max width with the warm canvas background, and removed the fixed 760px `.view` width. The top bar, tabs, All reminders and Settings inherit the wider, fluid container and the new background. That also fixes the phone-width problem from the audit. Their own styling is unchanged.
+
+## Left out
+Nothing from the export&apos;s mock data entered the project. The &quot;2 open&quot; count comes from your reminders.
+
+## Next step
+Please approve Today, or tell me what to change. After your approval I&apos;ll commit it and move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-substitutes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is ported but I couldn&apos;t show it to you, so it isn&apos;t committed. The app wouldn&apos;t start: `python3 app/main.py` failed binding `127.0.0.1:8000` because this sandbox blocks local ports. I haven&apos;t viewed the Screen at 390px or 1440px, and `Blocked` in `.ui-workflow/state.md` now records this.
+
+**For a Developer:** setting `sandbox.network.allowLocalBinding: true` in the settings would let me start the app. Or run `python3 app/main.py` yourself and open http://127.0.0.1:8000 (the Today tab is the default).
+
+## What I changed
+Work branch `ui-workflow/2026-11-01`. Your `app/main.py` and `notes.txt` edits are untouched.
+- `app/templates/index.html`: new Today markup and script. Today rows are now built with `textContent`, and there are loading, empty and error states.
+- `app/static/styles.css`: new tokens and Today styles. I also removed the inline `width`, `margin` and `background` from `&lt;body&gt;` and moved them into the stylesheet.
+- The project&apos;s one check, `tests/test_css.py` (every CSS class must appear in the template), passes. The page script passes a syntax check.
+
+## Decisions applied from the plan
+- **Snooze:** shown disabled with the label &quot;Snooze (coming soon)&quot;.
+- **Share list:** dropped.
+
+## Substitutes
+- **Tagline colour:** the export&apos;s `mutedText` comes from a module that isn&apos;t in the export, so I used the project&apos;s text colour.
+- **Rail width:** `railWidth` is also missing, so I measured the screenshot and used 16rem. Below 768px the rail goes full width, which is my choice because the screenshot only shows desktop.
+- **Muted text:** I added `--color-muted: #636976`. The export&apos;s 60% ink on white measured 4.05:1, below the 4.5:1 text minimum. This colour gives 5.5:1.
+- **Fonts:** Inter and Fraunces aren&apos;t loaded, so the browser falls back to system sans and Georgia italic. The screenshot shows the same fallbacks.
+- **Icons:** the bell, clock and check are inline SVG in the style of lucide (ISC licence). I wrote them from memory, not from the published files.
+- **Other tokens:** I mapped ink to your `--color-text` and added canvas, line, accent and radius tokens.
+- **Narrow screens:** rows wrap their buttons under the text, which the export doesn&apos;t do.
+
+## Not reproduced or below target
+- **Card edges:** the border is 1.2–1.3:1 against the background, below the 3:1 target for visible parts. I kept it because the screenshot shows the same faint edge.
+- **Disabled Snooze:** it sits at 50% opacity.
+- **Focus ring:** the export removes it, and I kept a visible one.
+
+## Shared shell
+I changed `&lt;body&gt;` to a 56rem max width with the warm canvas background, and removed the fixed 760px `.view` width. The top bar, tabs, All reminders and Settings inherit the wider, fluid container and the new background. That also fixes the phone-width problem from the audit. Their own styling is unchanged.
+
+## Left out
+Nothing from the export&apos;s mock data entered the project. The &quot;2 open&quot; count comes from your reminders.
+
+## Next step
+Please approve Today, or tell me what to change. After your approval I&apos;ll commit it and move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-viewed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 390|phone</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-project-checks</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">share-dropped</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">snooze-disabled</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched disabled[\s\S]{0,600}coming soon|coming soon[\s\S]{0,600}disabled</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Today is ported but I couldn&apos;t show it to you, so it isn&apos;t committed. The app wouldn&apos;t start: `python3 app/main.py` failed binding `127.0.0.1:8000` because this sandbox blocks local ports. I haven&apos;t viewed the Screen at 390px or 1440px, and `Blocked` in `.ui-workflow/state.md` now records this.
+
+**For a Developer:** setting `sandbox.network.allowLocalBinding: true` in the settings would let me start the app. Or run `python3 app/main.py` yourself and open http://127.0.0.1:8000 (the Today tab is the default).
+
+## What I changed
+Work branch `ui-workflow/2026-11-01`. Your `app/main.py` and `notes.txt` edits are untouched.
+- `app/templates/index.html`: new Today markup and script. Today rows are now built with `textContent`, and there are loading, empty and error states.
+- `app/static/styles.css`: new tokens and Today styles. I also removed the inline `width`, `margin` and `background` from `&lt;body&gt;` and moved them into the stylesheet.
+- The project&apos;s one check, `tests/test_css.py` (every CSS class must appear in the template), passes. The page script passes a syntax check.
+
+## Decisions applied from the plan
+- **Snooze:** shown disabled with the label &quot;Snooze (coming soon)&quot;.
+- **Share list:** dropped.
+
+## Substitutes
+- **Tagline colour:** the export&apos;s `mutedText` comes from a module that isn&apos;t in the export, so I used the project&apos;s text colour.
+- **Rail width:** `railWidth` is also missing, so I measured the screenshot and used 16rem. Below 768px the rail goes full width, which is my choice because the screenshot only shows desktop.
+- **Muted text:** I added `--color-muted: #636976`. The export&apos;s 60% ink on white measured 4.05:1, below the 4.5:1 text minimum. This colour gives 5.5:1.
+- **Fonts:** Inter and Fraunces aren&apos;t loaded, so the browser falls back to system sans and Georgia italic. The screenshot shows the same fallbacks.
+- **Icons:** the bell, clock and check are inline SVG in the style of lucide (ISC licence). I wrote them from memory, not from the published files.
+- **Other tokens:** I mapped ink to your `--color-text` and added canvas, line, accent and radius tokens.
+- **Narrow screens:** rows wrap their buttons under the text, which the export doesn&apos;t do.
+
+## Not reproduced or below target
+- **Card edges:** the border is 1.2–1.3:1 against the background, below the 3:1 target for visible parts. I kept it because the screenshot shows the same faint edge.
+- **Disabled Snooze:** it sits at 50% opacity.
+- **Focus ring:** the export removes it, and I kept a visible one.
+
+## Shared shell
+I changed `&lt;body&gt;` to a 56rem max width with the warm canvas background, and removed the fixed 760px `.view` width. The top bar, tabs, All reminders and Settings inherit the wider, fluid container and the new background. That also fixes the phone-width problem from the audit. Their own styling is unchanged.
+
+## Left out
+Nothing from the export&apos;s mock data entered the project. The &quot;2 open&quot; count comes from your reminders.
+
+## Next step
+Please approve Today, or tell me what to change. After your approval I&apos;ll commit it and move on to All reminders.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-empty</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Nothing due\. Enjoy the calm</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-error</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched could not load your reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-loading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Fetching your reminders</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:97.2%"></span></span>
+<span class="num">97.2%</span>
+<span class="muted num">14 turns · $0.34 · 18:45:52 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">arbitrary-value-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in file app/static/styles.css</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">branch-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Work branch:\s*`?ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-radius-override</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">config-spacing-resolved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 1\.75rem|28px</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">data-from-backend</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched fetch\(\s*[&quot;`&apos;]/api/reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-endpoint</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched /api/reminders/\$\{[^}]+\}/done</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">done-wired</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched markDone\((?!id\s*\))</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">mock-not-carried</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-push-or-merge</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-bulk-staging</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-commit-before-approval</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-new-dependency</span>  </summary>
+<div class="grader-body">
+<p class="explanation">package.json absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-remote-script</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-requirements-added</span>  </summary>
+<div class="grader-body">
+<p class="explanation">requirements.txt absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-classes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tailwind-css</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">on-work-branch</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ref: refs/heads/ui-workflow/\d{4}-\d{2}-\d{2}\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-screen-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">port-not-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-screenshot</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Read called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-header</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched What needs you now</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">region-rail</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched At a glance</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is ported, but I couldn&apos;t show it running, so it isn&apos;t committed and I haven&apos;t started All reminders. The sandbox won&apos;t let me bind `127.0.0.1:8000` (`PermissionError: Operation not permitted`), so the app never started. I haven&apos;t looked at the screen at 390px or 1440px for the same reason.
+
+**For the Developer:** please start the app yourself with `python3 app/main.py` and open http://127.0.0.1:8000. If the sandbox should allow it, set `sandbox.network.allowLocalBinding: true`. I recorded the block in `.ui-workflow/state.md`. Once it runs, I&apos;ll show Today and wait for the Stakeholder&apos;s approval before committing.
+
+The existing test passes (`tests/test_css.py`, no unused CSS classes). It left a `tests/__pycache__/` folder behind, which isn&apos;t part of this change.
+
+**Branch:** `ui-workflow/2026-11-01`. Your own changes (`app/main.py`, `notes.txt`) are untouched.
+
+**Files changed:** `app/templates/index.html` and `app/static/styles.css`.
+
+**Decisions applied**
+- **Share list:** dropped, as the plan says.
+- **Snooze:** shown disabled, labelled &quot;Snooze · coming soon&quot;.
+- **Done:** still calls the existing `POST /api/reminders/{id}/done` through `markDone`.
+- **Data and states:** Today reads `GET /api/reminders`. I added the loading, error and &quot;Nothing due. Enjoy the calm.&quot; states from the design.
+- **Count:** &quot;At a glance&quot; counts the open reminders.
+
+**Substitutes**
+- **Icons:** none. I couldn&apos;t fetch the Lucide SVGs because the sandbox blocked unpkg. Done uses a &quot;✓&quot; glyph, and the bell and clock icons are left out.
+- **Muted text colour:** the design&apos;s value comes from a runtime module that isn&apos;t in the export. The tagline, due dates and notes use the project&apos;s `--color-text` instead.
+- **Due-date text:** the design&apos;s lighter grey is 4.03:1 on white, below the 4.5:1 needed. I used `--color-text` there too, so the hierarchy comes from size only.
+- **Side panel width:** also from the missing module. I read 16rem from the screenshot.
+- **New tokens:** teal accent `#0f766e`, its hover `#0c635c` (the design&apos;s hover would have been 4.49:1), canvas, line, danger and danger-background colours, `--space-gutter` and `--radius`. The design&apos;s teal matches no existing project colour.
+- **Fonts:** Inter and Fraunces come from the same Google Fonts link the export uses. The project has no font set and no content security policy. They apply to the Today screen only.
+
+**Not reproduced or left out**
+- The card borders are 1.27:1 against white, below the 3:1 for visible parts. I kept them faint to match the screenshot.
+- The design&apos;s Share list button was dropped, and the bell and clock icons are not shown.
+- No images or claims of fact were in the export.
+
+**Other tabs affected**
+- The page width changed from fixed 800px to a maximum of 56rem (896px). This affects every tab.
+- I added a viewport meta tag, so the page now scales on phones.
+- The `.view` rule lost its fixed 760px width.
+- All reminders keeps its old row markup. Settings is unchanged apart from the wider page.
+
+**For the Developer, beyond the above:** the `esc()` helper I added escapes title and due in the new Today rows. All reminders still inserts them unescaped, as before.
+
+Once you&apos;ve seen it, should I approve Today and move on to All reminders, or do you want changes first?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-decisions</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is ported, but I couldn&apos;t show it running, so it isn&apos;t committed and I haven&apos;t started All reminders. The sandbox won&apos;t let me bind `127.0.0.1:8000` (`PermissionError: Operation not permitted`), so the app never started. I haven&apos;t looked at the screen at 390px or 1440px for the same reason.
+
+**For the Developer:** please start the app yourself with `python3 app/main.py` and open http://127.0.0.1:8000. If the sandbox should allow it, set `sandbox.network.allowLocalBinding: true`. I recorded the block in `.ui-workflow/state.md`. Once it runs, I&apos;ll show Today and wait for the Stakeholder&apos;s approval before committing.
+
+The existing test passes (`tests/test_css.py`, no unused CSS classes). It left a `tests/__pycache__/` folder behind, which isn&apos;t part of this change.
+
+**Branch:** `ui-workflow/2026-11-01`. Your own changes (`app/main.py`, `notes.txt`) are untouched.
+
+**Files changed:** `app/templates/index.html` and `app/static/styles.css`.
+
+**Decisions applied**
+- **Share list:** dropped, as the plan says.
+- **Snooze:** shown disabled, labelled &quot;Snooze · coming soon&quot;.
+- **Done:** still calls the existing `POST /api/reminders/{id}/done` through `markDone`.
+- **Data and states:** Today reads `GET /api/reminders`. I added the loading, error and &quot;Nothing due. Enjoy the calm.&quot; states from the design.
+- **Count:** &quot;At a glance&quot; counts the open reminders.
+
+**Substitutes**
+- **Icons:** none. I couldn&apos;t fetch the Lucide SVGs because the sandbox blocked unpkg. Done uses a &quot;✓&quot; glyph, and the bell and clock icons are left out.
+- **Muted text colour:** the design&apos;s value comes from a runtime module that isn&apos;t in the export. The tagline, due dates and notes use the project&apos;s `--color-text` instead.
+- **Due-date text:** the design&apos;s lighter grey is 4.03:1 on white, below the 4.5:1 needed. I used `--color-text` there too, so the hierarchy comes from size only.
+- **Side panel width:** also from the missing module. I read 16rem from the screenshot.
+- **New tokens:** teal accent `#0f766e`, its hover `#0c635c` (the design&apos;s hover would have been 4.49:1), canvas, line, danger and danger-background colours, `--space-gutter` and `--radius`. The design&apos;s teal matches no existing project colour.
+- **Fonts:** Inter and Fraunces come from the same Google Fonts link the export uses. The project has no font set and no content security policy. They apply to the Today screen only.
+
+**Not reproduced or left out**
+- The card borders are 1.27:1 against white, below the 3:1 for visible parts. I kept them faint to match the screenshot.
+- The design&apos;s Share list button was dropped, and the bell and clock icons are not shown.
+- No images or claims of fact were in the export.
+
+**Other tabs affected**
+- The page width changed from fixed 800px to a maximum of 56rem (896px). This affects every tab.
+- I added a viewport meta tag, so the page now scales on phones.
+- The `.view` rule lost its fixed 760px width.
+- All reminders keeps its old row markup. Settings is unchanged apart from the wider page.
+
+**For the Developer, beyond the above:** the `esc()` helper I added escapes title and due in the new Today rows. All reminders still inserts them unescaped, as before.
+
+Once you&apos;ve seen it, should I approve Today and move on to All reminders, or do you want changes first?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-substitutes</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is ported, but I couldn&apos;t show it running, so it isn&apos;t committed and I haven&apos;t started All reminders. The sandbox won&apos;t let me bind `127.0.0.1:8000` (`PermissionError: Operation not permitted`), so the app never started. I haven&apos;t looked at the screen at 390px or 1440px for the same reason.
+
+**For the Developer:** please start the app yourself with `python3 app/main.py` and open http://127.0.0.1:8000. If the sandbox should allow it, set `sandbox.network.allowLocalBinding: true`. I recorded the block in `.ui-workflow/state.md`. Once it runs, I&apos;ll show Today and wait for the Stakeholder&apos;s approval before committing.
+
+The existing test passes (`tests/test_css.py`, no unused CSS classes). It left a `tests/__pycache__/` folder behind, which isn&apos;t part of this change.
+
+**Branch:** `ui-workflow/2026-11-01`. Your own changes (`app/main.py`, `notes.txt`) are untouched.
+
+**Files changed:** `app/templates/index.html` and `app/static/styles.css`.
+
+**Decisions applied**
+- **Share list:** dropped, as the plan says.
+- **Snooze:** shown disabled, labelled &quot;Snooze · coming soon&quot;.
+- **Done:** still calls the existing `POST /api/reminders/{id}/done` through `markDone`.
+- **Data and states:** Today reads `GET /api/reminders`. I added the loading, error and &quot;Nothing due. Enjoy the calm.&quot; states from the design.
+- **Count:** &quot;At a glance&quot; counts the open reminders.
+
+**Substitutes**
+- **Icons:** none. I couldn&apos;t fetch the Lucide SVGs because the sandbox blocked unpkg. Done uses a &quot;✓&quot; glyph, and the bell and clock icons are left out.
+- **Muted text colour:** the design&apos;s value comes from a runtime module that isn&apos;t in the export. The tagline, due dates and notes use the project&apos;s `--color-text` instead.
+- **Due-date text:** the design&apos;s lighter grey is 4.03:1 on white, below the 4.5:1 needed. I used `--color-text` there too, so the hierarchy comes from size only.
+- **Side panel width:** also from the missing module. I read 16rem from the screenshot.
+- **New tokens:** teal accent `#0f766e`, its hover `#0c635c` (the design&apos;s hover would have been 4.49:1), canvas, line, danger and danger-background colours, `--space-gutter` and `--radius`. The design&apos;s teal matches no existing project colour.
+- **Fonts:** Inter and Fraunces come from the same Google Fonts link the export uses. The project has no font set and no content security policy. They apply to the Today screen only.
+
+**Not reproduced or left out**
+- The card borders are 1.27:1 against white, below the 3:1 for visible parts. I kept them faint to match the screenshot.
+- The design&apos;s Share list button was dropped, and the bell and clock icons are not shown.
+- No images or claims of fact were in the export.
+
+**Other tabs affected**
+- The page width changed from fixed 800px to a maximum of 56rem (896px). This affects every tab.
+- I added a viewport meta tag, so the page now scales on phones.
+- The `.view` rule lost its fixed 760px width.
+- All reminders keeps its old row markup. Settings is unchanged apart from the wider page.
+
+**For the Developer, beyond the above:** the `esc()` helper I added escapes title and due in the new Today rows. All reminders still inserts them unescaped, as before.
+
+Once you&apos;ve seen it, should I approve Today and move on to All reminders, or do you want changes first?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">report-viewed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched 390|phone</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-project-checks</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-the-app</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">share-dropped</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">snooze-disabled</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched disabled[\s\S]{0,600}coming soon|coming soon[\s\S]{0,600}disabled</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-change-kept</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Buy milk</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">stakeholder-never-runs</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is ported, but I couldn&apos;t show it running, so it isn&apos;t committed and I haven&apos;t started All reminders. The sandbox won&apos;t let me bind `127.0.0.1:8000` (`PermissionError: Operation not permitted`), so the app never started. I haven&apos;t looked at the screen at 390px or 1440px for the same reason.
+
+**For the Developer:** please start the app yourself with `python3 app/main.py` and open http://127.0.0.1:8000. If the sandbox should allow it, set `sandbox.network.allowLocalBinding: true`. I recorded the block in `.ui-workflow/state.md`. Once it runs, I&apos;ll show Today and wait for the Stakeholder&apos;s approval before committing.
+
+The existing test passes (`tests/test_css.py`, no unused CSS classes). It left a `tests/__pycache__/` folder behind, which isn&apos;t part of this change.
+
+**Branch:** `ui-workflow/2026-11-01`. Your own changes (`app/main.py`, `notes.txt`) are untouched.
+
+**Files changed:** `app/templates/index.html` and `app/static/styles.css`.
+
+**Decisions applied**
+- **Share list:** dropped, as the plan says.
+- **Snooze:** shown disabled, labelled &quot;Snooze · coming soon&quot;.
+- **Done:** still calls the existing `POST /api/reminders/{id}/done` through `markDone`.
+- **Data and states:** Today reads `GET /api/reminders`. I added the loading, error and &quot;Nothing due. Enjoy the calm.&quot; states from the design.
+- **Count:** &quot;At a glance&quot; counts the open reminders.
+
+**Substitutes**
+- **Icons:** none. I couldn&apos;t fetch the Lucide SVGs because the sandbox blocked unpkg. Done uses a &quot;✓&quot; glyph, and the bell and clock icons are left out.
+- **Muted text colour:** the design&apos;s value comes from a runtime module that isn&apos;t in the export. The tagline, due dates and notes use the project&apos;s `--color-text` instead.
+- **Due-date text:** the design&apos;s lighter grey is 4.03:1 on white, below the 4.5:1 needed. I used `--color-text` there too, so the hierarchy comes from size only.
+- **Side panel width:** also from the missing module. I read 16rem from the screenshot.
+- **New tokens:** teal accent `#0f766e`, its hover `#0c635c` (the design&apos;s hover would have been 4.49:1), canvas, line, danger and danger-background colours, `--space-gutter` and `--radius`. The design&apos;s teal matches no existing project colour.
+- **Fonts:** Inter and Fraunces come from the same Google Fonts link the export uses. The project has no font set and no content security policy. They apply to the Today screen only.
+
+**Not reproduced or left out**
+- The card borders are 1.27:1 against white, below the 3:1 for visible parts. I kept them faint to match the screenshot.
+- The design&apos;s Share list button was dropped, and the bell and clock icons are not shown.
+- No images or claims of fact were in the export.
+
+**Other tabs affected**
+- The page width changed from fixed 800px to a maximum of 56rem (896px). This affects every tab.
+- I added a viewport meta tag, so the page now scales on phones.
+- The `.view` rule lost its fixed 760px width.
+- All reminders keeps its old row markup. Settings is unchanged apart from the wider page.
+
+**For the Developer, beyond the above:** the `esc()` helper I added escapes title and due in the new Today rows. All reminders still inserts them unescaped, as before.
+
+Once you&apos;ve seen it, should I approve Today and move on to All reminders, or do you want changes first?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-empty</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Nothing due\. Enjoy the calm</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-error</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched could not load your reminders</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">state-loading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Fetching your reminders</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The plan is settled. Start putting the new design into my app.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">arbitrary-value-resolved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/static/styles.css&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;56rem|896px&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">branch-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Work branch:\\s*`?ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">config-radius-override</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/static/styles.css&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;border-radius:\\s*(999|9999)px&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">config-spacing-resolved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/static/styles.css&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;1\\.75rem|28px&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">data-from-backend</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;fetch\\(\\s*[\&quot;`&apos;]/api/reminders&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">done-endpoint</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;/api/reminders/\\$\\{[^}]+\\}/done&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">done-wired</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;markDone\\((?!id\\s*\\))&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">mock-not-carried</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Water the ferns|Book the vet|assignee&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-push-or-merge</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(push|merge|rebase)\\b|\\bgh\\s+pr\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-bulk-staging</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+add\\b[^\\n;&amp;|]*(\\s-A\\b|\\s--all\\b|\\s-u\\b|\\s\\.(\\s|$|;|&amp;)|\\s:/|\\*)|\\bgit\\s+commit\\b[^\\n]*\\s(-a\\w*|--all)\\b|\\bgit\\s+(stash|reset\\s+--hard|checkout\\s+--\\s|clean)\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-commit-before-approval</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bgit\\s+(?:-C\\s+\\S+\\s+)?commit\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-new-dependency</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;package.json&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-remote-script</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;&lt;script[^&gt;]+src=[\&quot;&apos;]https?:|&lt;link[^&gt;]+(icon|symbols)[^&gt;]*fonts\\.|&lt;link[^&gt;]+fonts\\.[^&gt;]*(icon|symbols)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-requirements-added</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;requirements.txt&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-tailwind-classes</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;\b(px-\\d|py-\\d|bg-accent|rounded-full|rounded-xl|text-ink|flex-col|space-y-\\d|md:flex-row|max-w-\\[)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-tailwind-css</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/static/styles.css&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;@tailwind|@apply&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-installed</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\b(npm|pnpm|yarn|bun)\\s+(install|i|ci|add|run|dev|build|start)\\b|\\bnpx\\s+vite\\b|\\bpip3?\\s+install\\b|\\buv\\s+(pip|add|sync)\\b|\\bpoetry\\s+install\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">on-work-branch</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.git/HEAD&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;ref: refs/heads/ui-workflow/\\d{4}-\\d{2}-\\d{2}\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">one-screen-only</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Everything on your list&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">port-not-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bport\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reads-screenshot</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Read&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;screenshots/today\\.png&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">region-header</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;What needs you now&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">region-rail</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;At a glance&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is in English and reports Porting one Screen only, Today, not committed and not approved. All reminders may be named as the next step. It gives a local URL for the Today view, or says the app could not be started and a Developer is needed. It does not offer a deployment or a public link.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-decisions</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says that Snooze is shown disabled with a "coming soon" label and that Share list was dropped, as the plan decided.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-substitutes</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply lists substitutes or things not reproduced, naming at least two of: the muted text colour that comes from a runtime module missing from the export; the width of the side panel, taken from the screenshot or asked about; the icons from an icon library; the italic display font.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">report-viewed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;390|phone&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">runs-project-checks</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;-m\\s+(unittest|pytest)|\\bpytest\\b|python3?\\s+\\S*test_css&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">runs-the-app</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;python3?\\s+(-\\w+\\s+)*\\S*main\\.py&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">share-dropped</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Share list&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">snooze-disabled</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;disabled[\\s\\S]{0,600}coming soon|coming soon[\\s\\S]{0,600}disabled&quot;</code></div><div class="kv"><span>flags</span><code>&quot;i&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-change-kept</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/main.py&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Buy milk&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">stakeholder-never-runs</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply does not ask the Stakeholder, the person it is addressed to, to run a command, install anything or change a setting. A command or setting explicitly addressed to a Developer passes.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">state-empty</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Nothing due\\. Enjoy the calm&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">state-error</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;could not load your reminders&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">state-loading</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;app/templates/index.html&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Fetching your reminders&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
