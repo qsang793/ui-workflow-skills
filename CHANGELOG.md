@@ -4,6 +4,15 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 
 ## [Unreleased]
 
+### Changed — docs for marketplace users and Stakeholders
+- `README.md` is in English: install (plugin and symlink, commands re-checked), flow, every Scenario labelled Beta until the Scenario C pilot passes.
+- `docs/stakeholder-guide.md` and `docs/stakeholder-guide.vi.md` replace `UI_IMPROVEMENT_GUIDE.md` and `CHEAT_SHEET.md`. They use glossary terms and plugin command names, follow the skills' current behaviour, and say what has not been proven yet.
+- `PILOT_RETROSPECTIVE.md` moves to `docs/pilots/2026-05-21-retrospective.md`.
+- `scripts/validate.py` reports a guide that names a command with no matching skill under the plugin's name, a plugin command with no matching skill in any other current Markdown file, and guides whose headings or commands differ between languages. A missing guide is an error.
+
+### Added — plugin icon
+- `.claude-plugin/icon.png`, 512 × 512.
+
 ### Changed — tool-neutral names and `.ui-workflow/` folder
 - `ingest-lovable-export` → `ingest-design-export`, `ui-translator` → `design-port`. No aliases.
 - Intermediate files move from the project root into `.ui-workflow/`: `UI_AUDIT.md` → `audit.md`, `LOVABLE_PROMPT.md` → `design-prompt.md`, `INTEGRATION_PLAN.md` → `integration-plan.md`, `lovable-export/` → `export/`.
