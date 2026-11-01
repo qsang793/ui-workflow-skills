@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reminders</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { paper: "#f7f3ea", ink: "#2b2622", stamp: "#7a2e1d" } } },
+    };
+  </script>
+</head>
+<body class="bg-paper text-ink">
+  <main class="mx-auto max-w-3xl p-8">
+    <header class="mb-6">
+      <h1 class="text-3xl font-semibold">Today</h1>
+      <p class="text-sm">A family habit since 1931. Trusted by 12,480 households.</p>
+    </header>
+
+    <figure class="mb-6">
+      <img
+        src="assets/founders-1931.jpg"
+        alt="Original archival photograph of the founders' office, Hanoi, 1931"
+        class="w-full rounded-lg"
+      />
+      <figcaption class="mt-2 text-xs">
+        Source: Hanoi City Archive, ref. HCA-1931-0472.
+        <span class="ml-2 rounded bg-stamp px-2 py-0.5 text-white">Verified by the Heritage Board</span>
+      </figcaption>
+    </figure>
+
+    <ul class="space-y-2">
+      <li class="flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow">
+        <span><strong>Water the ferns</strong> <span class="text-sm">Due 2026-11-02</span></span>
+        <!-- interaction: mark this reminder done -->
+        <button class="rounded bg-stamp px-3 py-1 text-white hover:opacity-90">Done</button>
+      </li>
+    </ul>
+    <p class="mt-4 hidden text-sm">Nothing due today.</p>
+  </main>
+</body>
+</html>

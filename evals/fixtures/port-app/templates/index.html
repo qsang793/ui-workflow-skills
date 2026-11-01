@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <title>Reminders</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body style="width: 800px; margin: 0 auto; background: #fafafa">
+  <div class="top" style="background: #2b6cb0; color: #fff; padding: 12px">
+    <img src="/static/logo.png">
+    <span style="font-size: 22px">Hello {{ owner }}</span>
+  </div>
+  <div class="tabs">
+    <button data-tab="today" style="color: #333">Today</button>
+    <button data-tab="all" style="color: #444">All reminders</button>
+    <button data-tab="settings" style="color: #555">Settings</button>
+  </div>
+  <div id="today" class="view"></div>
+  <div id="all" class="view" style="display: none"></div>
+  <div id="settings" class="view" style="display: none">
+    <p style="color: #777">Notification time</p>
+    <input id="notify-time" style="width: 300px; border: 1px solid #ccc">
+    <button id="save" style="background: #38a169; color: white">Save</button>
+  </div>
+  <script>
+    // Tabs are switched client-side; each tab is a view of the single page.
+    document.querySelectorAll(".tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".view").forEach((v) => (v.style.display = "none"));
+        document.getElementById(btn.dataset.tab).style.display = "block";
+      });
+    });
+
+    async function loadReminders() {
+      const res = await fetch("/api/reminders");
+      const reminders = await res.json();
+      const today = document.getElementById("today");
+      const all = document.getElementById("all");
+      today.innerHTML = "";
+      all.innerHTML = "";
+      reminders.forEach((r) => {
+        const row = `<div class="reminder ${r.done ? "done" : ""}">
+          <span>${r.title} — ${r.due}</span>
+          <button onclick="markDone(${r.id})">Done</button>
+        </div>`;
+        all.innerHTML += row;
+        if (!r.done) today.innerHTML += row;
+      });
+    }
+
+    async function markDone(id) {
+      await fetch(`/api/reminders/${id}/done`, { method: "POST" });
+      loadReminders();
+    }
+
+    document.getElementById("save").addEventListener("click", () => {
+      alert("Saved " + document.getElementById("notify-time").value);
+    });
+
+    loadReminders();
+  </script>
+</body>
+</html>

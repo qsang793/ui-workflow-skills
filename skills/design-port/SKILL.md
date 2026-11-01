@@ -50,6 +50,8 @@ Never commit while the current branch (`git branch --show-current`) is anything 
 
 The Screens and their order come from the Screens table of `.ui-workflow/integration-plan.md`. A Screen is done when the Work branch has its commit, `ui-workflow: port <Screen>` (`git log --oneline`).
 
+If `Blocked` says a Screen was Ported but the app did not start, its uncommitted files are that Screen's, not the Stakeholder's. Go to step 4 and show it, without Porting it again.
+
 If a Screen was Ported and shown but is not committed yet, read the Stakeholder's latest message first:
 
 - They approve it: commit it (step 5), then go on with the next Screen.
@@ -60,14 +62,50 @@ Then take the first Screen of the table that is not done. **One Screen per turn*
 
 ### 3. Port the Screen
 
-> **Extraction rules — pending #18 (spike: Port one Screen from a real Lovable export).** How style values, Tailwind classes, design tokens, icons, screenshots and substitutes are read from the export and rebuilt is not written yet. Until then, rebuild the Screen's look in the project's existing templates and stylesheet, and report every value you were unsure of.
-
-Whatever the extraction rules turn out to be, these hold:
+These hold throughout:
 
 - Read the export's source only (`.ui-workflow/export/`). Never install, build or run it. Never read `.env` files.
 - Change only what this Screen needs: its target template, the project's existing stylesheets and front-end scripts, and static assets. Never change backend code. If a file you need is among the Stakeholder's uncommitted changes from step 1, stop and ask the Developer to commit or set them aside first.
 - The data is the backend source named in the Screens table, fetched through the project's existing fetch code. Design-only actions follow the plan's decision (dropped, or disabled with a "coming soon" label); an action the plan does not list stops the Screen and is asked about. Required behaviour works as it does today, and no control looks active without working.
 - No Tailwind classes in a project that does not already use Tailwind. No new dependency.
+
+Read the look from the export, then rebuild it in the target template and the project's stylesheet. Every value ends up resolved, substituted or asked about; keep a list of the substitutes for the report.
+
+**Sources.** The Screen's Export file and the components it imports, to see what they render. The export's Tailwind config (`tailwind.config.*`, an inline `tailwind.config`, or `@theme` in its CSS), global CSS, CSS variables and font links. Its state, hooks, handlers and mock data, only to understand states and meaning: the export's runtime stays out of the project. The project's tokens and stylesheet.
+
+**Screenshot.** When `.ui-workflow/export/screenshots/<screen>.png` exists (name in lowercase with hyphens), read it. It checks the layout and settles values the source does not. When the source does settle a value, the source wins. What only the picture shows, such as an effect baked into an image, goes in the report as not reproduced.
+
+**Markup.** Keep the element tree, semantic tags and order the export renders. Rebuild components as the project's plain markup, reading each to see its output.
+
+**Style values.** Output is CSS in the project's existing stylesheet structure (Tailwind classes only if the project already uses Tailwind). Plain CSS is read as is. The Screen's container width and breakpoints apply even when they sit on a page shell other Screens share: change the shell and report what the others inherit. Resolve each Tailwind class in this order: an arbitrary value as written, the export's config, its CSS variables, Tailwind's default scale. A config entry replaces the default meaning: `rounded-full` may be `0.75rem`. Three Tailwind assumptions to apply:
+
+- Version: read it from the export's `package.json` or lockfile. The default scale is not in the export, so when no version is pinned (a CDN script), pick one and name it in the report.
+- Class order is not CSS order. When two utilities set one property, the order inside `class` does not decide it. `tracking-*`, `leading-*` and `font-*` override what a custom `fontSize` sets.
+- Filters compose in a fixed order, whatever the class order: blur, brightness, contrast, grayscale, hue-rotate, invert, saturate, sepia, drop-shadow.
+
+**Tokens.** Map colours, spacing, fonts, radii, shadows and breakpoints onto the project's existing tokens first. Add a token only when none matches. Then check what the mapping did:
+
+- Contrast: compute the ratio of every mapped foreground and background pair with a short script, dots, lines and borders included; an estimate by eye does not count. Text needs 4.5:1 (large text 3:1), other visible parts 3:1. For a pair below that, take another existing token, or treat it as a usability value (below). Report when several surface steps collapsed into one token.
+- Fonts by face: compare the styles and weights the export loads and uses with the files the project has, not just the family name. A missing italic or weight is drawn synthetically by the browser; report it as a substitute. Add a font link only when no project font fits the role and the project's content security policy allows it, and name it in the report.
+
+**Copy.** Carry labels, headings, placeholders, empty and error text, in the project's existing language. Text that comes from data is replaced by the backend field the Screens table names; mock values never reach the project.
+
+**Claims of fact are placeholders.** Sources, reference codes, counts, statistics, dates, credits, testimonials and verification badges in the export are design filler, however real they sound. They enter the project only through a field the Screens table names. Leave out the rest and list it in the report.
+
+**States.** Rebuild hover, focus, disabled, active, open, empty, loading and error as far as the export shows them, class strings inside handlers and scripts included. Every control keeps a visible focus style, even where the export removes it.
+
+**Interaction intent.** Write down in plain English what each handler or `<!-- interaction: <behaviour> -->` comment does, then build it in the project's existing style if it is Required behaviour. Rewrite from the intent; export code is never pasted or translated.
+
+**Icons.** Use the matching icon of the project's existing set, else inline SVG: from the export, or from the icon library's published static SVG, with library and licence named in the report. If you cannot get the SVG, use a text label or a plain glyph and report it as a substitute. No icon package or icon font.
+
+**Images.** An export's image may be a placeholder or generated, even when it is labelled a real photo or record. Show the image from a field the Screens table names, or the project's own; otherwise keep the slot as a plain surface. Report what the export had and how it was labelled, and ask in the report whether to use it. Copy it into the project's existing static folder only after the Stakeholder says yes.
+
+**Values you cannot resolve** (from runtime code, a missing file, CSS-in-JS, a Tailwind plugin):
+
+- Layout or usability (widths, breakpoints, contrast, hit areas): the screenshot settles it, or you ask before going on.
+- Anything else: use the project's default token for that role and report it as a substitute.
+
+**Before you show it.** Remove the CSS rules this Screen's rebuild left unused, after checking that no template or script still uses them; rules another Screen uses stay. Then look for the project's own checks (a tests folder, package scripts, a Makefile, CI config) and run those that work without installing anything. Fix what the Port broke; report what passed, what still fails and what could not run. To tell whether a failure is the Port's, read the failure and `git diff` with the working tree as it is: a stash would sweep up the Stakeholder's changes.
 
 ### 4. Show it in the running app
 
@@ -75,8 +113,9 @@ The Stakeholder approves a Screen only after seeing it in the project's own app,
 
 1. Read the `Run` line under `## Stack` in `.ui-workflow/audit.md` (`- Run: <command> → <local URL>`). If it says `unknown` or is missing, find the command in the project (`package.json` scripts, `README`, `Procfile`, `uvicorn`/`flask`/`manage.py` entry points), tell the Developer the command you found and wait for them to confirm it.
 2. Start the app in the background with that command, or, if the app you started for an earlier Screen is still running and does not reload changes on its own, restart it. Wait until the local URL answers. Do not install anything to make it run.
-3. If it does not start, stop and escalate: tell the Stakeholder a Developer must get the app running (never give them a command to run or a package to install), show the error output for the Developer, and write the reason in `Blocked`. Leave the Screen uncommitted.
-4. Give the Stakeholder the URL of this Screen: the local URL plus its route, or how to reach the view (for example the tab to click).
+3. If it does not start, stop and escalate: tell the Stakeholder a Developer must get the app running, give the rest of the step 5 report, and write in `Blocked` the reason and the Screen waiting to be shown. The error output, and any command or setting that may fix it, go in a part addressed to the Developer; the Stakeholder is never the one to run or install anything. Leave the Screen uncommitted.
+4. If you have a browser tool, look at the Screen yourself first, at about 390px and 1440px wide, with the app's real data and after transitions have finished. Fix broken wrapping, overflow and parts that vanish. Do not install a browser for this; without one, say in the report that you did not view it.
+5. Give the Stakeholder the URL of this Screen: the local URL plus its route, or how to reach the view (for example the tab to click).
 
 Never deploy a Screen. The check on a phone comes later, in the Preview step (`/ui-workflow-skills:preview-deploy`).
 
@@ -88,7 +127,9 @@ The Screen's report is in the language of the Stakeholder's latest message, even
 - the files you changed for it
 - the decisions applied (design-only actions dropped or disabled)
 - substitutes, and what was not reproduced visually
-- the question: approve this Screen, or what to change?
+- claims of fact left out, and images not copied with how the export labelled them
+- for the Developer: the Tailwind version assumed, if none was pinned; the project's checks and whether you viewed the Screen at both widths
+- the question: approve this Screen, or what to change? Include any image you are asking about.
 
 Then stop and wait. Commit only after the Stakeholder approves:
 
@@ -108,13 +149,15 @@ After the commit, Port the next Screen (step 3) in the same turn. After the last
 - **Seen before approved.** Each Screen is shown in the locally running app. No deploy per Screen.
 - **The export is never run.** Read its source; no install, build or run.
 - **No new dependencies**, icon packages included.
+- **Project data only.** Claims of fact need a field in the Screens table; an export's image needs the Stakeholder's yes.
 
 ## Common Mistakes
 
 - **Porting several Screens in one go.** One, then wait.
+- **Trusting the mapping.** A colour pair that passed in the export can vanish on the project's tokens; compute it.
 - **`git add -A` or `git commit -a`.** It sweeps in the Stakeholder's own uncommitted work.
 - **Committing before approval**, or approving on the Stakeholder's behalf.
-- **Installing packages to get the app running.** Escalate to the Developer instead.
+- **Installing packages to get the app running, or telling the Stakeholder to run it.** Escalate to the Developer instead.
 - **Inventing the run command.** Use the audit's `Run` line, or confirm a detected one with the Developer.
 
 ## Related Skills
