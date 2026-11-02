@@ -152,7 +152,7 @@ The export was easy because the Design prompt asked for one plain CSS file with 
 
 ## Remaining
 
-1. File the findings above as issues. Findings 1, 2, 3 and 7 are fixed before the release (#14). The evals `preview-first-deploy` and `port-all-project-checks` fail on the skills this pilot ran, and must pass after the fixes. The other findings stay open and are listed in the changelog as known limits.
+1. File the findings above as issues. Findings 1, 2, 3 and 7 are fixed before the release (#14). The evals `preview-first-deploy` and `port-all-project-checks` fail on the skills this pilot ran, and must pass after the fixes. The other findings stay open and are listed in the changelog as known limits. **Later correction:** #33 and #34 also fixed findings 4, 5, 6, 9 and 10 before the release, on fixtures and in the guides only, so finding 8 is the one left open.
 2. For 1.0.0 and #13: a full run on another project, following the final guide, with a person as Stakeholder, up to an approved Preview on a real phone.
 
 **Decision:** release 0.3.0 with every Scenario Beta. Finding 1 published to production against a critical rule, finding 2 is a real regression that passed approval, and this pilot's Stakeholder was not a person. ADR-0001 stands: Scenario C becomes Production only after a real pilot passes.

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.3.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.3.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.316</span>
+<span class="num">2026-11-02 09:32 UTC</span>
+<span class="num">10m 23s</span>
+<span class="num">$1.21</span>
+<span class="num">5 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case port-all-project-checks</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">93.3%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">80%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>port-all-project-checks</h2>
+<span class="muted mono">evals/port-all-project-checks</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">93.3%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span></span>
+<span class="num">93.3%</span>
+<span class="muted num">80% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">10 turns · $0.20 · 09:32:09 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">failure-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">Two project checks did not pass, and I couldn&apos;t show you the Today screen.
+
+- **Browser check:** it fails. It protects the rule that the page matches a saved, approved copy of the template. The Port changed the template, so it fails by design. A Developer has to decide whether to approve a new saved copy. I didn&apos;t touch the check or the saved copy.
+- **Page-style check:** it passes.
+- **App start:** the app wouldn&apos;t start, so nothing has been seen in a browser yet. Local port binding is blocked in this sandbox (`PermissionError: Operation not permitted` on port 8000). I didn&apos;t work around it.
+
+**What I did on Today:** it&apos;s rebuilt in your existing page and stylesheet, on the new branch `ui-workflow/2026-11-02`. Nothing is committed.
+- A &quot;Today&quot; heading with the list of unfinished reminders as white cards, each showing the title, &quot;Due &lt;date&gt;&quot; and a red Done button.
+- Done still works the same way, and &quot;Nothing due today.&quot; shows when the list is empty.
+- Your own uncommitted changes (`app/main.py`, `notes.txt`) are untouched.
+
+**Files changed:**
+- `app/templates/index.html`
+- `app/static/styles.css`
+- `.ui-workflow/state.md` (the block is recorded there)
+
+**Left out or substituted:**
+- **Filler claims:** I left out &quot;A family habit since 1931. Trusted by 12,480 households.&quot;, the source line and reference code, and the &quot;Verified by the Heritage Board&quot; badge. None of them has a backend field.
+- **Photo:** I didn&apos;t copy the 1931 &quot;founders&apos; office&quot; photo from the design. It&apos;s labelled as an archival photograph, but it may be a placeholder. Do you want it on the screen?
+- **Page-wide changes:** the cream background, dark text and system font now apply to the whole page. The width is now capped at 768px (it was 800px), so All reminders and Settings pick that up too. The top bar and tabs are unchanged.
+- **Contrast:** the white cards are barely distinguishable from the cream background (1.1:1). They rely on a soft shadow, as the design does.
+- **Done view:** the plan&apos;s Screens table lists only Today, so the Done view you asked for isn&apos;t planned yet.
+
+**For the Developer:**
+- **Tailwind:** the design loads it from a CDN with no version pinned, so I assumed v3 defaults.
+- **Screenshot:** none exists for this design.
+- **Contrast ratios:** ink on cream is 13.5:1 and white on the red button is 9.4:1.
+- **Viewing:** I viewed the screen at neither 390px nor 1440px.
+- **Next step:** to unblock, allow local port binding with `sandbox.network.allowLocalBinding: true` in settings, or run `python3 app/main.py` yourself and open http://127.0.0.1:8000 (Today is the first tab). Then re-run `/ui-workflow-skills:design-port`.
+
+Once you can see it, approve Today or tell me what to change.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-browser-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-unit-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">15 turns · $0.22 · 09:34:10 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">failure-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I&apos;ve rebuilt the Today screen in the app, but I couldn&apos;t show it to you. The app wouldn&apos;t start, so nothing is committed.
+
+**Checks that need a Developer**
+- **Page-snapshot check: fails.** It protects the approved page markup, and it fails because the Today screen changed that page, so this Port caused it. I did not touch the snapshot, because approving a new one is a person&apos;s decision.
+- **Stylesheet check: passes.**
+- **Sandbox: the app did not start.** This session&apos;s sandbox blocks the local port the app needs, so the screen is unseen.
+
+**For the Developer**
+- Local port binding is off in this sandbox. Setting `sandbox.network.allowLocalBinding: true` in the settings turns it on, and it applies without a restart. Changing sandbox settings is your decision, so I haven&apos;t done it.
+- Once it&apos;s on, tell me and I&apos;ll start the app with `python3 app/main.py` and show the screen at http://127.0.0.1:8000 (Today tab).
+- The state file records this under `Blocked`. The work is on branch `ui-workflow/2026-11-02`.
+- `npm run test:browser` is the snapshot check. `npm test` is the stylesheet check, and it passes.
+- No Tailwind version is pinned in the export (it loads from a CDN), so I assumed Tailwind v3 when reading its classes.
+- There is no screenshot of the design, and I haven&apos;t viewed the screen at either width.
+
+**Files changed**
+- `app/templates/index.html`
+- `app/static/styles.css`
+
+I did not touch your uncommitted `app/main.py` or `notes.txt`.
+
+**What I built**
+- A Today heading, white reminder cards with a &quot;Due …&quot; date, and a rust-red Done button.
+- A &quot;Nothing due today.&quot; message when the list is empty.
+- The list still comes from `GET /api/reminders`, and Done still calls `POST /api/reminders/{id}/done`.
+- I added two colours to the stylesheet, the cream paper background and the rust-red button. The text colour reuses the existing one, which is slightly cooler than the design&apos;s ink.
+- The contrast checks pass. The white cards are only 1.1:1 against the cream background, so they stand out by shadow alone, as in the design.
+
+**Shared-page changes**
+The width and background changes apply to every tab. The page is now fluid up to 768px instead of fixed at 800px. The tab bodies have fluid width with 2rem padding. The background is cream. All reminders and Settings pick these up.
+
+**Left out**
+- &quot;A family habit since 1931. Trusted by 12,480 households.&quot;
+- The &quot;Source: Hanoi City Archive…&quot; caption.
+- The &quot;Verified by the Heritage Board&quot; badge.
+
+None of these come from your app&apos;s data. The design also had a founders&apos; photograph labelled as an archival 1931 photo, which may well be a placeholder. I haven&apos;t copied it in and left no slot for it. Do you want it on the Today screen?
+
+**Still to do**
+The brief also asks for a redesigned All reminders tab and a Done view of finished reminders. The plan only lists Today, so I&apos;ll check how to handle those after you approve this one.
+
+Once I can show it: approve the Today screen, or tell me what to change?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-browser-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-unit-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">20 turns · $0.32 · 09:36:15 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">failure-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is built, but I couldn&apos;t show it to you, and one of your project checks now fails.
+
+**Checks**
+- **The check that protects the approved page markup fails.** It compares `app/templates/index.html` byte for byte with an approved copy, and the Port changed that file. This is expected, and the Port caused it. I did not touch the approved copy, because updating it is a person&apos;s decision. A Developer needs to look.
+- **The unused-styles check passes.**
+- **I couldn&apos;t view the screen.** The app wouldn&apos;t start here because this sandbox doesn&apos;t allow local ports, so the Today screen has not been seen or verified in a browser at either width.
+
+**For the Developer, to get the app running**
+- Allow `sandbox.network.allowLocalBinding: true` in the settings, or start it yourself with `python3 app/main.py`. The address is http://127.0.0.1:8000, and the Today view is the first tab.
+- Then run `/ui-workflow-skills:design-port` again to show the screen. I recorded the reason in `Blocked` in `.ui-workflow/state.md`.
+
+**Today screen**
+- **Branch:** I created `ui-workflow/2026-11-02`. The Port is uncommitted and nothing was pushed.
+- **Files changed:** `app/templates/index.html` and `app/static/styles.css`. Your own uncommitted work (`app/main.py`, `notes.txt`) is untouched and will stay out of the commit.
+- **What I built:** a &quot;Today&quot; heading and white rows with a bold title, &quot;Due &lt;date&gt;&quot; and a Done button. The empty text is &quot;Nothing due today.&quot; The rows come from `GET /api/reminders`, and Done still posts to `/api/reminders/{id}/done`.
+- **Shared page changes:** the page is now a centred column up to 768px wide on a warm paper background, replacing the fixed 800px width. All reminders and Settings inherit this, and I removed the 760px fixed width from their views. The top bar and tabs are unchanged.
+- **Colours:** I added four colour variables (paper, ink, stamp, surface) because none of the existing ones matched. All the colour pairs I measured pass: dark text on paper is 13.5:1, and the white Done label on its dark red is 9.4:1 (7.3:1 on hover). The white row on the paper is only 1.1:1, so the soft shadow marks the card edge, as in the design.
+- **Small additions beyond the export:** a visible focus outline on Done, a gap in each row, and the button no longer shrinks on narrow screens.
+
+**Left out**
+- &quot;A family habit since 1931. Trusted by 12,480 households.&quot; Nothing in your data backs these claims.
+- The archive photo, its source line and the &quot;Verified by the Heritage Board&quot; badge. The export presents the photo as an archival original, but it looks like design filler. Do you want the photo (`founders-1931.jpg`) copied in anyway? I haven&apos;t copied it.
+- The plan only covers the Today screen. Your brief also asked for a Done view of finished reminders and a redesign of All reminders, and neither is in the plan. A Developer may want to re-run the planner for them.
+
+**Tailwind:** the export loads it from a CDN with no pinned version, so I assumed v3&apos;s default sizes. There was no screenshot to check against.
+
+Once the Developer has the app running, I can show it and then ask you to approve Today or tell me what to change.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-browser-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 3x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-unit-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 3x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 4</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.22 · 09:38:45 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">failure-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">**One check fails, and I couldn&apos;t start the app, so you can&apos;t see the Today screen yet.**
+
+**Failing check**
+- The page-markup check fails. It compares the page with a saved approved copy, and the new Today screen changes the page, so it differs. This Port caused it.
+- I did not touch the saved copy. A Developer needs to review the new page and decide whether to approve it as the new copy.
+- The stylesheet check passes. The check that runs as `npm test` also tried to reach the network and was blocked, so I ran its Python command directly.
+
+**App not running**
+- The sandbox blocks the app from opening local port 8000, so it won&apos;t start. The error is `PermissionError: Operation not permitted`.
+- Nothing has been committed. A Developer needs to run `python3 app/main.py` (http://127.0.0.1:8000), or set `sandbox.network.allowLocalBinding: true` in the settings. That&apos;s their decision, not mine.
+- I recorded the block in `.ui-workflow/state.md`.
+
+**What I did on the Today screen** (on the new branch `ui-workflow/2026-11-02`)
+- **Files:** `app/templates/index.html` and `app/static/styles.css`.
+- **Look:** warm paper background, white reminder cards, a rust-red Done button with hover and keyboard-focus states, and a &quot;Nothing due today.&quot; message when the list is empty.
+- **Behaviour:** the list still comes from `GET /api/reminders`, and Done still uses `POST /api/reminders/{id}/done`.
+- **Colours:** I added four new colours (paper, ink, stamp, surface) because none of the existing ones matched. The contrast ratios are all at least 8.48:1, except the white card against the paper background (1.11:1), where the design uses a shadow to separate them.
+- **Shared page frame:** the page is now a flexible column up to 768px wide on the paper background, instead of fixed 800px. All reminders and Settings inherit that, and the fixed 760px width on each tab is gone.
+- **Image:** the design&apos;s archive photo is not in the app. It is labelled as a real 1931 photo from a city archive and I can&apos;t verify that. Do you want it copied in?
+- **Left out as unverifiable claims:** &quot;A family habit since 1931&quot;, &quot;Trusted by 12,480 households&quot;, the archive source and reference code, and the &quot;Verified by the Heritage Board&quot; badge.
+
+**For the Developer**
+- There is no screenshot of the design, so I worked from the code alone.
+- The design loads Tailwind from a CDN without a version, so I assumed v3 values.
+- I did not view the screen at 390px or 1440px because the app wouldn&apos;t start.
+- Your uncommitted changes (`app/main.py`, `notes.txt`) are untouched.
+
+Once the app is running, you can approve Today or ask for changes. Do you also want the &quot;Done&quot; view you listed as a must-have? It isn&apos;t in the plan&apos;s screen list, so I haven&apos;t built it.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-browser-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-unit-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 5</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">17 turns · $0.26 · 09:40:22 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">failure-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The Today screen is rebuilt, but I couldn&apos;t start the app, so you haven&apos;t seen it and I haven&apos;t committed it.
+
+**One check fails.** The page-layout check (`npm run test:browser`) compares the page to a saved approved copy, `tests/snapshots/index.html`. The new Today markup is different from that copy, so it fails. This Port caused the failure. I didn&apos;t touch the saved copy, because replacing it is a decision for a Developer. The other check, the unused-styles test, passes. I ran both through `python3` directly. `npm` was blocked from reaching the network, and I didn&apos;t investigate that further.
+
+**The app didn&apos;t start.** This environment refuses local network ports, so `python3 app/main.py` failed with &quot;Operation not permitted&quot;. A Developer needs to run it, or allow local ports with `sandbox.network.allowLocalBinding: true`. You shouldn&apos;t have to run anything yourself. I haven&apos;t looked at the screen at phone or desktop width, since there was nothing to look at.
+
+**What changed**
+- **Work branch:** I created `ui-workflow/2026-11-02`. Nothing is pushed.
+- **Screen:** Today, at `http://127.0.0.1:8000`, on the &quot;Today&quot; tab.
+- **Files:**
+  - `app/templates/index.html`
+  - `app/static/styles.css`
+  - `.ui-workflow/state.md`, which now records the branch and the blocked reason
+- **Your own changes:** `app/main.py` and `notes.txt` are untouched.
+- **What the screen does:** Reminders come from the same `/api/reminders` list as before, and Done still marks a reminder done. The design&apos;s empty message, &quot;Nothing due today.&quot;, shows when nothing is left.
+- **Style details I added:**
+  - The new paper, ink and stamp-red colours are stored as named tokens in `styles.css`.
+  - The Done button has a visible keyboard focus outline.
+  - Titles and dates are escaped before being drawn into the page.
+
+**Effects on other tabs.** The design sets the page width and background, so every tab inherits these changes:
+- The page now has a flexible width (up to 768px) instead of a fixed 800px, which should fix the phone problem from the audit. I added the viewport tag that phones need for that.
+- The page background is now paper-coloured, and body text is ink.
+- The &quot;Notification time&quot; label on Settings is grey `#777` and now has 4.04:1 contrast on the paper background, below the 4.5:1 target. I left Settings alone.
+- Finished reminders on All reminders were already faint, at 2.16:1. They are now 2.04:1.
+
+**Left out of the design**
+- **Filler claims:** &quot;A family habit since 1931&quot;, &quot;Trusted by 12,480 households&quot;, the archive source line and the &quot;Verified by the Heritage Board&quot; badge. No field in the plan supplies them.
+- **Photo:** The founders&apos; office photo is labelled as an original archival photograph. It may be a placeholder, so I didn&apos;t copy it and I omitted its slot entirely instead of leaving an empty box. Do you want it, and do you know it is real?
+- **Font:** The design relies on a system font, so I applied a system font to the Today view only. The rest of the app keeps its current font.
+
+**For the Developer**
+- The design pulls Tailwind from a CDN with no pinned version. I assumed v3 default sizes.
+- No screenshot of the design exists in the export.
+- Contrast for ink on paper is 13.5:1 and for white on the stamp red 9.4:1.
+- The plan lists only the Today screen. The brief also asks for the All reminders tab and a Done view, so those aren&apos;t covered yet.
+
+Once a Developer has the app running, I&apos;ll show you Today. Then please approve it or tell me what to change.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-browser-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 4x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">runs-unit-tests</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 4x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The plan is settled. Start putting the new design into my app.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">failure-comes-first</span><span class="badge">llm</span></div>
+<div class="md"><p>The Port changes the page, so the project's browser check (<code>test:browser</code>) fails against its approved snapshot. The final reply says so at its start, before describing the Screen and above the approval question, in words the Stakeholder can follow. A reply that mentions the failure only in a list near the end, or only in a part addressed to the Developer, does not pass. A reply that updated the snapshot passes only if it says that at its start, and that this needs a person's decision.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">runs-browser-check</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;test:browser|browser_checks&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">runs-unit-tests</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;npm\\s+(run\\s+)?test(?!:)|-m\\s+unittest|test_css&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

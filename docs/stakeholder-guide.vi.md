@@ -232,8 +232,9 @@ Tiến độ được lưu trong `.ui-workflow/state.md`, nên bạn có thể �
 
 ## Những gì chưa được kiểm chứng
 
-- **Chưa có lần chạy thật từ đầu đến cuối.** Chưa Scenario nào đi từ bước đầu tiên tới một Preview được duyệt trên dự án thật. [Pilot thật của Scenario C](https://github.com/qsang793/ui-workflow-skills/issues/13) là việc tiếp theo. Chỉ khi pilot qua thì C mới thành Production; A và B vẫn là Beta sau đó.
-- **Chưa có export thật nào từ Lovable hay Google AI Studio đi qua quy trình.** Các quy tắc Port mới được thử trên một Screen từ export của công cụ khác (Google Stitch) và trên các export mẫu nhỏ. Đọc source của một export Lovable thật có đủ hay không là điều pilot sẽ kiểm tra.
+- **Chưa có lần chạy thật từ đầu đến cuối.** Chưa Scenario nào đi từ bước đầu tiên tới một Preview được duyệt trên dự án thật. Một pilot của Scenario C trên một dự án riêng đã dừng trước khi duyệt, với một agent đóng vai Stakeholder. [Pilot mới](https://github.com/qsang793/ui-workflow-skills/issues/13) trên một dự án khác, với người thật, là việc tiếp theo. Chỉ khi pilot đó qua thì C mới thành Production; A và B vẫn là Beta sau đó.
+- **Mới có một export thật đi qua quy trình.** Export đó từ Lovable trong pilot trên, và là một trường hợp dễ, chỉ có một file CSS thuần. Chưa có export nào từ Google AI Studio đi qua, cũng chưa có export Lovable nào dùng class Tailwind. Các quy tắc Port còn được thử trên một Screen từ export của công cụ khác (Google Stitch) và trên các export mẫu nhỏ.
 - **Phần còn lại mới thử trên dự án mẫu.** Test tự động chạy từng skill trên các mẫu nhỏ, và kiểu test đó không mở được ứng dụng local. Vì vậy việc xem một Screen trong ứng dụng đang chạy chưa được nó kiểm tra, và chưa dự án framework thật nào được cài đặt và build.
-- **Chưa có link Preview nào được mở trên điện thoại thật** qua các skill này. Các test kiểm tra Claude chọn host nào, không kiểm tra tunnel hay link Vercel đang chạy.
+- **Preview chưa được chạy đến cuối.** Trong pilot, một link đã mở được trên điện thoại thật, nhưng skill chưa bao giờ kiểm tra link đó. Chưa ai đi hết checklist, bước duyệt và bước đóng một Preview. Các test kiểm tra Claude chọn host nào, không kiểm tra tunnel hay link Vercel đang chạy.
+- **Chưa có người không chuyên kỹ thuật nào làm theo các câu trả lời này.** Hãy báo Developer khi có câu trả lời nào bạn không hiểu.
 - **Thông tin của nhà cung cấp có thể đổi.** Menu và gói của Design tool lấy từ tài liệu kiểm tra ngày 2026-10-27.
