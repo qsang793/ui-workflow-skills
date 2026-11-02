@@ -20,3 +20,6 @@ cp app/templates/index.html tests/snapshots/index.html
 python3 tests/browser_checks.py
 git add -- package.json tests/browser_checks.py tests/snapshots
 git commit -q --amend --no-edit
+
+perl -pi -e 's{^(- Run: .*)$}{$1\n- Checks: `npm test`; `npm run test:browser`}' .ui-workflow/audit.md
+grep -q 'test:browser' .ui-workflow/audit.md

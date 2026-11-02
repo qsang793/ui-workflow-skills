@@ -148,7 +148,7 @@ For each Screen, in the plan's order:
 
 1. Claude rebuilds its look in the project's existing templates and styles.
 2. It starts the project's own app on this computer and gives you a local link, such as `http://127.0.0.1:8000`, and where to click. The link works only on this computer, and the app uses this computer's settings, so treat what you see as real data. The check on a phone comes in the Preview.
-3. Its report lists the files changed, the decisions applied, what it had to substitute, and what it could not reproduce. It also lists claims it left out, such as sources, counts, dates and testimonials, because a Design tool invents these. It asks before using any image from the export, which may be generated even when it is labelled a real photo or record.
+3. It runs the project's own checks. If one fails or could not run, the report opens with that, in plain words, so you know before you approve. Its report also lists the files changed, the decisions applied, what it had to substitute, and what it could not reproduce, plus claims it left out, such as sources, counts, dates and testimonials, because a Design tool invents these. It asks before using any image from the export, which may be generated even when it is labelled a real photo or record.
 4. You open the link and reply: approve, or say what to change. A change is made on the same Screen and shown again. An approval commits that Screen, and the next one starts.
 
 If the app does not start, Claude stops and a Developer must get it running. You are never asked to install or run anything.

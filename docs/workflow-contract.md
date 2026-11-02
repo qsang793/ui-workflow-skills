@@ -127,6 +127,7 @@ These are the minimum each file must contain. Skills may add sections.
 - CSS: <...>
 - Design tokens: <file of the :root custom-property block | none>
 - Run: <command that starts the app locally> → <local URL> | unknown
+- Checks: <command>; <command> | none found
 
 ## Pages / Routes
 - <page or view> — <file>
@@ -193,9 +194,9 @@ The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` pl
 ### `design-port` input
 
 - `.ui-workflow/export/`: the Design export as staged by ingest, in any framework (TanStack Start, React + Vite, Next, Angular) or plain HTML + CSS. It is a visual reference (ADR-0004): `design-port` reads its source and never installs, builds or runs it.
-- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest. `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). Used to check layout and resolve values the source does not settle.
+- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest. `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). Read before any markup is written, it checks layout and resolves values the source does not settle.
 - `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION`, no `pending` decision, and the Screens table naming, per Screen, the export file, the target template, the data and the actions.
-- `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen.
+- `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen, and the `Checks` line, every command in the project that passes or fails, or `none found`.
 
 What `design-port` extracts from each Screen. These rules were tested on one Screen of a Google Stitch export (plain HTML + Tailwind v3, [the spike note](research/2026-10-31-stitch-source-only-port-spike.md)) and by evals on fixture exports. They have not been run on a real Lovable export; pilot #13 checks that.
 
@@ -214,9 +215,9 @@ Rules for each Screen:
 - Output is CSS in the project's existing stylesheet structure. Tailwind classes stay only when the project already uses Tailwind.
 - Required behaviour is Ported in the project's existing style, with the data from the Screens table through the project's existing fetch code. Design-only actions follow the recorded decision: dropped, or shown disabled with a "coming soon" label. No control looks active without working. An action the plan does not list stops the Screen: `design-port` asks, never classifies it itself.
 - A value that cannot be resolved statically is replaced by the project's default token for that role (for example the body text colour) and reported as a substitute for the Stakeholder to approve. When it affects layout or usability (widths, breakpoints, contrast, hit areas) and no screenshot settles it, `design-port` asks before going on.
-- Before showing a Screen, `design-port` removes the CSS the rebuild left unused and runs the project's existing checks, if they run without installing anything.
+- Before showing a Screen, `design-port` removes the CSS the rebuild left unused and runs every project check, from the audit's `Checks` line plus any the line misses. It installs nothing, and a check that cannot run without an install counts as not run.
 - After each Screen, `design-port` starts or reloads the app with the audit's `Run` command and gives the Stakeholder the local URL of that Screen. Where a browser tool is available, it first views the Screen itself at phone and desktop width with real data; otherwise the report says so. When the line says `unknown`, it detects the command from the project and asks the Developer to confirm it. It never deploys per Screen. If the app cannot run locally, it stops and escalates to the Developer.
-- Each Screen's report, in the Stakeholder's language, lists substitutes, what was not reproduced visually, claims of fact left out, images not copied, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed. One Screen per turn: the next Screen starts only after the Stakeholder approves the last one.
+- Each Screen's report, in the Stakeholder's language, opens with any project check that fails or did not run, above the approval question, and lists substitutes, what was not reproduced visually, claims of fact left out, images not copied, and the decisions applied. The Stakeholder approves after viewing the running Screen; only then is it committed. One Screen per turn: the next Screen starts only after the Stakeholder approves the last one.
 
 ### Wiring record (`.ui-workflow/wiring.md`)
 

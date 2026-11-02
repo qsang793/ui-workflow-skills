@@ -148,7 +148,7 @@ Với mỗi Screen, theo thứ tự trong plan:
 
 1. Claude dựng lại giao diện trong template và style hiện có của dự án.
 2. Claude khởi động chính ứng dụng của dự án trên máy này và đưa bạn một link local, ví dụ `http://127.0.0.1:8000`, kèm chỗ cần bấm. Link chỉ mở được trên máy này, và ứng dụng dùng cấu hình của máy này, nên hãy coi những gì bạn thấy là dữ liệu thật. Việc kiểm tra trên điện thoại nằm ở bước Preview.
-3. Báo cáo liệt kê các file đã đổi, các quyết định đã áp dụng, những gì phải thay thế và những gì không dựng lại được. Báo cáo cũng liệt kê các thông tin bị bỏ ra, như nguồn, số liệu, ngày tháng và lời chứng thực, vì Design tool tự nghĩ ra chúng. Claude hỏi trước khi dùng bất kỳ ảnh nào từ export, vì ảnh có thể do AI tạo dù được ghi là ảnh hoặc tư liệu thật.
+3. Claude chạy các bước kiểm tra sẵn có của dự án. Nếu có bước không đạt hoặc không chạy được, báo cáo mở đầu bằng điều đó, bằng lời dễ hiểu, để bạn biết trước khi duyệt. Báo cáo còn liệt kê các file đã đổi, các quyết định đã áp dụng, những gì phải thay thế và những gì không dựng lại được, cùng các thông tin bị bỏ ra, như nguồn, số liệu, ngày tháng và lời chứng thực, vì Design tool tự nghĩ ra chúng. Claude hỏi trước khi dùng bất kỳ ảnh nào từ export, vì ảnh có thể do AI tạo dù được ghi là ảnh hoặc tư liệu thật.
 4. Bạn mở link và trả lời: duyệt, hoặc nói cần đổi gì. Thay đổi được làm trên chính Screen đó rồi cho xem lại. Khi duyệt, Screen đó được commit và Screen tiếp theo bắt đầu.
 
 Nếu ứng dụng không khởi động được, Claude dừng và Developer phải làm cho nó chạy. Bạn không bao giờ bị yêu cầu cài đặt hay chạy gì.
