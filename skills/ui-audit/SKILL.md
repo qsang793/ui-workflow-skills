@@ -41,6 +41,7 @@ Read in this order:
 - Build config: `vite.config.*`, `next.config.*`, `webpack.config.*`, or none (raw HTML)
 - CSS approach: Tailwind config present? CSS modules? SCSS? Bootstrap? Plain CSS?
 - Run command: how the app starts locally and the URL it answers on, from `package.json` scripts (`dev`, `start`), `README`, `Procfile`, or the `uvicorn`/`flask`/`manage.py` entry point. Read it from the files; do not run it. `design-port` and `preview-deploy` use it to show the Stakeholder the running app. When the files do not settle it, write `unknown`.
+- Checks: every command in the project that passes or fails: test, lint and typecheck scripts in `package.json` whatever their name, Makefile targets, a tests folder and its runner, and what CI config runs. Read them from the files; do not run them, and leave none out because it looks slow or seems to need a browser. Commands that install, start, build, deploy or publish are not checks. `design-port` runs them before showing each Screen. When the files hold none, write `none found`.
 
 ### 2. Map the structure
 
@@ -94,6 +95,7 @@ In `.ui-workflow/state.md`: append `audit` to `Completed steps`, set `Current st
 - State: <e.g. Redux / global window vars / none>
 - Design tokens: <file holding the `:root { --... }` block | none>
 - Run: <command that starts the app locally> → <local URL> | unknown
+- Checks: <command>; <command> | none found
 
 ## Pages / Routes (top 10)
 - `/` — `<path-to-entry-template>`
@@ -130,3 +132,4 @@ In `.ui-workflow/state.md`: append `audit` to `Completed steps`, set `Current st
 
 - `ui-scenario-picker` — must run first
 - `design-brief` — runs after, uses this report as input
+- `design-port` — runs the commands on the `Checks` line

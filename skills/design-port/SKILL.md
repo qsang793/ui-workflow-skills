@@ -73,7 +73,7 @@ Read the look from the export, then rebuild it in the target template and the pr
 
 **Sources.** The Screen's Export file and the components it imports, to see what they render. The export's Tailwind config (`tailwind.config.*`, an inline `tailwind.config`, or `@theme` in its CSS), global CSS, CSS variables and font links. Its state, hooks, handlers and mock data, only to understand states and meaning: the export's runtime stays out of the project. The project's tokens and stylesheet.
 
-**Screenshot.** When `.ui-workflow/export/screenshots/<screen>.png` exists (name in lowercase with hyphens), read it. It checks the layout and settles values the source does not. When the source does settle a value, the source wins. What only the picture shows, such as an effect baked into an image, goes in the report as not reproduced.
+**Screenshot.** When `.ui-workflow/export/screenshots/<screen>.png` exists (name in lowercase with hyphens), open the image before writing any markup: listing the folder is not reading it. It checks the layout and settles values the source does not. When the source does settle a value, the source wins. What only the picture shows, such as an effect baked into an image, goes in the report as not reproduced.
 
 **Markup.** Keep the element tree, semantic tags and order the export renders. Rebuild components as the project's plain markup, reading each to see its output.
 
@@ -105,7 +105,7 @@ Read the look from the export, then rebuild it in the target template and the pr
 - Layout or usability (widths, breakpoints, contrast, hit areas): the screenshot settles it, or you ask before going on.
 - Anything else: use the project's default token for that role and report it as a substitute.
 
-**Before you show it.** Remove the CSS rules this Screen's rebuild left unused, after checking that no template or script still uses them; rules another Screen uses stay. Then look for the project's own checks (a tests folder, package scripts, a Makefile, CI config) and run those that work without installing anything. Fix what the Port broke; report what passed, what still fails and what could not run. To tell whether a failure is the Port's, read the failure and `git diff` with the working tree as it is: a stash would sweep up the Stakeholder's changes.
+**Before you show it.** Remove the CSS rules this Screen's rebuild left unused, after checking that no template or script still uses them; rules another Screen uses stay. Then run every project check: each command on the `Checks` line of `.ui-workflow/audit.md`, plus any the line misses (a tests folder, package scripts, a Makefile, CI config), never a command that installs, deploys or publishes. Try each one: never skip a check because of its name or a guess that it needs a browser. Install nothing. A check that stops because something is not installed did not run. Fix what the Port broke, in the Screen's files. Never change a check, its snapshot or its expected values to make it pass: that is a person's decision. To tell whether a failure is the Port's, read the failure and `git diff` with the working tree as it is: a stash would sweep up the Stakeholder's changes.
 
 ### 4. Show it in the running app
 
@@ -113,7 +113,7 @@ The Stakeholder approves a Screen only after seeing it in the project's own app,
 
 1. Read the `Run` line under `## Stack` in `.ui-workflow/audit.md` (`- Run: <command> → <local URL>`). If it says `unknown` or is missing, find the command in the project (`package.json` scripts, `README`, `Procfile`, `uvicorn`/`flask`/`manage.py` entry points), tell the Developer the command you found and wait for them to confirm it.
 2. Start the app in the background with that command, or, if the app you started for an earlier Screen is still running and does not reload changes on its own, restart it. Wait until the local URL answers. Do not install anything to make it run.
-3. If it does not start, stop and escalate: tell the Stakeholder a Developer must get the app running, give the rest of the step 5 report, and write in `Blocked` the reason and the Screen waiting to be shown. The error output, and any command or setting that may fix it, go in a part addressed to the Developer; the Stakeholder is never the one to run or install anything. Leave the Screen uncommitted.
+3. If it does not start, stop and escalate: give the step 5 report, which still opens with any failed or unrun check, tell the Stakeholder a Developer must get the app running, and write in `Blocked` the reason and the Screen waiting to be shown. The error output, and any command or setting that may fix it, go in a part addressed to the Developer; the Stakeholder is never the one to run or install anything. Leave the Screen uncommitted.
 4. If you have a browser tool, look at the Screen yourself first, at about 390px and 1440px wide, with the app's real data and after transitions have finished. Fix broken wrapping, overflow and parts that vanish. Do not install a browser for this; without one, say in the report that you did not view it.
 5. Give the Stakeholder the URL of this Screen: the local URL plus its route, or how to reach the view (for example the tab to click).
 
@@ -123,12 +123,13 @@ Never deploy a Screen. The check on a phone comes later, in the Preview step (`/
 
 The Screen's report is in the language of the Stakeholder's latest message, even when `Stakeholder language` in the state says otherwise. It gives:
 
+- first, in the opening lines and before anything else, even before saying the app did not start: every project check that still fails or did not run. Say what it protects in words the Stakeholder can follow, with no command or package names, whether this Port caused it, and that a Developer needs to look. A check that did not run means that part is not verified. Leave this out only when every check ran and passed; checks that passed belong in the Developer part.
 - the Screen and its local URL
 - the files you changed for it
 - the decisions applied (design-only actions dropped or disabled)
 - substitutes, and what was not reproduced visually
 - claims of fact left out, and images not copied with how the export labelled them
-- for the Developer: the Tailwind version assumed, if none was pinned; the project's checks and whether you viewed the Screen at both widths
+- for the Developer: the Tailwind version assumed, if none was pinned; each check's command and result; the screenshot read, or that none exists; and whether you viewed the Screen at both widths
 - the question: approve this Screen, or what to change? Include any image you are asking about.
 
 Then stop and wait. Commit only after the Stakeholder approves:
@@ -147,6 +148,7 @@ After the commit, Port the next Screen (step 3) in the same turn. After the last
 - **Work branch only.** Never commit to the main branch; never push or merge.
 - **One commit per approved Screen**, holding only that Screen and its workflow documents, never the Stakeholder's own changes.
 - **Seen before approved.** Each Screen is shown in the locally running app. No deploy per Screen.
+- **Every project check, failures first.** A check that fails or did not run opens the report, above the approval question.
 - **The export is never run.** Read its source; no install, build or run.
 - **No new dependencies**, icon packages included.
 - **Project data only.** Claims of fact need a field in the Screens table; an export's image needs the Stakeholder's yes.
@@ -154,6 +156,7 @@ After the commit, Port the next Screen (step 3) in the same turn. After the last
 ## Common Mistakes
 
 - **Porting several Screens in one go.** One, then wait.
+- **Skipping a check on a guess.** A check named `test:browser` may need nothing installed. Try it.
 - **Trusting the mapping.** A colour pair that passed in the export can vanish on the project's tokens; compute it.
 - **`git add -A` or `git commit -a`.** It sweeps in the Stakeholder's own uncommitted work.
 - **Committing before approval**, or approving on the Stakeholder's behalf.
@@ -163,5 +166,5 @@ After the commit, Port the next Screen (step 3) in the same turn. After the last
 ## Related Skills
 
 - `integration-planner` — must return PROCEED first; its Screens table drives the order
-- `ui-audit` — records the `Run` line used to show each Screen
+- `ui-audit` — records the `Run` line used to show each Screen and the `Checks` line of commands to run
 - `preview-deploy` — runs after the last Screen is approved

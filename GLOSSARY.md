@@ -54,6 +54,10 @@ _Avoid_: Committed feature, core feature
 Rebuilding the look of one Screen of a Scenario C Design export in the project's existing templates, styles and data code.
 _Avoid_: Translate, convert
 
+**Project check**:
+A command in the project that passes or fails, such as a test, lint or typecheck. Commands that install, start, build, deploy or publish are not checks.
+_Avoid_: Test (too narrow)
+
 **Work branch**:
 The git branch that holds every change of one workflow run; the bundle commits to it but never merges or pushes it.
 _Avoid_: Feature branch

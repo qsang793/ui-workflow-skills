@@ -1,0 +1,732 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T03:42:12.075Z",
+  "durationSeconds": 224,
+  "costUsd": 0.7063021,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "audit-*",
+    "threshold": 0.8,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "audit-fastapi-vanilla",
+      "dir": "evals/audit-fastapi-vanilla",
+      "source": "mixed",
+      "promptMarkdown": "The scenario is picked. Please audit the current UI now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "audit-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "checks-none",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:\\W*none",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "max-five-per-tier",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "### [^\\n]*\\n(?:[ \\t]*\\n)*(?:[ \\t]*[-*] [^\\n]*\\n(?:[ \\t]+(?![-*] )\\S[^\\n]*\\n|[ \\t]*\\n)*){6}",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "names-next-command",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "/ui-workflow-skills:design-brief",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "next-is-brief",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*brief\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "report-content",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "This UI audit lists the Today, All reminders and Settings tabs (or views) as pages, and reports that design tokens exist in a `:root` block but are mostly bypassed by hard-coded colours or inline styles.",
+          "config": {
+            "criteria": "This UI audit lists the Today, All reminders and Settings tabs (or views) as pages, and reports that design tokens exist in a `:root` block but are mostly bypassed by hard-coded colours or inline styles.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            }
+          }
+        },
+        {
+          "name": "report-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": ".ui-workflow/audit.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "run-line",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Run:[^\\n]*\\buvicorn\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "severity-tiers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11494860000000003,
+            "judgeCostUsd": 0.0007974,
+            "durationSeconds": 45,
+            "startedAt": "2026-11-02T03:42:12.512Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-bSqpQC/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "checks-none",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:\\W*none",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "max-five-per-tier",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "names-next-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched /ui-workflow-skills:design-brief",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-brief",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*brief\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-content",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# UI Audit — Reminders (2026-11-02)\n\n## Stack\n- Framework: Vanilla JS + FastAPI serving one Jinja2 template (no JS framework, no jQuery/htmx)\n- Build tool: none\n- CSS: plain CSS in `app/static/styles.css` plus inline `style=` attributes in the template\n- State: none (the server list is re-fetched and re-rendered as HTML strings)\n- Design tokens: `app/static/styles.css` (`:root` block, 4 tokens, none used anywhere)\n- Run: `uvicorn app.main:app --reload` (run from the project root; inferred from `app/main.py`, no README/Procfile) → http://127.0.0.1:8000\n- Checks: none found\n\n## Pages / Routes (top 10)\n- `/` — `app/templates/index.html` (rendered by `app/main.py`)\n  - Tab \"Today\" (`#today`) — reminders not yet done\n  - Tab \"All reminders\" (`#all`) — every reminder\n  - Tab \"Settings\" (`#settings`) — notification time and Save\n- `/api/reminders` — `app/main.py` (JSON, not user-facing)\n- `/api/reminders/{id}/done` — `app/main.py` (JSON, not user-facing)\n\n## Style approach\nAlmost all styling is inline in `index.html` (11 `style=` attributes) with a small `styles.css` (13 lines) beside it. `styles.css` declares colour and spacing tokens, but nothing uses `var(--…)`. About 17 distinct colour values are hard-coded, several near-duplicates (`#fff`/`#ffffff`, three greys `#333/#444/#555` for the same tab buttons, `#2b6cb0` vs `#3182ce` blues).\n\n## Pain points\n\n### 🔴 High\n- Not responsive: `body` is fixed `width: 800px`, `.view` is `760px` and the input is `300px`. There is no `<meta name=\"viewport\">` and no media queries, so it breaks on phones.\n- Tokens exist but are unused: `--color-primary`, `--color-success` and others are defined, yet the same values are hard-coded in inline styles and CSS. This is the highest-leverage fix for a redesign.\n- Broken, inaccessible logo: `<img src=\"/static/logo.png\">` has no `alt`, and `logo.png` does not exist in `app/static/`.\n- Tabs and controls are not accessible: tab buttons have no `role=\"tablist\"`/`role=\"tab\"`/`aria-selected`, there are no `<header>`/`<nav>`/`<main>` landmarks, no `<html lang>`, the input has no `<label>`, and the grey-on-grey text (`#777` on `#fafafa`, `#a0aec0` done items) is likely under contrast guidelines.\n- Reminder titles are injected via `innerHTML` without escaping (`app/static/app.js`). A title containing HTML would render as markup (an XSS risk once users can add reminders).\n\n### 🟡 Medium\n- No loading, error or empty states: `loadReminders()` and `markDone()` have no spinner and no failure handling. `.empty` is styled but never used, so an empty Today tab is just blank.\n- Settings \"Save\" only shows `alert()`; nothing is sent to the backend and the time is not persisted. The design must either drop it or the backend must gain an endpoint.\n- No active-tab indicator: clicking a tab shows its view, but the buttons never show which one is selected.\n- \"Today\" means \"not done\", not \"due today\" (`app/static/app.js`), which is confusing next to the due dates shown.\n- The \"Done\" button is shown on already-done reminders, and the due date is raw ISO text (`2026-11-01`), with no overdue cue.\n\n### 🟢 Low\n- Inconsistent button styling: the tab, Done and Save buttons use three different looks.\n- Hard-coded English text throughout, with no i18n markers (fine unless a second language is planned).\n- No tests, lint or CI, so there are no automated checks to protect a port.\n\n## Recommendation\nConfirm scenario C: the app is tiny (about 100 lines, one page with three tabs) and keeping FastAPI + Jinja + vanilla JS is straightforward. Wire the tokens, fix the layout and accessibility, and decide the Settings behaviour in the design brief.\n"
+              },
+              {
+                "name": "report-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": ".ui-workflow/audit.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "run-line",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Run:[^\\n]*\\buvicorn\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "severity-tiers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.1143133,
+            "judgeCostUsd": 0.0007424000000000003,
+            "durationSeconds": 37,
+            "startedAt": "2026-11-02T03:42:57.571Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-mp9pUc/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "checks-none",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:\\W*none",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "max-five-per-tier",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "names-next-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched /ui-workflow-skills:design-brief",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-brief",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*brief\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-content",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# UI Audit — Reminders (2026-11-02)\n\n## Stack\n- Framework: Vanilla JS + FastAPI serving one Jinja template (`app/templates/index.html`)\n- Build tool: none\n- CSS: plain CSS in `app/static/styles.css` (13 lines), plus inline `style=` in the template\n- State: none (DOM re-rendered from `/api/reminders`; in-memory list on the server)\n- Design tokens: `app/static/styles.css` (`:root` with 4 variables, none used anywhere)\n- Run: `uvicorn app.main:app --reload` (from project root; inferred from `app/main.py`, no README/Procfile) → http://127.0.0.1:8000 (uvicorn default port)\n- Checks: none found\n\n## Pages / Routes (top 10)\nSPA mode: one page, three client-side tabs.\n- `/` — `app/templates/index.html` (route in `app/main.py`)\n- Tab \"Today\" — `#today`, filled by `app/static/app.js` (not-done reminders)\n- Tab \"All reminders\" — `#all`, filled by `app/static/app.js`\n- Tab \"Settings\" — `#settings` (notification time input + Save)\n- `/api/reminders` (GET) and `/api/reminders/{id}/done` (POST) — `app/main.py` (data only, no UI)\n\n## Style approach\nStyling is split between a tiny stylesheet and about 10 inline `style=` attributes in the template, and `app.js` toggles visibility with inline `display`. The `:root` tokens (primary, success, text, space) are defined but never referenced with `var()`. About 17 unique hex colours are hard-coded, several of them near-duplicates (blues `#2b6cb0`/`#3182ce`, greys `#333`/`#444`/`#555`/`#777`).\n\n## Pain points\n\n### 🔴 High\n- Not responsive: `body` is fixed at `width: 800px` and `.view` at `760px`, and there is no `<meta name=\"viewport\">`, so it breaks on phones. No media queries at all.\n- Tokens exist but are unused: 4 `:root` variables, 0 `var()` uses, ~17 hard-coded colours and ~10 inline styles. Highest-leverage fix for a redesign.\n- Accessibility basics missing: no `alt` on the logo `<img>`, no `lang` on `<html>`, no `<header>`/`<nav>`/`<main>`, zero `aria-` attributes, tabs are plain buttons without `role=\"tab\"`/`aria-selected`, and the settings input has no `<label>`.\n- Broken logo: `/static/logo.png` is referenced but the file does not exist in `app/static/`.\n- Reminder titles are inserted with `innerHTML` unescaped (`app/static/app.js`), so a title containing HTML would render as markup. Needs fixing in the port (flag for the Developer).\n\n### 🟡 Medium\n- No loading or error state: the reminders `fetch` and the `markDone` POST show nothing while waiting or on failure. The tab area is blank until data arrives.\n- The Settings \"Save\" only shows `alert(...)`; nothing is stored and there is no backend route. The design must treat it as non-functional, or the Developer must add an endpoint.\n- \"Today\" tab shows every not-done reminder, not those due today. The `.empty` style exists but is never used, so there is no empty state.\n- \"Done\" button is shown on already-done reminders, and the active tab has no visual highlight.\n\n### 🟢 Low\n- All text is hard-coded English (no i18n markers found).\n- Page title is just \"Reminders\", with no favicon.\n- Tab and button padding and font sizes are inconsistent (22px greeting, default sizes elsewhere).\n\n## Recommendation\nConfirm scenario C: the app is tiny (about 100 lines in total, no file over 500) and the stack is simple, so a visual port into the existing template and stylesheet is quick. Required behaviour to preserve: 3 tabs, list with Done action, greeting with owner name, notification-time field.\n"
+              },
+              {
+                "name": "report-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": ".ui-workflow/audit.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "run-line",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Run:[^\\n]*\\buvicorn\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "severity-tiers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.1158894,
+            "judgeCostUsd": 0.0007505000000000001,
+            "durationSeconds": 41,
+            "startedAt": "2026-11-02T03:43:34.206Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-HwQCpe/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "checks-none",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:\\W*none",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "max-five-per-tier",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "names-next-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched /ui-workflow-skills:design-brief",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-brief",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*brief\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-content",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# UI Audit — Reminders (2026-11-02)\n\n## Stack\n- Framework: Vanilla JS + FastAPI serving one Jinja2 template (`app/templates/index.html`)\n- Build tool: none\n- CSS: plain CSS in `app/static/styles.css` (13 lines) plus inline `style=` in the template\n- State: none (DOM re-rendered from `/api/reminders`; in-memory list on the server)\n- Design tokens: `app/static/styles.css` (`:root` with 4 variables)\n- Run: `uvicorn app.main:app --reload` from the project root (paths like `app/static` are relative to it) → http://127.0.0.1:8000 (uvicorn default port; not stated in the files)\n- Checks: none found\n\n## Pages / Routes (top 10)\nSingle-page app: one server route, three client-side tabs.\n- `/` — `app/templates/index.html` (the page)\n  - Tab \"Today\" — `#today` (reminders not done)\n  - Tab \"All reminders\" — `#all`\n  - Tab \"Settings\" — `#settings` (notification time; Save only shows an `alert`)\n- `/api/reminders` (GET) — `app/main.py`, data only\n- `/api/reminders/{id}/done` (POST) — `app/main.py`, data only\n\n## Style approach\nStyling is split between a tiny stylesheet and inline `style=` attributes on 11 elements in the template. The stylesheet declares colour/spacing variables but never uses them (`var(` appears 0 times), so every colour is a hard-coded value. The page is fixed at 800px wide.\n\n## Pain points\n\n### 🔴 High\n- Not responsive: `<body>` is `width: 800px` and `.view` is `width: 760px`; no `<meta name=\"viewport\">` and no media queries, so the page will not fit a phone.\n- Tokens exist but are unused: 4 variables in `:root`, 0 `var()` uses, about 17 distinct hard-coded colours (e.g. three near-identical greys `#333/#444/#555` on the tab buttons, two blues `#2b6cb0` and `#3182ce`). Highest-leverage fix for a redesign.\n- Accessibility basics missing: no `lang` on `<html>`, logo `<img>` has no `alt` (and `/static/logo.png` does not exist in the repo, so it renders broken), no `<header>/<nav>/<main>`, tabs are plain buttons with no `role=\"tablist\"/\"tab\"`, `aria-selected` or `aria-controls`; 0 `aria-` attributes for 4 buttons. The active tab is also not visually indicated.\n- Reminder titles are inserted with `innerHTML` unescaped (`app.js:17-22`), so a title containing HTML would be rendered as markup. Fix while porting the list rendering.\n\n### 🟡 Medium\n- No loading or error state: both `fetch` calls (`app.js:10`, `app.js:27`) show nothing while waiting and nothing on failure; the Done button is not disabled during the request. The `.empty` style is defined but never used, so an empty list is a blank area.\n- Settings does nothing real: Save only runs `alert(...)`; nothing is stored and there is no backend endpoint for it. The design must either drop it or the Developer must add an endpoint.\n- The \"Today\" tab is just \"not done\", not filtered by date, which can mislead users once the design labels it by day.\n\n### 🟢 Low\n- Hard-coded English text throughout (no i18n markers); fine if the app stays English-only.\n- Inline `onclick=\"markDone(...)\"` handlers and `display:none` toggling in JS rather than a CSS class.\n- No page `<meta description>` or favicon.\n\n## Recommendation\nConfirm scenario C: the project is tiny (4 files, all under 500 lines), the stack is simple, and a new look can be ported into the existing template and stylesheet. Note for the design brief: the Settings screen has no backend behind it.\n"
+              },
+              {
+                "name": "report-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": ".ui-workflow/audit.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "run-line",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Run:[^\\n]*\\buvicorn\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "severity-tiers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ### 🔴[\\s\\S]*### 🟡[\\s\\S]*### 🟢",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "audit-lists-checks",
+      "dir": "evals/audit-lists-checks",
+      "source": "mixed",
+      "promptMarkdown": "The scenario is picked. Please audit the current UI now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "audit-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "dev-is-not-a-check",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:[^\\n]*(uvicorn|run\\s+dev|run\\s+deploy|scp)",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "lists-browser-check",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:[^\\n]*test:browser",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "lists-ci-check",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:[^\\n]*css_budget",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "lists-make-check",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:[^\\n]*make\\s+check-contrast",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "lists-unit-tests",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/audit.md"
+            },
+            "pattern": "-\\s*Checks:[^\\n]*npm\\s+(run\\s+)?test\\b(?!:)",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.12402410000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 32,
+            "startedAt": "2026-11-02T03:44:15.704Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-W4uHdn/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "dev-is-not-a-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-browser-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*test:browser",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-ci-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*css_budget",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-make-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*make\\s+check-contrast",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-unit-tests",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*npm\\s+(run\\s+)?test\\b(?!:)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11529909999999999,
+            "judgeCostUsd": 0,
+            "durationSeconds": 33,
+            "startedAt": "2026-11-02T03:44:47.396Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-fmZykZ/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "dev-is-not-a-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-browser-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*test:browser",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-ci-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*css_budget",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-make-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*make\\s+check-contrast",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-unit-tests",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*npm\\s+(run\\s+)?test\\b(?!:)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.12182760000000001,
+            "judgeCostUsd": 0,
+            "durationSeconds": 36,
+            "startedAt": "2026-11-02T03:45:20.670Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-81y0mB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "audit-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "dev-is-not-a-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-browser-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*test:browser",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-ci-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*css_budget",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-make-check",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*make\\s+check-contrast",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "lists-unit-tests",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched -\\s*Checks:[^\\n]*npm\\s+(run\\s+)?test\\b(?!:)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 2,
+    "casesPassed": 2,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

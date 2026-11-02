@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.316</span>
+<span class="num">2026-11-02 05:17 UTC</span>
+<span class="num">4m 39s</span>
+<span class="num">$0.66</span>
+<span class="num">3 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+<span>filtered: --case port-check-needs-install</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">1 of 1 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>port-check-needs-install</h2>
+<span class="muted mono">evals/port-check-needs-install</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">19 turns · $0.24 · 05:17:01 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-run-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">**Two things need a Developer before you can approve this Screen:**
+- **One check didn&apos;t run.** The end-to-end browser test needs a package (`reminders_e2e_kit`) that isn&apos;t installed here, and I installed nothing. Nothing has clicked through the app in a browser, so that part is unverified. The quick stylesheet test passes.
+- **I couldn&apos;t show you the Screen.** The app wouldn&apos;t start because this environment refuses to open a local port (`PermissionError: Operation not permitted`). I didn&apos;t look at it at phone or laptop width either. A Developer needs to start it with `python3 app/main.py` and open http://127.0.0.1:8000, where Today is the first tab. If they run it in a sandbox like mine, they can allow local ports with `sandbox.network.allowLocalBinding: true`.
+
+**What I ported: Today (not committed yet)**
+- **Work branch:** `ui-workflow/2026-11-02`. Nothing is pushed.
+- **Files changed:** `app/templates/index.html` and `app/static/styles.css`. I also updated `.ui-workflow/state.md`, which now records the branch and the block.
+- **Your own changes:** I left `app/main.py` and `notes.txt` alone.
+- **Look and behaviour:**
+  - It has the paper, ink and stamp-red palette, a &quot;Today&quot; heading, and one white card per reminder.
+  - Each card shows the title and &quot;Due &lt;date&gt;&quot; with a Done button.
+  - &quot;Nothing due today.&quot; appears when the list is empty.
+  - Done still posts to the same endpoint as before, and the list reloads.
+  - Every button now has a visible focus outline.
+- **Contrast:** I computed it. Text is 13.5:1 or better, and white on the red Done button is 9.4:1.
+
+**Shared parts that other tabs now inherit**
+- The page background and text colour changed to paper and ink.
+- The fixed 800px page width is now a flexible maximum of 48rem, so it fits phones.
+- The `.view` width of 760px is gone. All reminders and Settings now fill the page, and I haven&apos;t seen how they look.
+
+**Left out of the design**
+- The &quot;family habit since 1931 / 12,480 households&quot; line.
+- The &quot;Source: Hanoi City Archive, ref. HCA-1931-0472&quot; caption.
+- The &quot;Verified by the Heritage Board&quot; badge.
+- None of these comes from your data, so they&apos;re treated as design filler.
+
+**Photo:** the export has an archival photo of &quot;the founders&apos; office, Hanoi, 1931&quot;, which may well be a placeholder. I didn&apos;t copy it. Do you want it on the page?
+
+**Not in the plan:** the plan lists only Today as a Screen. Your brief asked for a redesigned All reminders tab and a new Done view for finished reminders, and the plan has no entry for either. Should I re-run the planner for those, or leave them out?
+
+**For the Developer**
+- The export loads Tailwind from a CDN with no pinned version, so I assumed v3 for the size and shadow values.
+- I used no screenshot, because the export has none.
+- Today&apos;s list is now built from the DOM instead of HTML strings, so reminder titles can&apos;t inject markup. All reminders still uses the old way.
+
+Once the Screen is visible, do you approve it, or what should change?</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-e2e-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">14 turns · $0.20 · 05:18:39 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-run-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">**Not verified.** The end-to-end check couldn&apos;t run, and I couldn&apos;t start the app to show you the Today screen. A developer needs to look at both.
+
+- **End-to-end check:** it needs a package that isn&apos;t installed here, and I installed nothing. It protects the real click-through behaviour of the app, so the Port&apos;s behaviour isn&apos;t confirmed by it yet. The failure isn&apos;t caused by the Port.
+- **Unit check:** the stylesheet check passes (no unused styles).
+- **App start:** the sandbox refuses local ports, so I couldn&apos;t start the app or see the screen at phone or desktop width.
+
+**Today is ported but uncommitted.** I&apos;m on the branch `ui-workflow/2026-11-02`, and nothing was pushed.
+
+**Files changed**
+- `app/templates/index.html`: Today now has a heading, a list of cards and a &quot;Nothing due today.&quot; message. It still loads from `GET /api/reminders`, and Done still calls `POST /api/reminders/{id}/done`.
+- `app/static/styles.css`: new paper, ink and accent colours, and the Today styles. Every button has a visible focus outline.
+- I did not touch your uncommitted `app/main.py` or `notes.txt`.
+
+**Shared changes that affect other tabs**
+- The page is no longer a fixed 800px wide and now has a maximum width. This also fixes the phone-width problem the audit found.
+- The page background and text colour now come from the new design.
+- The top bar, tabs, All reminders and Settings keep their old look, so they now sit on the new cream background.
+
+**Left out of the design**
+- **Tagline:** &quot;A family habit since 1931. Trusted by 12,480 households.&quot; isn&apos;t backed by any field in your app.
+- **Founders photo:** the caption &quot;Hanoi City Archive, ref. HCA-1931-0472&quot; and the &quot;Verified by the Heritage Board&quot; badge aren&apos;t backed by any field either. The export labels the photo as an archival original; I did not copy it into your app.
+
+**For you:** do you want the founders photo in the app, or is it design filler?
+
+**For the developer**
+- Run `python3 app/main.py` and open http://127.0.0.1:8000, then check the Today tab at about 390px and 1440px wide. Or allow `sandbox.network.allowLocalBinding: true` and I&apos;ll start it.
+- The export loads Tailwind from a CDN with no pinned version, so I assumed v3 for its default sizes.
+- There is no screenshot of the design to compare against.
+- The contrast ratios all pass: white on the accent colour is 9.4:1, and ink on cream is 13.5:1.
+- The reason is recorded in `Blocked` in `.ui-workflow/state.md`.
+
+Once you&apos;ve seen the screen, approve it or tell me what to change. I&apos;ll commit it after you approve.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-e2e-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.21 · 05:20:05 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-run-comes-first</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">**Checks first**
+- **Browser check:** it did not run, because a testing add-on it needs isn&apos;t installed here. Nothing about how the app behaves in a browser has been verified. This is not caused by the new design, but a Developer needs to look.
+- **Stylesheet check:** it passed. It confirms that every style rule in the stylesheet is still used by the page.
+
+**The app didn&apos;t start, so you can&apos;t see Today yet.** I built the Today screen but couldn&apos;t run the app, and I haven&apos;t viewed it at phone or desktop width. This environment doesn&apos;t allow the app to open its local port (8000). I left Today uncommitted on the work branch `ui-workflow/2026-11-02`, and I noted the block in `.ui-workflow/state.md`.
+
+**For the Developer**
+- Run `python3 app/main.py` and open http://127.0.0.1:8000. Today is the first tab.
+- Alternatively, allow `sandbox.network.allowLocalBinding: true` in the sandbox settings and I&apos;ll start the app myself.
+- Check results:
+  - `npm test` passed (1 test).
+  - `npm run test:e2e` failed with `ModuleNotFoundError: reminders_e2e_kit`.
+- The design came from the export&apos;s source only. The export has no screenshot.
+- Tailwind wasn&apos;t pinned, since the export loads it from a CDN. I assumed Tailwind v3 for the default sizes and the shadow.
+
+**What I changed for Today**
+- `app/templates/index.html`:
+  - The body now uses a class instead of inline styles.
+  - Today has a &quot;Today&quot; heading, a list of unfinished reminders (title and &quot;Due &lt;date&gt;&quot;) and a &quot;Nothing due today.&quot; message.
+  - The Done button works as before.
+- `app/static/styles.css`:
+  - New paper, ink and stamp colours (the design&apos;s cream, dark brown and dark red).
+  - New Today styles, with a visible focus outline on the Done button.
+  - Contrast is fine: the lowest ratio is 8.5:1.
+- I didn&apos;t touch your own change in `app/main.py` or `notes.txt`.
+
+**Shared page changes that affect other tabs too**
+- The page is now at most 48rem wide and shrinks on phones. The fixed 800px width is gone.
+- The page background is now cream, with a system font instead of the browser default.
+- Padding around every tab is now 2rem.
+- All reminders and Settings pick up these changes. The blue top bar and the tab buttons are unchanged.
+
+**Left out of the design**
+- The tagline &quot;A family habit since 1931. Trusted by 12,480 households.&quot;
+- The caption &quot;Source: Hanoi City Archive, ref. HCA-1931-0472.&quot;
+- The &quot;Verified by the Heritage Board&quot; badge.
+- The sample reminder &quot;Water the ferns&quot; and its date.
+
+These are filler claims with no matching field in your data. The design never shows an actual date in the header.
+
+**Question about the photo:** the design has a large archival photo, labelled &quot;Original archival photograph of the founders&apos; office, Hanoi, 1931&quot;. It may be a placeholder. I haven&apos;t copied it, and the slot is simply left out. Do you want it added? If so, tell me what it really is.
+
+**Still to do, outside the plan**
+- The plan lists only the Today screen.
+- The brief also asked for a Done view of finished reminders. The export has no design for it and the plan doesn&apos;t cover it. Do you want that planned separately?
+
+Once a Developer has the app running, tell me whether you approve Today or what to change. I&apos;ll commit it only after you approve.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-installed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-e2e-check</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The plan is settled. Start putting the new design into my app.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-run-comes-first</span><span class="badge">llm</span></div>
+<div class="md"><p>The project's end-to-end check (<code>test:e2e</code>) cannot run here because a package it needs is not installed. The final reply says that check did not run at its start, before describing the Screen and above the approval question, in words the Stakeholder can follow. It does not count the check as passed and does not ask the Stakeholder to install anything. A reply that mentions it only in a list near the end, or only in a part addressed to the Developer, does not pass.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-installed</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\b(npm|pnpm|yarn|bun)\\s+(install|i|ci|add)\\b|\\bpip3?\\s+install\\b|\\bpython3?\\s+-m\\s+pip\\s+install\\b|\\buv\\s+(pip|add)\\b|\\bbrew\\s+install\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">tries-e2e-check</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;run\\s+test:e2e|python3?\\s+\\S*e2e_checks\\.py&quot;</code></div><div class="kv"><span>min</span><code>1</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
