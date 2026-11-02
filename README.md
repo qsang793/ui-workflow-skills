@@ -89,10 +89,10 @@ What the skills hand each other: [docs/workflow-contract.md](docs/workflow-contr
 
 No Scenario has passed a real end-to-end run. Behavioural evals cover the skills on small fixtures ([evals/README.md](evals/README.md)), but:
 
-- No real Lovable or Google AI Studio export has gone through the workflow. The Port rules were tried on one Screen of a Google Stitch export ([note](docs/research/2026-10-31-stitch-source-only-port-spike.md)) and on fixtures.
+- One real Lovable export has gone through the workflow, in a pilot that stopped before an approved Preview ([report](docs/pilots/2026-11-01-scenario-c-pilot.md)). It was an easy one, with one plain CSS file. No Google AI Studio export has, and neither has a Lovable export built on Tailwind classes. The Port rules were also tried on one Screen of a Google Stitch export ([note](docs/research/2026-10-31-stitch-source-only-port-spike.md)) and on fixtures.
 - The eval sandbox cannot open local ports or install real frameworks, so it does not reach a Screen viewed in the running app, a real framework build, or a live tunnel or Vercel link.
 
-Scenario C becomes Production once its pilot passes; Scenarios A and B stay Beta (ADR-0001). The first pilot covered only the early steps of v0.1.0: [docs/pilots/2026-05-21-retrospective.md](docs/pilots/2026-05-21-retrospective.md).
+Scenario C becomes Production once its pilot passes; Scenarios A and B stay Beta (ADR-0001). The first pilot covered only the early steps of v0.1.0: [docs/pilots/2026-05-21-retrospective.md](docs/pilots/2026-05-21-retrospective.md). The second ran Scenario C on a private project with an agent as Stakeholder and stopped before approval, so the next one needs another project and a person.
 
 ## Repository layout
 

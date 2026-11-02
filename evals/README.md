@@ -56,7 +56,7 @@ Needs a Claude login or `ANTHROPIC_API_KEY`. The script works from a plain termi
 scripts/eval.sh
 ```
 
-`--scaffold`, which the script passes, runs the case scripts in this folder. They copy fixtures, and some patch the copy; each patch is followed by a check that fails the scaffold if it did not apply. Add `--case <name>` for one case and `--runs 1` for a quick check. One run of every case costs about 1 USD. Results land in `evals/results/<timestamp>/`; keep the run you cite in the changelog.
+`--scaffold`, which the script passes, runs the case scripts in this folder. They copy fixtures, and some patch the copy; each patch is followed by a check that fails the scaffold if it did not apply. Add `--case <name>` for one case and `--runs 1` for a quick check. One run of every case costs about 6 USD on Sonnet. Results land in `evals/results/<timestamp>/`; keep the run you cite in the changelog.
 
 ## Run in CI
 

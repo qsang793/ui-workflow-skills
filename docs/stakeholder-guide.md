@@ -232,8 +232,9 @@ Your progress is saved in `.ui-workflow/state.md`, so you can close Claude Code 
 
 ## What has not been proven yet
 
-- **No real end-to-end run.** No Scenario has gone from the first step to an approved Preview on a real project. A real [pilot of Scenario C](https://github.com/qsang793/ui-workflow-skills/issues/13) is next. Only if it passes does C become Production; A and B stay Beta after that.
-- **No real export from Lovable or Google AI Studio has gone through the workflow.** The Port rules were tried on one Screen from another tool's export (Google Stitch) and on small sample exports. Whether reading a real Lovable export's source is enough is what the pilot checks.
+- **No real end-to-end run.** No Scenario has gone from the first step to an approved Preview on a real project. A pilot of Scenario C on a private project stopped before approval, with an agent as the Stakeholder. A [new pilot](https://github.com/qsang793/ui-workflow-skills/issues/13) on another project, with a person, is next. Only if it passes does C become Production; A and B stay Beta after that.
+- **Only one real export has gone through the workflow.** It came from Lovable in that pilot, and it was an easy one with one plain CSS file. No Google AI Studio export has gone through, and neither has a Lovable export built on Tailwind classes. The Port rules were also tried on one Screen from another tool's export (Google Stitch) and on small sample exports.
 - **The rest was tested on sample projects.** Automated tests ran each skill on small samples, and that testing cannot open a local app. So viewing a Screen in the running app has not been tested by it, and no real framework project has been installed and built.
-- **No Preview link has been opened on a real phone** through these skills. The tests check which host Claude chooses, not a live tunnel or Vercel link.
+- **The Preview has not been run to the end.** In the pilot, one link opened on a real phone, but the skill never checked that link. Nobody has gone through the checklist, approval and closing of a Preview. The tests check which host Claude chooses, not a live tunnel or Vercel link.
+- **Nobody non-technical has followed these replies yet.** Tell your Developer when one does not make sense.
 - **Vendor details can change.** Design tool menus and plans come from documentation checked on 2026-10-27.

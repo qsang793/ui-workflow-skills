@@ -2,7 +2,63 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [0.3.0] — 2026-11-02
+
+Every Scenario stays Beta. A pilot of Scenario C on a private project stopped before an approved Preview, and its Stakeholder was an agent, not a person. ADR-0001 stands: Scenario C becomes Production only after a real pilot passes (#13). Report: [docs/pilots/2026-11-01-scenario-c-pilot.md](docs/pilots/2026-11-01-scenario-c-pilot.md).
+
+### Migrating from 0.x
+
+No aliases: the old names are gone.
+
+| 0.2.0 and earlier | 0.3.0 |
+|---|---|
+| `ingest-lovable-export` | `ingest-design-export` |
+| `ui-translator` | `design-port` |
+| `UI_AUDIT.md` | `.ui-workflow/audit.md` |
+| `LOVABLE_PROMPT.md` | `.ui-workflow/design-prompt.md` |
+| `INTEGRATION_PLAN.md` | `.ui-workflow/integration-plan.md` |
+| `lovable-export/` | `.ui-workflow/export/` |
+
+Move a run in progress, from the project root:
+
+```bash
+mkdir -p .ui-workflow
+mv UI_AUDIT.md .ui-workflow/audit.md
+mv LOVABLE_PROMPT.md .ui-workflow/design-prompt.md
+mv INTEGRATION_PLAN.md .ui-workflow/integration-plan.md
+mv lovable-export .ui-workflow/export
+```
+
+Then start with `/ui-workflow-skills:ui-scenario-picker`: every other skill stops without `.ui-workflow/state.md`. An audit written before this release has no `Checks` line. `design-port` still looks for checks in the project, and running `/ui-workflow-skills:ui-audit` again adds the line. On Vercel, a project that was never deployed now stops at the Preview until a Developer makes a placeholder deployment.
+
+### Results
+
+- **Full suite on this release candidate:** `evals/results/2026-11-02T07-28-59-154Z/`, Sonnet, 41 cases × 3 runs, overall 0.96, 39 of 41 cases at or above the 0.8 threshold. That run set its threshold to 1, so its report shows 19 of 41.
+  - **Below 0.8:** `port-all-project-checks` 0.78 and `ingest-single-file-views` 0.75. Five more runs each on the same candidate: `port-all-project-checks` 0.93 (`evals/results/2026-11-02T09-32-08-774Z/`) and `ingest-single-file-views` 1.00 (`evals/results/2026-11-02T09-42-33-438Z/`). The `ingest-single-file-views` miss was the eval sandbox denying the Write tool in one run. The `port-all-project-checks` miss is real, and is listed under Known limits.
+  - **Lowest of the rest:** `ingest-react-scenario-c` 0.83, `preview-server-rendered` 0.87, `audit-lists-checks` 0.89, `planner-matching-backend` 0.92. `port-check-needs-install`, `preview-gap-outside-screens`, `preview-return-blocked` and `port-return-commits-fix` scored 1.00; `preview-first-deploy` 0.97.
+  - **After the run:** only this changelog and the result folders changed.
+- **Real Vercel run, 2026-11-02, CLI 65.9.0, a new project holding one empty page, following the skill's commands by hand:** a named preview was refused (`first_deployment_production`), and `<project>.vercel.app` answered 404. After a placeholder deployment with `--prod --skip-domain`, it still answered 404. A named preview then gave `target preview` in `vercel inspect`, with the same address at 404 and the deployment's own URL behind the sign-in redirect. The deploy's own output said `target: null`, so only the read-back counts.
+- **Pilot:** [the report](docs/pilots/2026-11-01-scenario-c-pilot.md) has the findings and the commit-by-commit results.
+
+### Not tested by anyone
+
+- A full run to an approved Preview on a real phone.
+- The skill's own check of a Shareable Link. The owner's link opened on a phone in the pilot, but the skill never checked it.
+- Closing a Preview, including the tunnel on the way back to the Port.
+- Whether a non-technical person can follow the replies. The pilot's Stakeholder was an agent.
+
+### Known limits
+
+- Finding 8, open: a Port report can name the wrong cause for a layout problem.
+- Finding 2, in part: the contrast step checks 4.5:1, so it cannot see a project's stricter rule. Running every project check is what catches that.
+- The pilot's one unexplained load failure has no established cause.
+- Findings 4, 5, 6, 9 and 10 were fixed after the pilot, on fixtures and in the guides only. No real run has tried those fixes, and no real Design tool has received the new prompt.
+- `port-all-project-checks`: in 3 of 8 runs on this release, the reply opened with the app not starting and came to the failed check next, still above the approval question. The skill asks for the check first.
+- `stakeholder-never-runs` missed in 4 of 11 runs of `port-invented-provenance` on #32 and this release, and in 1 of 3 of `port-tailwind-screen`: when the app could not start, the reply told the Stakeholder to run a command or decide a setting.
+- `audit-lists-checks`: in 1 of 3 runs, the audit left two checks off the `Checks` line. `design-port` also looks for checks the line misses.
+- LLM reply graders are noisy, and the judges' reasons are not recorded. All three runs of `ingest-react-scenario-c` failed on replies that read as correct, while every file grader passed.
+- The eval sandbox refuses local ports, so the `port-*` runs reach only the path where the app does not start, and it runs no live tunnel or Vercel link.
+- Vercel path: checked on stand-ins and in the one real run above, not by the skill itself against a real project.
 
 ### Fixed — the Design prompt works from one message and the chosen variation is recorded (#34)
 - The Design prompt of every Scenario now asks for one shared style on every Screen in its first message, and for no variations. The old prompt asked for variations of the first Screen and a second message to apply one, which a free plan can refuse.
