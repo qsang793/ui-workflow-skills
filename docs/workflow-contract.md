@@ -249,10 +249,11 @@ Rules for the wiring:
 - Host: <vercel | tunnel | staging>
 - Host reason: <one sentence citing what preview-deploy saw in the files>
 - Run: <command> → <local URL> | none
+- Released site: <addresses a Developer confirmed> | none
 - URL: <the link given to the Stakeholder> | none
 - Processes: <app pid, tunnel pid> | none
 - Status: <chosen | open | failed: <reason> | closed>
 - Updated: <yyyy-mm-dd> by preview-deploy
 ```
 
-`preview-deploy` writes it as soon as it has chosen the host, before checking any tool or account, and updates it as the Preview opens and closes. The host follows the project's shape (ADR-0003): `vercel` only for a static frontend whose backend is public or absent, never a production deploy; `tunnel` (local run with the audit's `Run` command, exposed through a temporary tunnel) when the backend serves the frontend, or when a static frontend reaches a local backend through the same origin; `staging` only when the project has one and the Developer confirms it. It is git-ignored because it holds a shareable link and local process ids. After approval the tunnel is stopped or the Developer confirms the shareable link is revoked, and Status is `closed`. Any stop before the link is verified sets Status `failed: <reason>`.
+`preview-deploy` writes it as soon as it has chosen the host, before checking any tool or account, and updates it as the Preview opens and closes. The host follows the project's shape (ADR-0003): `vercel` only for a static frontend whose backend is public or absent, deployed to the preview target by name, with the target read back and the production aliases checked from outside, never a production deploy; `tunnel` (local run with the audit's `Run` command, exposed through a temporary tunnel) when the backend serves the frontend, or when a static frontend reaches a local backend through the same origin; `staging` only when the project has one and the Developer confirms it. It is git-ignored because it holds a shareable link and local process ids. After approval the tunnel is stopped or the Developer confirms the shareable link is revoked, and Status is `closed`. Any stop before the link is verified sets Status `failed: <reason>`.

@@ -4,6 +4,14 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 
 ## [Unreleased]
 
+### Fixed — a Vercel Preview is really a preview (#31)
+- `preview-deploy` deploys to the preview target by name, reads the target back with `vercel inspect`, and checks the project's production aliases from outside before and after the deploy: `<project>.vercel.app` and the aliases of its latest production deployment. A target other than `preview`, or an alias that newly opens, stops the step: no link, and the Developer is asked to act.
+- A project with no deployment cannot get a preview: CLI 65.9.0 refuses a named preview with `first_deployment_production`, and a deploy with no target goes to production. The pilot's proposed `--target preview` worked only because a production deployment already existed. The skill stops, never runs `--prod`, and asks the Developer for a first deployment of a placeholder page with `--prod --skip-domain`.
+- A production alias that already opens before the deploy stops the step until the Developer confirms it, recorded as `Released site` in `preview.md`, so a project already live on Vercel can still get a Preview.
+- The step never offers a local address for a phone or any other device.
+- Real check on 2026-11-02, CLI 65.9.0, a new Vercel project holding one empty page: a named preview was refused and `<project>.vercel.app` answered `404`; after `--prod --skip-domain` it still answered `404` and the deployment's own alias ended on the login page; `deploy --environment preview` then read back `target preview`, and `<project>.vercel.app` still answered `404`. A framework-detected project was not tried with the placeholder; a failed placeholder build publishes nothing.
+- Evals: `preview-first-deploy` now expects the refusal and the stop; new `preview-later-deploy`, `preview-target-mismatch`, `preview-alias-answers` and `preview-live-site`. `fixtures/vercel-stub` follows the real CLI, `fixtures/curl-stub` is new, and `scripts/test_eval_stubs.py` checks both. Local run 2026-11-02, 7 `preview-*` cases × 3 runs on Sonnet, every case above the 0.8 threshold, with `preview-first-deploy` at 0.93 and `preview-server-rendered` at 0.87, both on LLM reply graders (`evals/results/2026-11-02T01-37-43-951Z/`).
+
 ### Changed — docs for marketplace users and Stakeholders
 - `README.md` is in English: install (plugin and symlink, commands re-checked), flow, every Scenario labelled Beta until the Scenario C pilot passes.
 - `docs/stakeholder-guide.md` and `docs/stakeholder-guide.vi.md` replace `UI_IMPROVEMENT_GUIDE.md` and `CHEAT_SHEET.md`. They use glossary terms and plugin command names, follow the skills' current behaviour, and say what has not been proven yet.
