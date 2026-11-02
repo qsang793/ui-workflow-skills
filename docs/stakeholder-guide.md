@@ -90,7 +90,7 @@ You get `.ui-workflow/design-prompt.md`. The prompt is always in English, whatev
 
 ### 4. Work in the Design tool
 
-Claude is not part of this step. Paste the prompt into the tool and adjust the result until you like it. Then get the code out:
+Claude is not part of this step. Paste the prompt into the tool. It asks for every Screen, in one shared style, in that first message, because a follow-up may not be possible the same day: in one real run on Lovable's Free plan, the next message after one build was refused for lack of credits. If you can still send messages, adjust the result until you like it. If not, use what you have: in Scenario C you can ask for the remaining changes when Claude shows you each Screen. Then get the code out:
 
 | Design tool | How to get the code |
 |---|---|
@@ -98,6 +98,8 @@ Claude is not part of this step. Paste the prompt into the tool and adjust the r
 | Google AI Studio (Build) | Download a ZIP, or sync to GitHub |
 
 These menus come from the vendors' documentation, checked on 2026-10-27, and may have moved.
+
+A preview link from Lovable's connector, the kind an assistant gives you when it creates the project for you, needs a sign-in. In a browser that is not signed in to Lovable, it opens the sign-in page instead of the design. Sign in first, and send a screenshot to anyone without an account.
 
 In Scenario C any framework is fine, because only the look is used. With Google AI Studio in Scenario C, open Settings before pasting: pick plain HTML if it is offered, otherwise the lightest framework (React rather than Next.js or Angular). This advice is untested; if no such choice appears, paste anyway.
 
@@ -118,7 +120,7 @@ Tell Claude where the export is:
 
 A private repository can only be copied if this computer has access to it. If the copy fails, use the ZIP or ask your Developer.
 
-Claude copies the files into `.ui-workflow/export/` and never installs or runs them. If an earlier export is there, it asks before moving that one to a backup. It tells you the framework it found and lists the Screens, then asks for the optional screenshots and gives the file name for each.
+Claude copies the files into `.ui-workflow/export/` and never installs or runs them. If an earlier export is there, it asks before moving that one to a backup. It tells you the framework it found and lists the Screens, then asks for the optional screenshots and gives the file name for each. In Scenario C, several variations of one Screen are listed as one Screen, and the next step asks which to use.
 
 Two stops: a ZIP that is rejected as unsafe (download it again from the Design tool), and 🚨 SCENARIO MISMATCH, which means the export does not fit your Scenario. Follow what the message says; if that does not help, call your Developer.
 
@@ -133,6 +135,8 @@ Skipped in Scenario A. A Design tool does not know your backend, so it can draw 
 | PROCEED | The design fits the backend | Run the next command |
 | PROCEED WITH CAUTION | It fits, with small adjustments or things Claude could not check | Read the Not checked list, run the next command |
 | STOP | At least one Blocker | Show the plan to your Developer. No later step may run |
+
+If the export has several variations of one Screen, Claude asks which one to use. There is no default, the step waits for your answer, and the plan keeps only the one you chose. Claude then asks for an optional screenshot of it.
 
 For a button that exists only in the design, Claude asks you to drop it (the default) or show it disabled with a "coming soon" label. After you answer, it may ask you to run this step again. Behaviour the screen has today, and your must-haves, can never be dropped: if the backend cannot do them, that is a Blocker. So is data the design shows that the backend does not have, even when the Design tool invented it, such as a testimonial; the Developer decides.
 

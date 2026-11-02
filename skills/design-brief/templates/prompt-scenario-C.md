@@ -53,13 +53,11 @@ Design only the look: **layout, spacing, colours, fonts and component states** (
 - A plain-English interaction comment on every interactive element.
 - Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
 
-## Iteration
-Provide **2–3 visual variations** of the first Screen:
-- Variation 1: <e.g. dense layout, current feel>
-- Variation 2: <e.g. spacious, premium feel>
-- Variation 3: <e.g. dark mode default>
-
-I will pick one (or mix), then you apply it to every Screen.
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
 
 ## Out of scope (do not produce)
 - Routing, state management, data fetching, backend or server code, auth, database, API keys

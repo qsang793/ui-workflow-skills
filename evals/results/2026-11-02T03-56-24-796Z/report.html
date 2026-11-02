@@ -1,0 +1,2112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.316</span>
+<span class="num">2026-11-02 03:56 UTC</span>
+<span class="num">4m 21s</span>
+<span class="num">$0.58</span>
+<span class="num">3 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case brief-scenario-c-vietnamese</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">1 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>brief-scenario-c-vietnamese</h2>
+<span class="muted mono">evals/brief-scenario-c-vietnamese</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">16 turns · $0.22 · 03:56:25 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">brief-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">copy-markers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===[\s\S]*=== END COPY ===</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">design-tool-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Design tool:\s*Google AI Studio</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">existing-tokens</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched --color-primary</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-ingest</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*ingest\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-framework-ban</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-shared-style</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (10224 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+
+All three Screens share a header (the &quot;Reminders&quot; wordmark and a greeting) and a tab bar with three tabs: Today, All reminders, Settings. Today is the landing Screen.
+
+- `Today` — a list of the reminders that are **not done yet**. Each row shows the reminder&apos;s title and due date and has a Done button. Marking a reminder done removes it from this list. Finished reminders never appear here.
+- `All reminders` — a list of every reminder, finished or not. Each row shows the title and due date and has a Done button. Finished reminders look visibly &quot;completed&quot; (muted, struck through, success colour accent) so they are easy to tell apart from open ones.
+- `Settings` — one setting: the time of day the user wants to be notified. A labelled single-line field for the time and a Save button.
+
+## Real copy and field names (use these exactly)
+
+Header
+- Greeting text: `Hello Lan` (the name comes from a field called `owner`; use &quot;Lan&quot; as sample)
+- Wordmark: the bold text `Reminders` (there is no logo image; do not draw one)
+
+Tabs (button text): `Today`, `All reminders`, `Settings`
+
+Reminder row (Today and All reminders)
+- Data fields: `title`, `due` (date written as YYYY-MM-DD), `done` (true or false)
+- Row text pattern: `&lt;title&gt; — &lt;due&gt;`, for example `Pay rent — 2026-11-01`
+- Button text: `Done`
+- Sample data: `Pay rent — 2026-11-01` (not done), `Call dentist — 2026-11-03` (done). On the Today Screen you may add two or three more not-done sample rows so the list looks realistic.
+
+Settings
+- Label: `Notification time`
+- Field: a single-line field for the time, with a sample value such as `08:30`
+- Button text: `Save`
+- After saving, the user sees a short confirmation, today the text `Saved &lt;time&gt;`. Show it as a calm success message using the success colour.
+
+Empty states (no text exists in the project yet; write short, friendly, plain English copy and keep it to one line)
+- Today with no open reminders, for example: `Nothing left for today.`
+- All reminders with no reminders at all, for example: `No reminders yet.`
+
+## What needs to look better
+
+- The page is fixed at 800px wide and scrolls sideways on phones. It must fit any screen from 320px up with no horizontal scroll.
+- Colours are scattered and hard-coded. Use only the shared CSS variables.
+- The tabs give no sign of which one is active. Make the active tab unmistakable.
+- There is no empty state when there are no reminders. Design one for each list.
+
+## Target users
+
+About 20 office employees in one company, using the tool internally. They are not technical and are not designers. Most open it on their phone during the day to check what they need to do; some use a laptop at their desk. The screen must be obvious at a glance with no instructions.
+
+## Most important user actions
+
+1. See today&apos;s open reminders at a glance (the Today Screen, first thing they see).
+2. Mark a single reminder as done with one clear tap, with visible feedback.
+3. Set the time they want to receive notifications (the Settings Screen).
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, primary buttons, links, focus rings
+- **Secondary / accent color**: none — do not add one
+- **Neutral palette**: a cool grey scale, near-white backgrounds and lots of white space; body text #1a202c, secondary text and borders from the greys listed in the existing tokens below
+- **Success / warning / danger**: success #38a169 (used for done states and the saved confirmation); no warning or danger colours are specified, so keep any you need very restrained
+- **Body font family**: Inter
+- **Heading font family**: same as body (Inter)
+- **Logo**: text-only logo: &quot;Reminders&quot; in bold Inter
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+
+Feel like a calm, minimal productivity tool, in the spirit of Todoist and Things 3, but not a copy of either. Generous white space, quiet borders, one accent colour. No gradients, no heavy shadows, no emoji, no decorative illustrations. Mobile is the main device, and desktop must also work well, so use a comfortable centred column on large screens rather than stretching rows across the whole width.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once (including the active tab, a finished reminder, both empty states, and the Settings confirmation).
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders whose `done` is false, as `&lt;title&gt; — &lt;due&gt;` rows. The data comes from `GET /api/reminders` (fields `id`, `title`, `due`, `done`), rendered by `loadReminders()` in app/static/app.js. The page header shows &quot;Hello {{ owner }}&quot; (`owner` is passed by the `/` route in app/main.py) and an image `/static/logo.png` (that file is not in app/static today). Today shows every open reminder, whatever its due date.
+- Does: a `Done` button on each row calls `POST /api/reminders/{id}/done` (`markDone()` in app/static/app.js), which sets `done` to true, then the list reloads and the row leaves this tab. The tab buttons (Today, All reminders, Settings) switch views on the client, with no request.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, as `&lt;title&gt; — &lt;due&gt;` rows. Rows with `done` true get the `done` style (grey, struck through). Same header as Today.
+- Does: a `Done` button on every row, including rows already done, calls `POST /api/reminders/{id}/done`, then the list reloads. Nothing else.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot;, a text field `#notify-time` and a `Save` button.
+- Does: Save only runs `alert(&quot;Saved &quot; + &lt;field value&gt;)`. It sends no request, there is no endpoint for it and nothing is stored, so the time is lost on reload. The list of what the backend offers today has no notification setting.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they receive notifications (Stakeholder&apos;s third most important action; see the Settings note above: it does not persist today).
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL PASS — note: long file (10224 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+
+All three Screens share a header (the &quot;Reminders&quot; wordmark and a greeting) and a tab bar with three tabs: Today, All reminders, Settings. Today is the landing Screen.
+
+- `Today` — a list of the reminders that are **not done yet**. Each row shows the reminder&apos;s title and due date and has a Done button. Marking a reminder done removes it from this list. Finished reminders never appear here.
+- `All reminders` — a list of every reminder, finished or not. Each row shows the title and due date and has a Done button. Finished reminders look visibly &quot;completed&quot; (muted, struck through, success colour accent) so they are easy to tell apart from open ones.
+- `Settings` — one setting: the time of day the user wants to be notified. A labelled single-line field for the time and a Save button.
+
+## Real copy and field names (use these exactly)
+
+Header
+- Greeting text: `Hello Lan` (the name comes from a field called `owner`; use &quot;Lan&quot; as sample)
+- Wordmark: the bold text `Reminders` (there is no logo image; do not draw one)
+
+Tabs (button text): `Today`, `All reminders`, `Settings`
+
+Reminder row (Today and All reminders)
+- Data fields: `title`, `due` (date written as YYYY-MM-DD), `done` (true or false)
+- Row text pattern: `&lt;title&gt; — &lt;due&gt;`, for example `Pay rent — 2026-11-01`
+- Button text: `Done`
+- Sample data: `Pay rent — 2026-11-01` (not done), `Call dentist — 2026-11-03` (done). On the Today Screen you may add two or three more not-done sample rows so the list looks realistic.
+
+Settings
+- Label: `Notification time`
+- Field: a single-line field for the time, with a sample value such as `08:30`
+- Button text: `Save`
+- After saving, the user sees a short confirmation, today the text `Saved &lt;time&gt;`. Show it as a calm success message using the success colour.
+
+Empty states (no text exists in the project yet; write short, friendly, plain English copy and keep it to one line)
+- Today with no open reminders, for example: `Nothing left for today.`
+- All reminders with no reminders at all, for example: `No reminders yet.`
+
+## What needs to look better
+
+- The page is fixed at 800px wide and scrolls sideways on phones. It must fit any screen from 320px up with no horizontal scroll.
+- Colours are scattered and hard-coded. Use only the shared CSS variables.
+- The tabs give no sign of which one is active. Make the active tab unmistakable.
+- There is no empty state when there are no reminders. Design one for each list.
+
+## Target users
+
+About 20 office employees in one company, using the tool internally. They are not technical and are not designers. Most open it on their phone during the day to check what they need to do; some use a laptop at their desk. The screen must be obvious at a glance with no instructions.
+
+## Most important user actions
+
+1. See today&apos;s open reminders at a glance (the Today Screen, first thing they see).
+2. Mark a single reminder as done with one clear tap, with visible feedback.
+3. Set the time they want to receive notifications (the Settings Screen).
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, primary buttons, links, focus rings
+- **Secondary / accent color**: none — do not add one
+- **Neutral palette**: a cool grey scale, near-white backgrounds and lots of white space; body text #1a202c, secondary text and borders from the greys listed in the existing tokens below
+- **Success / warning / danger**: success #38a169 (used for done states and the saved confirmation); no warning or danger colours are specified, so keep any you need very restrained
+- **Body font family**: Inter
+- **Heading font family**: same as body (Inter)
+- **Logo**: text-only logo: &quot;Reminders&quot; in bold Inter
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+
+Feel like a calm, minimal productivity tool, in the spirit of Todoist and Things 3, but not a copy of either. Generous white space, quiet borders, one accent colour. No gradients, no heavy shadows, no emoji, no decorative illustrations. Mobile is the main device, and desktop must also work well, so use a comfortable centred column on large screens rather than stretching rows across the whole width.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once (including the active tab, a finished reminder, both empty states, and the Settings confirmation).
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders whose `done` is false, as `&lt;title&gt; — &lt;due&gt;` rows. The data comes from `GET /api/reminders` (fields `id`, `title`, `due`, `done`), rendered by `loadReminders()` in app/static/app.js. The page header shows &quot;Hello {{ owner }}&quot; (`owner` is passed by the `/` route in app/main.py) and an image `/static/logo.png` (that file is not in app/static today). Today shows every open reminder, whatever its due date.
+- Does: a `Done` button on each row calls `POST /api/reminders/{id}/done` (`markDone()` in app/static/app.js), which sets `done` to true, then the list reloads and the row leaves this tab. The tab buttons (Today, All reminders, Settings) switch views on the client, with no request.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, as `&lt;title&gt; — &lt;due&gt;` rows. Rows with `done` true get the `done` style (grey, struck through). Same header as Today.
+- Does: a `Done` button on every row, including rows already done, calls `POST /api/reminders/{id}/done`, then the list reloads. Nothing else.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot;, a text field `#notify-time` and a `Save` button.
+- Does: Save only runs `alert(&quot;Saved &quot; + &lt;field value&gt;)`. It sends no request, there is no endpoint for it and nothing is stored, so the time is lost on reload. The list of what the backend offers today has no notification setting.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they receive notifications (Stakeholder&apos;s third most important action; see the Settings note above: it does not persist today).
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/design-prompt.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">✅ Mình đã lưu prompt vào `.ui-workflow/design-prompt.md`. Mình đã trả lời hết các câu hỏi từ câu trả lời của bạn, và các màn hình lấy từ bản kiểm tra giao diện (audit) của dự án. Trạng thái dự án đã chuyển sang bước tiếp theo là `ingest`.
+
+**Cách dùng**
+1. Mở file và copy phần giữa hai dòng `=== COPY ... ===` và `=== END COPY ===`.
+2. Trước khi dán vào Google AI Studio (Build), mở Settings. Nếu có tuỳ chọn HTML thuần thì chọn nó. Nếu không thì chọn framework nhẹ nhất, tức React, không chọn Next.js hay Angular. Mình chưa thử bước này. Nếu Settings không có lựa chọn nào như vậy thì bạn cứ dán, framework nào cũng dùng được.
+3. Khi ưng ý, tải về dạng ZIP hoặc đồng bộ lên GitHub. Sau đó chạy `/ui-workflow-skills:ingest-design-export`.
+
+Phần &quot;Required behaviour&quot; nằm dưới dòng `END COPY`, nên bạn không cần dán nó. Bước lập kế hoạch tích hợp sẽ đọc phần đó.
+
+**Những điểm mình ghi trong prompt, bạn nên biết**
+- **Đặt giờ thông báo hiện chưa lưu được gì.** Nút Save trong code chỉ hiện hộp thoại `Saved &lt;giờ&gt;`. Không có yêu cầu nào gửi đi, backend cũng không có API cho việc này, nên tải lại trang là mất giờ. Thiết kế chỉ làm phần giao diện. Muốn giờ được lưu thật thì developer cần bổ sung phần backend.
+- **Tab Hôm nay** chỉ hiện việc chưa xong, đúng như bạn yêu cầu. Hiện nó hiện mọi việc chưa xong, không lọc theo ngày đến hạn. Mình ghi lại đúng như vậy.
+- **Nút Done** hiện ở cả những dòng đã xong trong tab All reminders. Mình ghi nguyên hành vi này, không tự sửa.
+- **Logo:** header cũ gọi `/static/logo.png`, nhưng file đó không có trong dự án. Prompt dùng chữ &quot;Reminders&quot; đậm, đúng ý bạn.
+- **Màn hình trống:** dự án chưa có chữ cho trường hợp không có nhắc việc. Mình cho AI viết một dòng ngắn, ví dụ &quot;Nothing left for today.&quot; Bạn nên xem lại câu này sau.
+- **Màu cảnh báo và lỗi:** bạn chưa nêu, nên prompt dặn dùng rất tiết chế.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour-heading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === END COPY ===[\s\S]*\n## Required behaviour[ \t]*\r?\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (10224 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+
+All three Screens share a header (the &quot;Reminders&quot; wordmark and a greeting) and a tab bar with three tabs: Today, All reminders, Settings. Today is the landing Screen.
+
+- `Today` — a list of the reminders that are **not done yet**. Each row shows the reminder&apos;s title and due date and has a Done button. Marking a reminder done removes it from this list. Finished reminders never appear here.
+- `All reminders` — a list of every reminder, finished or not. Each row shows the title and due date and has a Done button. Finished reminders look visibly &quot;completed&quot; (muted, struck through, success colour accent) so they are easy to tell apart from open ones.
+- `Settings` — one setting: the time of day the user wants to be notified. A labelled single-line field for the time and a Save button.
+
+## Real copy and field names (use these exactly)
+
+Header
+- Greeting text: `Hello Lan` (the name comes from a field called `owner`; use &quot;Lan&quot; as sample)
+- Wordmark: the bold text `Reminders` (there is no logo image; do not draw one)
+
+Tabs (button text): `Today`, `All reminders`, `Settings`
+
+Reminder row (Today and All reminders)
+- Data fields: `title`, `due` (date written as YYYY-MM-DD), `done` (true or false)
+- Row text pattern: `&lt;title&gt; — &lt;due&gt;`, for example `Pay rent — 2026-11-01`
+- Button text: `Done`
+- Sample data: `Pay rent — 2026-11-01` (not done), `Call dentist — 2026-11-03` (done). On the Today Screen you may add two or three more not-done sample rows so the list looks realistic.
+
+Settings
+- Label: `Notification time`
+- Field: a single-line field for the time, with a sample value such as `08:30`
+- Button text: `Save`
+- After saving, the user sees a short confirmation, today the text `Saved &lt;time&gt;`. Show it as a calm success message using the success colour.
+
+Empty states (no text exists in the project yet; write short, friendly, plain English copy and keep it to one line)
+- Today with no open reminders, for example: `Nothing left for today.`
+- All reminders with no reminders at all, for example: `No reminders yet.`
+
+## What needs to look better
+
+- The page is fixed at 800px wide and scrolls sideways on phones. It must fit any screen from 320px up with no horizontal scroll.
+- Colours are scattered and hard-coded. Use only the shared CSS variables.
+- The tabs give no sign of which one is active. Make the active tab unmistakable.
+- There is no empty state when there are no reminders. Design one for each list.
+
+## Target users
+
+About 20 office employees in one company, using the tool internally. They are not technical and are not designers. Most open it on their phone during the day to check what they need to do; some use a laptop at their desk. The screen must be obvious at a glance with no instructions.
+
+## Most important user actions
+
+1. See today&apos;s open reminders at a glance (the Today Screen, first thing they see).
+2. Mark a single reminder as done with one clear tap, with visible feedback.
+3. Set the time they want to receive notifications (the Settings Screen).
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, primary buttons, links, focus rings
+- **Secondary / accent color**: none — do not add one
+- **Neutral palette**: a cool grey scale, near-white backgrounds and lots of white space; body text #1a202c, secondary text and borders from the greys listed in the existing tokens below
+- **Success / warning / danger**: success #38a169 (used for done states and the saved confirmation); no warning or danger colours are specified, so keep any you need very restrained
+- **Body font family**: Inter
+- **Heading font family**: same as body (Inter)
+- **Logo**: text-only logo: &quot;Reminders&quot; in bold Inter
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+
+Feel like a calm, minimal productivity tool, in the spirit of Todoist and Things 3, but not a copy of either. Generous white space, quiet borders, one accent colour. No gradients, no heavy shadows, no emoji, no decorative illustrations. Mobile is the main device, and desktop must also work well, so use a comfortable centred column on large screens rather than stretching rows across the whole width.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once (including the active tab, a finished reminder, both empty states, and the Settings confirmation).
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders whose `done` is false, as `&lt;title&gt; — &lt;due&gt;` rows. The data comes from `GET /api/reminders` (fields `id`, `title`, `due`, `done`), rendered by `loadReminders()` in app/static/app.js. The page header shows &quot;Hello {{ owner }}&quot; (`owner` is passed by the `/` route in app/main.py) and an image `/static/logo.png` (that file is not in app/static today). Today shows every open reminder, whatever its due date.
+- Does: a `Done` button on each row calls `POST /api/reminders/{id}/done` (`markDone()` in app/static/app.js), which sets `done` to true, then the list reloads and the row leaves this tab. The tab buttons (Today, All reminders, Settings) switch views on the client, with no request.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, as `&lt;title&gt; — &lt;due&gt;` rows. Rows with `done` true get the `done` style (grey, struck through). Same header as Today.
+- Does: a `Done` button on every row, including rows already done, calls `POST /api/reminders/{id}/done`, then the list reloads. Nothing else.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot;, a text field `#notify-time` and a `Save` button.
+- Does: Save only runs `alert(&quot;Saved &quot; + &lt;field value&gt;)`. It sends no request, there is no endpoint for it and nothing is stored, so the time is lost on reload. The list of what the backend offers today has no notification setting.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they receive notifications (Stakeholder&apos;s third most important action; see the Settings note above: it does not persist today).
+</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.18 · 03:58:02 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">brief-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">copy-markers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===[\s\S]*=== END COPY ===</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">design-tool-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Design tool:\s*Google AI Studio</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">existing-tokens</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched --color-primary</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-ingest</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*ingest\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-framework-ban</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-shared-style</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (8829 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, the three Screens are three tabs of one page. Give each its own page or route, and show the same header and tab bar on all three.
+- `Today` — a list of the reminders that are not done yet. For each one the user sees the title and the due date, and can mark it as done with a &quot;Done&quot; button. When nothing is left, it shows an empty state.
+- `All reminders` — a list of every reminder, done and not done. Done reminders look completed (muted, struck through). Each row still has a &quot;Done&quot; button that marks it as done.
+- `Settings` — one setting: the time of day the user wants to be notified. A text field with a visible label and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Shared header (on every Screen):
+- Brand: the bold text &quot;Reminders&quot; (no logo image)
+- Greeting: &quot;Hello Lan&quot; (the name comes from the field `owner`)
+- Tabs, in this order: &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+`Today` and `All reminders`, each reminder row:
+- Fields: `title`, `due` (a date written like `2026-11-01`), `done` (true or false)
+- Row text is the title followed by the due date, for example &quot;Pay rent — 2026-11-01&quot;
+- Button text: &quot;Done&quot;
+- Sample content to use: &quot;Pay rent&quot;, due 2026-11-01, not done. &quot;Call dentist&quot;, due 2026-11-03, done. On `Today` show only &quot;Pay rent&quot;. On `All reminders` show both, with &quot;Call dentist&quot; in the done style.
+- Also design an empty state for `Today` (no copy exists yet; write one short, calm line, for example &quot;Nothing left for today&quot;).
+
+`Settings`:
+- Label: &quot;Notification time&quot;
+- Field: a single text input for the time (id `notify-time`)
+- Button text: &quot;Save&quot;
+
+## What needs to look better
+- The page has a fixed 800px width and scrolls sideways on phones. It must fit any screen from 320px wide and use the space well on a desktop.
+- Colours are hard-coded all over the markup instead of coming from the shared tokens. Use only the tokens and CSS variables.
+- Tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office staff using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. They use it mostly on their phone, and also on a computer.
+
+## Most important user actions
+1. See what has to be done today (the `Today` tab, which shows only reminders that are not done).
+2. Mark a reminder as done.
+3. Set the time at which they get notified.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, the active tab, focus rings
+- **Secondary / accent color**: none, do not add one
+- **Neutral palette**: lots of white and very light grey for surfaces, cool greys for borders and muted text, dark text #1a202c
+- **Success / warning / danger**: #38a169 for success (use it for the &quot;done&quot; state and the Done button), Tailwind defaults for warning and danger
+- **Body font family**: Inter, system-ui
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality (free-form, 2–3 lines)
+Feel like a calm, minimal productivity tool. Generous white space, quiet typography, very few borders and shadows. No gradients, no emoji, no decoration that does not help the user act.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well (comfortable centred column, not a stretched phone layout)
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders from `GET /api/reminders` (fields `title`, `due`, `done`), filtered in `app/static/app.js` to those with `done` false. Header greeting &quot;Hello {{ owner }}&quot; comes from the template variable `owner`. Today there is no empty state.
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done` (`markDone` in `app/static/app.js`), then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders` (`title`, `due`, `done`); done ones get the `done` style (muted, struck through).
+- Does: &quot;Done&quot; button on each row, same endpoint as above. It is shown on already-done rows too, where it changes nothing.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot; and a text input `notify-time`. Nothing is loaded from the server, so the field starts empty.
+- Does: none that lasts. &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;; no endpoint exists and nothing is stored.
+
+### Stakeholder must-haves
+- Each reminder can still be marked as done, one at a time.
+- The Today tab shows only reminders that are not done.
+- The user can set the notification time (Settings). Note that Save does not store anything today.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (8829 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, the three Screens are three tabs of one page. Give each its own page or route, and show the same header and tab bar on all three.
+- `Today` — a list of the reminders that are not done yet. For each one the user sees the title and the due date, and can mark it as done with a &quot;Done&quot; button. When nothing is left, it shows an empty state.
+- `All reminders` — a list of every reminder, done and not done. Done reminders look completed (muted, struck through). Each row still has a &quot;Done&quot; button that marks it as done.
+- `Settings` — one setting: the time of day the user wants to be notified. A text field with a visible label and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Shared header (on every Screen):
+- Brand: the bold text &quot;Reminders&quot; (no logo image)
+- Greeting: &quot;Hello Lan&quot; (the name comes from the field `owner`)
+- Tabs, in this order: &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+`Today` and `All reminders`, each reminder row:
+- Fields: `title`, `due` (a date written like `2026-11-01`), `done` (true or false)
+- Row text is the title followed by the due date, for example &quot;Pay rent — 2026-11-01&quot;
+- Button text: &quot;Done&quot;
+- Sample content to use: &quot;Pay rent&quot;, due 2026-11-01, not done. &quot;Call dentist&quot;, due 2026-11-03, done. On `Today` show only &quot;Pay rent&quot;. On `All reminders` show both, with &quot;Call dentist&quot; in the done style.
+- Also design an empty state for `Today` (no copy exists yet; write one short, calm line, for example &quot;Nothing left for today&quot;).
+
+`Settings`:
+- Label: &quot;Notification time&quot;
+- Field: a single text input for the time (id `notify-time`)
+- Button text: &quot;Save&quot;
+
+## What needs to look better
+- The page has a fixed 800px width and scrolls sideways on phones. It must fit any screen from 320px wide and use the space well on a desktop.
+- Colours are hard-coded all over the markup instead of coming from the shared tokens. Use only the tokens and CSS variables.
+- Tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office staff using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. They use it mostly on their phone, and also on a computer.
+
+## Most important user actions
+1. See what has to be done today (the `Today` tab, which shows only reminders that are not done).
+2. Mark a reminder as done.
+3. Set the time at which they get notified.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, the active tab, focus rings
+- **Secondary / accent color**: none, do not add one
+- **Neutral palette**: lots of white and very light grey for surfaces, cool greys for borders and muted text, dark text #1a202c
+- **Success / warning / danger**: #38a169 for success (use it for the &quot;done&quot; state and the Done button), Tailwind defaults for warning and danger
+- **Body font family**: Inter, system-ui
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality (free-form, 2–3 lines)
+Feel like a calm, minimal productivity tool. Generous white space, quiet typography, very few borders and shadows. No gradients, no emoji, no decoration that does not help the user act.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well (comfortable centred column, not a stretched phone layout)
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders from `GET /api/reminders` (fields `title`, `due`, `done`), filtered in `app/static/app.js` to those with `done` false. Header greeting &quot;Hello {{ owner }}&quot; comes from the template variable `owner`. Today there is no empty state.
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done` (`markDone` in `app/static/app.js`), then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders` (`title`, `due`, `done`); done ones get the `done` style (muted, struck through).
+- Does: &quot;Done&quot; button on each row, same endpoint as above. It is shown on already-done rows too, where it changes nothing.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot; and a text input `notify-time`. Nothing is loaded from the server, so the field starts empty.
+- Does: none that lasts. &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;; no endpoint exists and nothing is stored.
+
+### Stakeholder must-haves
+- Each reminder can still be marked as done, one at a time.
+- The Today tab shows only reminders that are not done.
+- The user can set the notification time (Settings). Note that Save does not store anything today.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/design-prompt.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">✅ Mình đã lưu prompt vào `.ui-workflow/design-prompt.md`. Bạn mở file, copy toàn bộ phần giữa hai dòng `=== COPY ===` rồi dán vào Google AI Studio (Build).
+
+**Trước khi dán:** vào Settings của AI Studio. Nếu có tuỳ chọn HTML thuần thì chọn nó. Nếu không thì chọn framework nhẹ nhất (React tốt hơn Next.js hay Angular). Mình chưa kiểm tra được điều này. Nếu không thấy lựa chọn nào thì cứ dán, framework nào cũng dùng được.
+
+**Prompt đã có gì:**
+- **Thương hiệu:** màu chính #2b6cb0, màu xanh lá #38a169 cho trạng thái xong, font Inter, chữ &quot;Reminders&quot; đậm thay logo. Cảm giác tối giản, nhiều khoảng trắng, tham khảo Todoist và Things 3.
+- **Thiết bị:** ưu tiên điện thoại, máy tính vẫn dùng tốt.
+- **Ba tab:** Hôm nay, Tất cả nhắc việc và Cài đặt được thiết kế lại. Nội dung chữ (Today, All reminders, Settings, Done, Save, Notification time) giữ nguyên bản tiếng Anh như trong app hiện tại.
+- **Tab Hôm nay:** chỉ hiện việc chưa xong, có nút Done ở từng dòng và một trạng thái trống (hiện app chưa có).
+- **Lỗi hiện tại:** prompt yêu cầu sửa lỗi bị cuộn ngang trên điện thoại và tab không cho biết đang ở tab nào.
+
+**Một điều bạn nên biết:** nút Save ở tab Cài đặt hiện chỉ hiện một cái thông báo &quot;Saved…&quot; chứ không lưu giờ nhận thông báo. Mình ghi rõ điều này ở phần &quot;Required behaviour&quot; của file. Phần đó nằm sau `=== END COPY ===` nên bạn không dán vào AI Studio. Muốn tính năng này hoạt động thật thì cần một lập trình viên làm thêm phần lưu giờ.
+
+Khi ưng ý kết quả, tải về dạng ZIP hoặc đồng bộ lên GitHub, rồi quay lại chạy `/ui-workflow-skills:ingest-design-export`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour-heading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === END COPY ===[\s\S]*\n## Required behaviour[ \t]*\r?\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (8829 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, vanilla JavaScript, one plain CSS file). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, the three Screens are three tabs of one page. Give each its own page or route, and show the same header and tab bar on all three.
+- `Today` — a list of the reminders that are not done yet. For each one the user sees the title and the due date, and can mark it as done with a &quot;Done&quot; button. When nothing is left, it shows an empty state.
+- `All reminders` — a list of every reminder, done and not done. Done reminders look completed (muted, struck through). Each row still has a &quot;Done&quot; button that marks it as done.
+- `Settings` — one setting: the time of day the user wants to be notified. A text field with a visible label and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Shared header (on every Screen):
+- Brand: the bold text &quot;Reminders&quot; (no logo image)
+- Greeting: &quot;Hello Lan&quot; (the name comes from the field `owner`)
+- Tabs, in this order: &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+`Today` and `All reminders`, each reminder row:
+- Fields: `title`, `due` (a date written like `2026-11-01`), `done` (true or false)
+- Row text is the title followed by the due date, for example &quot;Pay rent — 2026-11-01&quot;
+- Button text: &quot;Done&quot;
+- Sample content to use: &quot;Pay rent&quot;, due 2026-11-01, not done. &quot;Call dentist&quot;, due 2026-11-03, done. On `Today` show only &quot;Pay rent&quot;. On `All reminders` show both, with &quot;Call dentist&quot; in the done style.
+- Also design an empty state for `Today` (no copy exists yet; write one short, calm line, for example &quot;Nothing left for today&quot;).
+
+`Settings`:
+- Label: &quot;Notification time&quot;
+- Field: a single text input for the time (id `notify-time`)
+- Button text: &quot;Save&quot;
+
+## What needs to look better
+- The page has a fixed 800px width and scrolls sideways on phones. It must fit any screen from 320px wide and use the space well on a desktop.
+- Colours are hard-coded all over the markup instead of coming from the shared tokens. Use only the tokens and CSS variables.
+- Tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office staff using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. They use it mostly on their phone, and also on a computer.
+
+## Most important user actions
+1. See what has to be done today (the `Today` tab, which shows only reminders that are not done).
+2. Mark a reminder as done.
+3. Set the time at which they get notified.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, the active tab, focus rings
+- **Secondary / accent color**: none, do not add one
+- **Neutral palette**: lots of white and very light grey for surfaces, cool greys for borders and muted text, dark text #1a202c
+- **Success / warning / danger**: #38a169 for success (use it for the &quot;done&quot; state and the Done button), Tailwind defaults for warning and danger
+- **Body font family**: Inter, system-ui
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality (free-form, 2–3 lines)
+Feel like a calm, minimal productivity tool. Generous white space, quiet typography, very few borders and shadows. No gradients, no emoji, no decoration that does not help the user act.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well (comfortable centred column, not a stretched phone layout)
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders from `GET /api/reminders` (fields `title`, `due`, `done`), filtered in `app/static/app.js` to those with `done` false. Header greeting &quot;Hello {{ owner }}&quot; comes from the template variable `owner`. Today there is no empty state.
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done` (`markDone` in `app/static/app.js`), then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders` (`title`, `due`, `done`); done ones get the `done` style (muted, struck through).
+- Does: &quot;Done&quot; button on each row, same endpoint as above. It is shown on already-done rows too, where it changes nothing.
+
+### Settings — app/templates/index.html#settings
+- Shows: the label &quot;Notification time&quot; and a text input `notify-time`. Nothing is loaded from the server, so the field starts empty.
+- Does: none that lasts. &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;; no endpoint exists and nothing is stored.
+
+### Stakeholder must-haves
+- Each reminder can still be marked as done, one at a time.
+- The Today tab shows only reminders that are not done.
+- The user can set the notification time (Settings). Note that Save does not store anything today.
+</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.18 · 03:59:24 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">brief-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">copy-markers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===[\s\S]*=== END COPY ===</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">design-tool-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Design tool:\s*Google AI Studio</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">existing-tokens</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched --color-primary</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-ingest</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*ingest\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-framework-ban</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-shared-style</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (8958 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+- `Today` — the list of reminders that are NOT done yet. Each row shows the reminder title and its due date, with a &quot;Done&quot; button. Clicking &quot;Done&quot; marks the reminder as done and it disappears from this list. This is the first tab and the default view.
+- `All reminders` — the list of every reminder, done and not done. Each row shows the title and due date, with a &quot;Done&quot; button. Done reminders look visibly finished (muted, struck through).
+- `Settings` — one setting: the time of day the user gets notifications. A labelled time field and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Text logo: &quot;Reminders&quot; in bold (there is no logo image; do not use one)
+- Greeting: &quot;Hello Lan&quot; (in the real app the name comes from a variable called `owner`)
+
+Tabs (on every Screen): &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+Today and All reminders:
+- Reminder fields: `id`, `title`, `due` (a date such as 2026-11-01), `done` (true or false)
+- Each row reads: title — due (for example &quot;Pay rent — 2026-11-01&quot;)
+- Button text on every row: &quot;Done&quot;
+- Sample data to use: `Pay rent`, due `2026-11-01`, not done; `Call dentist`, due `2026-11-03`, done. Today shows only &quot;Pay rent&quot;; All reminders shows both.
+- Empty state: the app has no empty text today. Add a short, friendly one for each list (for example &quot;Nothing to do today&quot; and &quot;No reminders yet&quot;).
+
+Settings:
+- Label: &quot;Notification time&quot;
+- Field id: `notify-time`
+- Button: &quot;Save&quot;
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any screen from 320px up.
+- Colours are hard-coded inline instead of using the tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office employees using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. Most of them use it on a phone, but it must also work well on a computer.
+
+## Most important user actions
+1. See today&apos;s tasks (the Today tab opens first and shows only what is not done yet).
+2. Mark a reminder as done with one clear tap or click.
+3. Set the time of day for notifications.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, links, focus rings and primary buttons
+- **Secondary / accent color**: none — do not add an accent color
+- **Neutral palette**: a calm cool-grey scale (for example Tailwind `slate-50` → `slate-900`), with plenty of white
+- **Success / warning / danger**: success #38a169 (used for the &quot;done&quot; state and the confirmation after saving); warning and danger: use Tailwind defaults, only if needed
+- **Body font family**: Inter
+- **Heading font family**: Inter (same as body)
+- **Logo**: text-only logo: &quot;Reminders&quot; in Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+Calm, minimal and quiet, like Things 3 and Todoist. Generous white space, one task per clear row, very few lines and borders, no gradients, no emoji, no heavy shadows. Colour is used sparingly: blue for what is active or actionable, green only for success and done.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well. On desktop keep the content in a comfortable centred column rather than stretching it across the screen.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders where `done` is false, each as &quot;title — due&quot; (fields `title`, `due` from `GET /api/reminders`, filtered client-side in `app/static/app.js`). The header also shows &quot;Hello {{ owner }}&quot; (`owner` is a template variable set in `app/main.py`, currently &quot;Lan&quot;). Empty list: nothing is shown today (no empty state).
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves Today.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder, done and not done, as &quot;title — due&quot; (fields `title`, `due`, `done` from `GET /api/reminders`). Done reminders get the `done` style (grey, struck through).
+- Does: &quot;Done&quot; button on each row (shown on already-done rows too) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label &quot;Notification time&quot; and a text field `notify-time` (no value is loaded from the server).
+- Does: &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;. Nothing is stored and no endpoint serves it, so the notification time is NOT saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they get notifications (one of the three most important actions; today it does not persist, so the planner should flag it).
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-content</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL PASS — note: long file (8958 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+- `Today` — the list of reminders that are NOT done yet. Each row shows the reminder title and its due date, with a &quot;Done&quot; button. Clicking &quot;Done&quot; marks the reminder as done and it disappears from this list. This is the first tab and the default view.
+- `All reminders` — the list of every reminder, done and not done. Each row shows the title and due date, with a &quot;Done&quot; button. Done reminders look visibly finished (muted, struck through).
+- `Settings` — one setting: the time of day the user gets notifications. A labelled time field and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Text logo: &quot;Reminders&quot; in bold (there is no logo image; do not use one)
+- Greeting: &quot;Hello Lan&quot; (in the real app the name comes from a variable called `owner`)
+
+Tabs (on every Screen): &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+Today and All reminders:
+- Reminder fields: `id`, `title`, `due` (a date such as 2026-11-01), `done` (true or false)
+- Each row reads: title — due (for example &quot;Pay rent — 2026-11-01&quot;)
+- Button text on every row: &quot;Done&quot;
+- Sample data to use: `Pay rent`, due `2026-11-01`, not done; `Call dentist`, due `2026-11-03`, done. Today shows only &quot;Pay rent&quot;; All reminders shows both.
+- Empty state: the app has no empty text today. Add a short, friendly one for each list (for example &quot;Nothing to do today&quot; and &quot;No reminders yet&quot;).
+
+Settings:
+- Label: &quot;Notification time&quot;
+- Field id: `notify-time`
+- Button: &quot;Save&quot;
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any screen from 320px up.
+- Colours are hard-coded inline instead of using the tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office employees using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. Most of them use it on a phone, but it must also work well on a computer.
+
+## Most important user actions
+1. See today&apos;s tasks (the Today tab opens first and shows only what is not done yet).
+2. Mark a reminder as done with one clear tap or click.
+3. Set the time of day for notifications.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, links, focus rings and primary buttons
+- **Secondary / accent color**: none — do not add an accent color
+- **Neutral palette**: a calm cool-grey scale (for example Tailwind `slate-50` → `slate-900`), with plenty of white
+- **Success / warning / danger**: success #38a169 (used for the &quot;done&quot; state and the confirmation after saving); warning and danger: use Tailwind defaults, only if needed
+- **Body font family**: Inter
+- **Heading font family**: Inter (same as body)
+- **Logo**: text-only logo: &quot;Reminders&quot; in Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+Calm, minimal and quiet, like Things 3 and Todoist. Generous white space, one task per clear row, very few lines and borders, no gradients, no emoji, no heavy shadows. Colour is used sparingly: blue for what is active or actionable, green only for success and done.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well. On desktop keep the content in a comfortable centred column rather than stretching it across the screen.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders where `done` is false, each as &quot;title — due&quot; (fields `title`, `due` from `GET /api/reminders`, filtered client-side in `app/static/app.js`). The header also shows &quot;Hello {{ owner }}&quot; (`owner` is a template variable set in `app/main.py`, currently &quot;Lan&quot;). Empty list: nothing is shown today (no empty state).
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves Today.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder, done and not done, as &quot;title — due&quot; (fields `title`, `due`, `done` from `GET /api/reminders`). Done reminders get the `done` style (grey, struck through).
+- Does: &quot;Done&quot; button on each row (shown on already-done rows too) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label &quot;Notification time&quot; and a text field `notify-time` (no value is loaded from the server).
+- Does: &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;. Nothing is stored and no endpoint serves it, so the notification time is NOT saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they get notifications (one of the three most important actions; today it does not persist, so the planner should flag it).
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/design-prompt.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">✅ Mình đã lưu prompt vào `.ui-workflow/design-prompt.md`. Đây là kịch bản C (giữ nguyên stack FastAPI + Jinja + JS thuần), nên prompt chỉ yêu cầu AI Studio làm phần giao diện.
+
+**Cách dùng**
+1. Mở file, copy mọi thứ nằm giữa hai dòng `=== COPY ... ===` và `=== END COPY ===`, rồi dán vào Google AI Studio (Build).
+2. Trước khi dán, mở Settings. Nếu có tuỳ chọn HTML thuần thì chọn nó, nếu không thì chọn framework nhẹ nhất (React tốt hơn Next.js hay Angular). Mình chưa thử bước này. Nếu không thấy tuỳ chọn nào thì cứ dán, framework nào cũng dùng được.
+3. Khi ưng kết quả, tải về dạng ZIP hoặc đồng bộ lên GitHub. Sau đó chạy `/ui-workflow-skills:ingest-design-export`.
+
+**Những gì mình đã đưa vào prompt**
+- **Phần giao diện:** màu #2b6cb0 và #38a169, font Inter, chữ &quot;Reminders&quot; đậm thay logo, cảm giác tối giản như Todoist và Things 3, ưu tiên điện thoại nhưng máy tính vẫn dùng tốt. Các token màu có sẵn trong `styles.css` được giữ lại.
+- **Chữ và tên trường:** mình lấy đúng từ template hiện có (Today, All reminders, Settings, Notification time, Save, Done, `title`, `due`, `done`).
+- **Việc cần cải thiện:** trang cố định 800px nên cuộn ngang trên điện thoại, màu viết cứng trong HTML, tab không báo đang ở tab nào, và chưa có trạng thái trống.
+- **Ràng buộc:** Today chỉ hiện việc chưa xong, và từng nhắc việc vẫn đánh dấu xong được.
+- **Phần chỉ lập trình viên đọc:** `## Required behaviour` nằm sau `END COPY`, bạn không cần dán phần này. Mình đã cập nhật trạng thái workflow, bước tiếp theo là ingest.
+
+**Hai điểm bạn nên biết**
+- **Đặt giờ thông báo chưa lưu được:** hiện nút Save chỉ hiện một hộp thoại &quot;Saved …&quot;, không có API nào lưu giá trị này. Đây là một trong ba việc quan trọng nhất của bạn, nên thiết kế chỉ làm đẹp được phần nhìn. Muốn lưu thật thì lập trình viên cần thêm backend. Mình đã ghi chú để bước lập kế hoạch tích hợp báo cáo điểm này.
+- **Chữ cho trạng thái trống là mình đề xuất:** app chưa có chữ này, nên mình gợi ý &quot;Nothing to do today&quot; và &quot;No reminders yet&quot;. Bạn muốn câu khác thì sửa trong file trước khi dán.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour-heading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === END COPY ===[\s\S]*\n## Required behaviour[ \t]*\r?\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (8958 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-02. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. The three Screens share one page today (tabs), but still give each Screen its own page or route, each with the same header and tab bar.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+- `Today` — the list of reminders that are NOT done yet. Each row shows the reminder title and its due date, with a &quot;Done&quot; button. Clicking &quot;Done&quot; marks the reminder as done and it disappears from this list. This is the first tab and the default view.
+- `All reminders` — the list of every reminder, done and not done. Each row shows the title and due date, with a &quot;Done&quot; button. Done reminders look visibly finished (muted, struck through).
+- `Settings` — one setting: the time of day the user gets notifications. A labelled time field and a &quot;Save&quot; button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Text logo: &quot;Reminders&quot; in bold (there is no logo image; do not use one)
+- Greeting: &quot;Hello Lan&quot; (in the real app the name comes from a variable called `owner`)
+
+Tabs (on every Screen): &quot;Today&quot;, &quot;All reminders&quot;, &quot;Settings&quot;. The active tab must be clearly marked.
+
+Today and All reminders:
+- Reminder fields: `id`, `title`, `due` (a date such as 2026-11-01), `done` (true or false)
+- Each row reads: title — due (for example &quot;Pay rent — 2026-11-01&quot;)
+- Button text on every row: &quot;Done&quot;
+- Sample data to use: `Pay rent`, due `2026-11-01`, not done; `Call dentist`, due `2026-11-03`, done. Today shows only &quot;Pay rent&quot;; All reminders shows both.
+- Empty state: the app has no empty text today. Add a short, friendly one for each list (for example &quot;Nothing to do today&quot; and &quot;No reminders yet&quot;).
+
+Settings:
+- Label: &quot;Notification time&quot;
+- Field id: `notify-time`
+- Button: &quot;Save&quot;
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any screen from 320px up.
+- Colours are hard-coded inline instead of using the tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+
+## Target users
+About 20 office employees using this as an internal tool. They are not technical, so everything must be obvious at a glance with no instructions. Most of them use it on a phone, but it must also work well on a computer.
+
+## Most important user actions
+1. See today&apos;s tasks (the Today tab opens first and shows only what is not done yet).
+2. Mark a reminder as done with one clear tap or click.
+3. Set the time of day for notifications.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for the active tab, links, focus rings and primary buttons
+- **Secondary / accent color**: none — do not add an accent color
+- **Neutral palette**: a calm cool-grey scale (for example Tailwind `slate-50` → `slate-900`), with plenty of white
+- **Success / warning / danger**: success #38a169 (used for the &quot;done&quot; state and the confirmation after saving); warning and danger: use Tailwind defaults, only if needed
+- **Body font family**: Inter
+- **Heading font family**: Inter (same as body)
+- **Logo**: text-only logo: &quot;Reminders&quot; in Inter, bold
+- **Tone**: minimal
+- **Reference sites/apps** (for feel — do NOT clone): Todoist, Things 3
+
+## Visual personality
+Calm, minimal and quiet, like Things 3 and Todoist. Generous white space, one task per clear row, very few lines and borders, no gradients, no emoji, no heavy shadows. Colour is used sparingly: blue for what is active or actionable, green only for success and done.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first, desktop must also work well. On desktop keep the content in a comfortable centred column rather than stretching it across the screen.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required**
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: reminders where `done` is false, each as &quot;title — due&quot; (fields `title`, `due` from `GET /api/reminders`, filtered client-side in `app/static/app.js`). The header also shows &quot;Hello {{ owner }}&quot; (`owner` is a template variable set in `app/main.py`, currently &quot;Lan&quot;). Empty list: nothing is shown today (no empty state).
+- Does: &quot;Done&quot; button on each row calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves Today.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder, done and not done, as &quot;title — due&quot; (fields `title`, `due`, `done` from `GET /api/reminders`). Done reminders get the `done` style (grey, struck through).
+- Does: &quot;Done&quot; button on each row (shown on already-done rows too) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label &quot;Notification time&quot; and a text field `notify-time` (no value is loaded from the server).
+- Does: &quot;Save&quot; only shows a browser alert &quot;Saved &lt;value&gt;&quot;. Nothing is stored and no endpoint serves it, so the notification time is NOT saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+- The user can set the time they get notifications (one of the three most important actions; today it does not persist, so the planner should flag it).
+</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Mình viết prompt cho công cụ thiết kế luôn nhé. Mình trả lời trước hết các câu hỏi để khỏi phải hỏi lại:</p>
+<ul>
+<li>Công cụ thiết kế: Google AI Studio.</li>
+<li>Người dùng: nội bộ, khoảng 20 nhân viên văn phòng, không rành kỹ thuật.</li>
+<li>Ba việc quan trọng nhất: xem việc cần làm hôm nay, đánh dấu một nhắc việc là đã xong, đặt giờ nhận thông báo.</li>
+<li>Thương hiệu: giữ màu xanh dương #2b6cb0 làm màu chính và xanh lá #38a169 cho trạng thái thành công. Font Inter. Chưa có logo, chỉ dùng chữ "Reminders" đậm.</li>
+<li>Cảm giác: tối giản, bình tĩnh, nhiều khoảng trắng.</li>
+<li>Thiết bị: điện thoại quan trọng nhất, máy tính cũng phải dùng tốt.</li>
+<li>Tham khảo: Todoist và Things 3.</li>
+<li>Bắt buộc phải có: vẫn đánh dấu xong được từng nhắc việc, và tab Hôm nay chỉ hiện những việc chưa xong.</li>
+<li>Ràng buộc kỹ thuật: không có.</li>
+<li>Phần không cần thiết kế lại: không có, làm lại cả ba tab.</li>
+</ul>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">brief-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit,\\s*brief\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">copy-markers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== COPY EVERYTHING BELOW INTO[^\\n]*===[\\s\\S]*=== END COPY ===&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">design-tool-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Design tool:\\s*Google AI Studio&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">existing-tokens</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;--color-primary&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-ingest</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*ingest\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-framework-ban</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;([Dd]o\\s+\\*{0,2}[Nn][Oo][Tt]\\*{0,2}|[Dd]on.t|[Nn]ever|[Mm]ust\\s+not)\\s+use\\s+(React|Vue|Svelte|Angular|JSX|any|a\\s+(JS\\s+)?framework|(JS\\s+)?frameworks)|[Dd]iscard everything&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">one-shared-style</span><span class="badge">llm</span></div>
+<div class="md"><p>The part of this file between the COPY markers asks for one visual style shared by every Screen and for every Screen to be built in this first message. It does not ask for several variations of a Screen, and nothing in it depends on a later message, such as "I will pick one, then you apply it to every Screen".</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-content</span><span class="badge">llm</span></div>
+<div class="md"><p>The part of this file between the COPY markers is a Design prompt written in English (UI copy quoted from the project may stay as it is; no Vietnamese sentences). It asks for the look only (layout, spacing, colours, fonts, component states), prefers plain HTML with one CSS file and CSS variables, and asks for no routing, state or real backend. It does not forbid React or other frameworks and does not say framework code will be discarded. It asks for one page or route per Screen and names the Today, All reminders and Settings screens, and it quotes real copy from the project such as "Done", "Notification time" or "Save".</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.ui-workflow/design-prompt.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is written in Vietnamese, says the Design prompt was saved to <code>.ui-workflow/design-prompt.md</code>, tells the Stakeholder to copy it into Google AI Studio, and names the next step <code>/ui-workflow-skills:ingest-design-export</code>. It does not ask the interview questions the Stakeholder already answered.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">required-behaviour-heading</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== END COPY ===[\\s\\S]*\\n## Required behaviour[ \\t]*\\r?\\n&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">required-behaviour</span><span class="badge">llm</span></div>
+<div class="md"><p>After the COPY block, a <code>## Required behaviour</code> section in English covers each existing screen (Today, All reminders, Settings) with what it does today: Today and All reminders list reminders from <code>/api/reminders</code> and let the user mark one done through <code>/api/reminders/{id}/done</code>; Settings has a notification time field and a Save button. It also lists the Stakeholder's must-haves: marking each reminder done keeps working, and Today shows only reminders that are not done.</p>
+</div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

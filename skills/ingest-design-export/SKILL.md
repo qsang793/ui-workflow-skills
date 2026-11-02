@@ -113,6 +113,8 @@ Read what landed in `.ui-workflow/export/`.
 
 Name each Screen as the export labels it (tab text, page title, route name).
 
+Under Scenario C, routes or views that show the same heading, fields and purpose in different looks are variations of one Screen. List that Screen once with every Export file, and say the next step asks which one to use. Never decide this from route names alone, and never choose one here.
+
 Under Scenario C, when you cannot tell what the Screens are, list the files that render UI and ask the Stakeholder to name the Screens; never guess. Under A and B, report the Screens you find and never stop on them. Under Scenario C:
 
 - The export renders nothing at all (screenshots only, an empty folder, backend, server or config code only): there is nothing to point to. Report the mismatch and STOP.
@@ -148,7 +150,7 @@ When the export fits, complete the step in the Workflow state (step 0), then rep
 - Backup: <.ui-workflow/export-backup-<timestamp>/ | none>
 
 ### Screens
-- <Screen> — <Export file>
+- <Screen> — <Export file>[, <Export file>: variations, the next step asks which one to use]
 
 ### Next step
 <B, C: /ui-workflow-skills:integration-planner | A: /ui-workflow-skills:integration-wire>
@@ -156,7 +158,7 @@ When the export fits, complete the step in the Workflow state (step 0), then rep
 
 ### 6. Ask for screenshots
 
-Ask for one screenshot per Screen from the Design tool's preview, saved as `.ui-workflow/export/screenshots/<Screen>.png`, where `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). List the file name for each Screen and create the folder. They help `design-port` check layout. The Stakeholder may skip this; skipping never blocks the step, which is already completed.
+Ask for one screenshot per Screen from the Design tool's preview, saved as `.ui-workflow/export/screenshots/<Screen>.png`, where `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). List the file name for each Screen and create the folder. Leave out a Screen with variations: the planner asks for its screenshot once one is chosen. They help `design-port` check layout. The Stakeholder may skip this; skipping never blocks the step, which is already completed.
 
 ## Critical Rules
 
@@ -171,7 +173,7 @@ Ask for one screenshot per Screen from the Design tool's preview, saved as `.ui-
 
 - **Taking the Scenario from the export instead of the Workflow state.** The Stakeholder already chose it.
 - **Rejecting a React or TanStack export under Scenario C.** Any framework is accepted; only an export with no Screen is a mismatch (ADR-0004).
-- **Counting files as Screens.** `components/ui/button.tsx` is not a Screen, and one `App.tsx` with three tabs is three Screens.
+- **Counting files as Screens.** `components/ui/button.tsx` is not a Screen, and one `App.tsx` with three tabs is three Screens. Three routes that draw the same Screen in different looks are one Screen.
 - **Flattening a ZIP with several top-level folders** (`src/`, `public/`). Flatten only when there is exactly one.
 
 ## Related Skills

@@ -36,13 +36,11 @@ You are designing a complete web application from scratch.
 - Use shadcn/ui components where they fit
 - Place mock data in a single `lib/mock/` directory so it's easy to swap for real APIs later
 
-## Iteration
-After the first version, I will ask for 2–3 alternatives focused on:
-- Layout variations (sidebar vs top nav, dense vs spacious)
-- Color/palette variations
-- Typography variations
-
-Prepare to iterate based on which one I pick.
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every page, from the same colours, fonts and components.
+- Build every page above in this first build. Do not stop after the first page, and do not ask me to choose anything first.
+- Build one version of each page: no alternative versions, variations or style switchers.
 
 ## Out of scope (do not implement)
 - Backend / database — assume a REST API exists that returns the mock shapes

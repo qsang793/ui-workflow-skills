@@ -57,5 +57,8 @@ You are redesigning the frontend of an existing web application. The **backend s
 - ❌ Do NOT redesign the response shapes — adapt your UI to them
 - ❌ Do NOT add a separate state management library if the framework's defaults suffice
 
-## Iteration
-Provide one full implementation, then offer 2 layout/style variations.
+## One shared style
+This may be the only message I can send, so build everything now.
+- Choose one visual style yourself and use it on every page, from the same colours, fonts and components.
+- Build every page above in this first build. Do not stop after the first page, and do not ask me to choose anything first.
+- Build one version of each page: no alternative versions, variations or style switchers.

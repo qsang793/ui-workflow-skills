@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T04:11:46.596Z",
+  "durationSeconds": 26,
+  "costUsd": 0.123032,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "planner-variation-chosen",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "planner-variation-chosen",
+      "dir": "evals/planner-variation-chosen",
+      "source": "mixed",
+      "promptMarkdown": "Use the cards one for Today. Now re-run the integration planner step, as the plan says.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "chosen-in-screens",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Screens(?:(?!\\n## )[\\s\\S])*TodayCards",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "decision-recorded",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*use[^\\n]*TodayCards",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "next-is-port",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*port\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-pending",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*pending",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "others-not-in-screens",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Screens(?:(?!\\n## )[\\s\\S])*Today(Compact|Timeline)",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "planner-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "unchosen-action-left-out",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "Snooze",
+            "flags": "",
+            "match": "not_contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.7142857142857143,
+            "passed": false,
+            "turns": 7,
+            "costUsd": 0.123032,
+            "judgeCostUsd": 0,
+            "durationSeconds": 25,
+            "startedAt": "2026-11-02T04:11:46.824Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-3J8Gjk/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "chosen-in-screens",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Screens(?:(?!\\n## )[\\s\\S])*TodayCards",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "decision-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in file .ui-workflow/integration-plan.md",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pending",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "others-not-in-screens",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "unchosen-action-left-out",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern found (expected absent)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.7142857142857143,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0.7142857142857143,
+    "overallPassRate": 0
+  }
+}

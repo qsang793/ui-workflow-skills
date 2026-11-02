@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T04:20:56.596Z",
+  "durationSeconds": 35,
+  "costUsd": 0.12488709999999999,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "planner-matching-backend",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "planner-matching-backend",
+      "dir": "evals/planner-matching-backend",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "export-not-installed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "files",
+            "pattern": "node_modules",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "next-is-port",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*port\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-blockers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-decisions",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "planner-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "screen-per-view",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "screens-and-no-invented-issues",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The Screens table has one row for each of the Today, All reminders and Done views, all with Export file src/App.tsx followed by #<view>, and no row for main.tsx. The plan invents no problems: no Blockers, no Stakeholder decisions, and anything under Not checked is something genuinely not verified rather than a made-up issue.",
+          "config": {
+            "criteria": "The Screens table has one row for each of the Today, All reminders and Done views, all with Export file src/App.tsx followed by #<view>, and no row for main.tsx. The plan invents no problems: no Blockers, no Stakeholder decisions, and anything under Not checked is something genuinely not verified rather than a made-up issue.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "verdict-proceed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*PROCEED(?! WITH)",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.12488709999999999,
+            "judgeCostUsd": 0.0009034000000000001,
+            "durationSeconds": 34,
+            "startedAt": "2026-11-02T04:20:56.832Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-SrIsO7/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "export-not-installed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-decisions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Needs Stakeholder decision\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screen-per-view",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^(?=[\\s\\S]*App\\.tsx#today)(?=[\\s\\S]*App\\.tsx#all)(?=[\\s\\S]*App\\.tsx#done)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "screens-and-no-invented-issues",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-11-02\n\n## Verdict: PROCEED\n\nThe design shows three Screens (Today, All reminders, Done). Every field they display (`title`, `due`, `done`) comes from `GET /api/reminders`, and the only action (Done) is served by `POST /api/reminders/{id}/done`. The Done Screen is a filter on `done === true` of the same data, so no new backend is needed. Blockers: 0. No adapters needed. No design-only actions.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- none\n\n## Not checked\n- none\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `.ui-workflow/export/src/App.tsx#today` | `app/templates/index.html#today` | title, due | Done | `GET /api/reminders` (filter `done` false); `POST /api/reminders/{id}/done` |\n| All reminders | `.ui-workflow/export/src/App.tsx#all` | `app/templates/index.html#all` | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `.ui-workflow/export/src/App.tsx#done` | `app/templates/index.html` (new `#done` view; Stakeholder must-have) | title, due | none | `GET /api/reminders` (filter `done` true, computed in the frontend) |\n\nNotes for the port:\n- The design has no Settings tab. Settings is \"not redesigned\" and must keep working, so the port must keep a way to reach it.\n- The design drops the \"Hello {{ owner }}\" greeting and the logo. Neither is Required behaviour; confirm with the Stakeholder when showing each Screen.\n\n## Next step\nRun `/ui-workflow-skills:design-port`.\n"
+              },
+              {
+                "name": "verdict-proceed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Verdict:\\s*PROCEED(?! WITH)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

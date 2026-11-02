@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T04:21:32.582Z",
+  "durationSeconds": 25,
+  "costUsd": 0.11552470000000001,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "planner-design-only-action",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "planner-design-only-action",
+      "dir": "evals/planner-design-only-action",
+      "source": "mixed",
+      "promptMarkdown": "The new design is staged. Check it against our backend before we port it. If the design has buttons our backend can't do yet, just leave them out for now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 30,
+      "graders": [
+        {
+          "name": "decision-drop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*drop",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "email-is-decision",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The plan lists the \"Email me\" action under Needs Stakeholder decision with the decision to drop it, and does not list it, or anything else, as a Blocker.",
+          "config": {
+            "criteria": "The plan lists the \"Email me\" action under Needs Stakeholder decision with the decision to drop it, and does not list it, or anything else, as a Blocker.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            }
+          }
+        },
+        {
+          "name": "next-is-port",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*port\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-blockers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-pending",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "decision:\\s*pending",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "not-stop",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/integration-plan.md"
+            },
+            "pattern": "## Verdict:\\s*STOP",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "planner-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.11552470000000001,
+            "judgeCostUsd": 0.0003944,
+            "durationSeconds": 25,
+            "startedAt": "2026-11-02T04:21:32.811Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-O11TlL/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "decision-drop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched decision:\\s*drop",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "email-is-decision",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Integration Plan — 2026-11-02\n\n## Verdict: PROCEED\n\nNo Blockers. Every field the design shows (`title`, `due`, `done`) and every Required behaviour (list reminders, mark one done) is served by the existing backend. The new Done view only filters `done: true` from `GET /api/reminders`, so the backend already supplies it. One design-only button (\"Email me\") has no backend and is dropped, as the Stakeholder instructed.\n\n## Blockers\n- none\n\n## Needs Stakeholder decision\n- Today, All reminders, Done: \"Email me\" button | backend missing (no email/notification endpoint) | decision: drop\n\n## Not checked\n- `export/src/main.tsx` and `export/package.json` were not read; the Screens come from `App.tsx`, which renders all of them.\n\n## Screens (Scenario C)\n| Screen | Export file | Target template | Data it displays | Actions | Backend source |\n|---|---|---|---|---|---|\n| Today | `src/App.tsx#today` | `app/templates/index.html` (`#today`) | title, due | Done | `GET /api/reminders` (filter `done == false` in the browser); `POST /api/reminders/{id}/done` |\n| All reminders | `src/App.tsx#all` | `app/templates/index.html` (`#all`) | title, due, done | Done (unfinished only) | `GET /api/reminders`; `POST /api/reminders/{id}/done` |\n| Done | `src/App.tsx#done` | `app/templates/index.html` (new `#done` tab; no existing view) | title, due | none | `GET /api/reminders` (filter `done == true` in the browser) |\n\nSettings is not in the design and is not redesigned; it stays as it is.\n\n## Next step\nRun `/ui-workflow-skills:design-port`. Leave out the \"Email me\" button on every Screen.\n"
+              },
+              {
+                "name": "next-is-port",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*port\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-blockers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ## Blockers\\s*\\n\\s*-\\s*[Nn]one",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-pending",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "not-stop",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "planner-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest,\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}
