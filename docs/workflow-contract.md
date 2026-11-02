@@ -80,6 +80,7 @@ Scenario A skips audit and planner by design. A skipped step is never reported a
 | `ui-scenario-picker` | Creates the file. Sets every field: Scenario, Scenario reason, Maturity, Stakeholder language, Completed steps `picker`, Current step = the next step for the Scenario, the rest `none`. |
 | `design-brief` | Design tool |
 | First skill that changes project code (`design-port`, `integration-wire`) | Work branch, as soon as it creates or reuses the branch |
+| `preview-deploy`, on a [way back](#going-back-from-the-preview) | Sets Current step `port` and takes `port` out of Completed steps, the one case where a step leaves that list |
 | Every skill, on success | Appends its step to Completed steps, sets Current step to the next step for the Scenario, sets Blocked to `none`, updates Stakeholder language if the Stakeholder switched, sets Updated |
 
 A STOP, a Scenario mismatch or an escalation never marks a step as completed. The skill leaves Completed steps as they were, sets Current step to its own step and writes the reason in Blocked. When the picker escalates (for example, a half-finished framework migration), it still writes the file, with Scenario `none`, Maturity `none`, Completed steps `none`, Current step `picker` and the reason in Blocked, so a new session sees why the workflow stopped.
@@ -91,6 +92,7 @@ Every code change of one workflow run lives on one Work branch, `ui-workflow/<yy
 - The first skill that changes project code creates it from the current commit, or switches to the one named in the Workflow state, and records it there before changing anything. Uncommitted changes the Stakeholder already had come along untouched.
 - Nothing is ever committed to the main branch. Skills never push, merge, rebase or open a pull request; the Developer does.
 - One commit per Stakeholder-approved Screen, `ui-workflow: port <Screen>`, staged by path: the files of that Screen and the `.ui-workflow` documents that are new or changed (`state.md`, `audit.md`, `design-prompt.md`, `integration-plan.md`). Never the Stakeholder's pre-existing uncommitted changes, which are the paths outside `.ui-workflow/` that `git status --porcelain` lists before the first change (except the `.ui-workflow/` lines earlier steps added to `.gitignore`; in later turns, those that are not files of the Screen awaiting approval) and are never staged, stashed or reset. A Screen that needs a file the Stakeholder had already changed stops and asks.
+- A change to a committed Screen that comes back from the Preview (see [Going back from the Preview](#going-back-from-the-preview)) gets its own commit, `ui-workflow: port fix <Screen>: <what changed>`, staged the same way.
 - `integration-wire` has no Screens: one commit per Stakeholder-approved wiring, `ui-workflow: wire` (a later fix: `ui-workflow: wire <what changed>`), made once the build passes and staged the same way, with the frontend's paths and `wiring.md`. The Stakeholder's pre-existing changes are found the same way; in later turns, those outside the frontend folder, apart from the ignore lines this step added.
 - A project that is not a git repository stops and escalates to the Developer.
 
@@ -106,6 +108,24 @@ Every skill except the picker reads `.ui-workflow/state.md` first and stops with
 4. An earlier step of the Scenario is not in Completed steps: name the first missing step and its command. Never guess its output.
 
 The picker reads the file too. If a Scenario is already recorded, it says which one and asks whether to start over before replacing the file.
+
+## Going back from the Preview
+
+While Current step is `preview`, `preview-deploy` sorts what the Stakeholder reports against the Screens table of the plan (Scenarios A and B: the `Frontend folder` of `wiring.md`). It changes no code. When it cannot tell where a problem is, it asks where the Stakeholder saw it.
+
+**A change to a committed Screen** (Scenario C): the Stakeholder withdraws the approval of a Screen, or reports a problem in one.
+
+- Only `preview-deploy` moves the run back. `design-port` stops at Current step `preview` and gives its command.
+- It always records the change under `## Return to the Port` in `preview.md`.
+- With Blocked `none`, it closes the Preview, sets Current step `port` and takes `port` out of Completed steps, so the Preview cannot run again before the change is made. It names the `design-port` command.
+- With a reason in Blocked, only a Developer may clear it, in the chat or in the file. A Stakeholder's withdrawal does not clear it, and no skill clears it on its own. `preview-deploy` moves nothing, repeats the reason and stops. Once a Developer has cleared it, the run goes back as above. A recorded change is settled before any new Preview opens, even when the step is re-run.
+- `design-port` makes one listed change per turn, shows it and waits. On approval it commits `ui-workflow: port fix <Screen>: <what changed>` and removes the line. After the last line it completes its step as usual, and the next Preview is a new one.
+
+Under Scenarios A and B, a problem in the new frontend closes the Preview and points to `integration-wire`, as before.
+
+**A gap outside the planned Screens:** a part with no row in the Screens table (A, B: outside the `Frontend folder`), such as one marked `(not redesigned)` in the Design prompt. `preview-deploy` records it under `## Gaps for the Developer` in `preview.md`. The Preview stays open, and the Workflow state and the code do not change. A gap does not hold up approval, and the closing message lists the gaps for the Developer, who removes a line once it is settled.
+
+Once Current step is `done`, the Preview is approved and closed. A change after that is the Developer's to decide, and `preview-deploy` moves nothing.
 
 ## Language
 
@@ -255,6 +275,14 @@ Rules for the wiring:
 - Processes: <app pid, tunnel pid> | none
 - Status: <chosen | open | failed: <reason> | closed>
 - Updated: <yyyy-mm-dd> by preview-deploy
+
+## Return to the Port
+- <Screen>: <what to change, in the Stakeholder's words>
+
+## Gaps for the Developer
+- <yyyy-mm-dd>: <part>: <what they saw, on which device>
 ```
+
+Each section appears only when it has a line. `design-port` removes a line under `## Return to the Port` once its change is committed; the gaps stay when the Preview step runs again.
 
 `preview-deploy` writes it as soon as it has chosen the host, before checking any tool or account, and updates it as the Preview opens and closes. The host follows the project's shape (ADR-0003): `vercel` only for a static frontend whose backend is public or absent, deployed to the preview target by name, with the target read back and the production aliases checked from outside, never a production deploy; `tunnel` (local run with the audit's `Run` command, exposed through a temporary tunnel) when the backend serves the frontend, or when a static frontend reaches a local backend through the same origin; `staging` only when the project has one and the Developer confirms it. It is git-ignored because it holds a shareable link and local process ids. After approval the tunnel is stopped or the Developer confirms the shareable link is revoked, and Status is `closed`. Any stop before the link is verified sets Status `failed: <reason>`.

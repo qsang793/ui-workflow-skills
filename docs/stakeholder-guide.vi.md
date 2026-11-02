@@ -188,7 +188,11 @@ Claude kiểm tra link mở được từ bên ngoài rồi mới đưa cho bạ
 
 Đã đánh dấu hết: trả lời **preview approved**. Nếu bạn chỉ nói trông ổn, Claude sẽ hỏi bạn đã kiểm những ô nào. Sau đó link được đóng: Claude dừng tunnel, hoặc chờ Developer tắt Shareable Link.
 
-Có gì sai: mô tả cái gì hỏng và trên thiết bị nào, và đừng duyệt. Claude đóng Preview và nêu bước sẽ sửa lỗi đó.
+Có gì sai ở một Screen đã lên kế hoạch: mô tả cái gì hỏng và trên thiết bị nào, và đừng duyệt. Claude đóng Preview và nêu bước sẽ sửa lỗi đó.
+
+Trong Scenario C, bạn cũng có thể rút lại việc đã duyệt một Screen. Claude đóng Preview, ghi lại thay đổi và nêu bước Port. Thay đổi được làm trên chính Screen đó và cho bạn xem lại, chỉ được lưu sau khi bạn duyệt, rồi một Preview mới được mở. Nếu có bước đang ghi `Blocked`, thay đổi của bạn vẫn được ghi lại, nhưng Developer phải gỡ `Blocked` trước.
+
+**Những phần bạn để ngoài brief.** Preview dành cho các Screen đã lên kế hoạch. Phần bạn để ngoài brief không được thiết kế lại, nên quy trình này chưa kiểm tra chất lượng của phần đó trên điện thoại, và nó có thể chưa tốt ở đó. Nếu thấy vấn đề ở phần đó, hãy mô tả nó. Claude ghi lại cho Developer, không Screen nào bị đổi, và Preview vẫn mở. Việc này không cản bạn duyệt.
 
 ### Sau khi duyệt
 
@@ -212,6 +216,8 @@ UI đã duyệt nằm trên Work branch và chưa có gì được push. Push, m
 | Preview: chưa đăng nhập Vercel, dự án cần bản deploy trang giữ chỗ đầu tiên, cần tạo hoặc đóng Shareable Link, không có công cụ tunnel nào chạy được, hoặc link không mở được từ bên ngoài | Thiết lập hoặc sửa |
 | Preview: Vercel báo không phải preview, hoặc địa chỉ production của dự án mở được | Gỡ khỏi địa chỉ công khai, hoặc xác nhận đó là trang đã phát hành |
 | Preview vẫn hiện UI cũ hoặc các nút không làm gì, và chạy bước Claude nêu cũng không khỏi | Tìm nguyên nhân |
+| Bạn rút lại việc duyệt trong khi có bước đang ghi `Blocked` | Quyết định về lý do đó và gỡ `Blocked`, để quy trình quay lại bước Port |
+| Claude đã ghi lại một vấn đề nằm ngoài các Screen đã lên kế hoạch | Quyết định có sửa không và khi nào |
 | UI đã được duyệt | Review, merge và phát hành |
 
 Một bước ghi `Blocked` sẽ không đi tiếp cho tới khi Developer quyết định. Chạy lại chính bước đã dừng thì luôn được phép.

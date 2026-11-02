@@ -4,6 +4,14 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 
 ## [Unreleased]
 
+### Fixed — a way back from the Preview, and somewhere for gaps outside the planned Screens (#33)
+- Scenario C: a withdrawn approval or a problem in a planned Screen goes back through `preview-deploy`. It closes the Preview, records the change under `## Return to the Port` in `preview.md`, sets `Current step: port` and takes `port` out of `Completed steps`. `design-port` makes the change, shows it, and on approval commits `ui-workflow: port fix <Screen>: <what changed>`. It stops at `Current step: preview` and gives the `preview-deploy` command.
+- A `Blocked` reason stays until a Developer clears it. A Stakeholder's withdrawal is recorded and moves nothing.
+- A gap outside the planned Screens, such as a part marked `(not redesigned)`, is recorded under `## Gaps for the Developer` in `preview.md`. The Preview stays open, and the state and the code do not change. The closing message lists the gaps.
+- The Stakeholder guides say that a part left out of the brief is not tested for quality on a phone.
+- After `Current step: done` a change is the Developer's to decide, and `preview-deploy` moves nothing.
+- Evals: new `preview-return-to-port`, `preview-return-blocked`, `port-return-commits-fix` and `preview-gap-outside-screens`, all failing on the earlier skills. A commit needs an approval in a later turn, so one case stops at the state change and another starts from a change already made. They use a staging Preview, because the eval sandbox refuses what closing a tunnel needs. No grader proves what the fix commit holds. Local run 2026-11-02, the 11 new and `preview-*` cases × 3 runs on Sonnet, every case above the 0.8 threshold; the lowest are `preview-first-deploy` at 0.90 and `preview-server-rendered` at 0.93, both on LLM reply graders (`evals/results/2026-11-02T04-12-27-206Z/`). Full suite 2026-11-02 before the review fixes, 38 cases × 1 run, every case at or above 0.8 (`evals/results/2026-11-02T04-02-39-618Z/`).
+
 ### Fixed — Port runs every project check and leads with failures (#32)
 - `ui-audit` records every check command in the project on a new `Checks` line next to `Run`, or `none found`.
 - `design-port` runs all of them before showing each Screen, plus any the line misses, and never skips one on a guess. It installs nothing, and a check that cannot run that way counts as not run. A check that fails or did not run opens the report, above the approval question, in words the Stakeholder can follow. It never edits a check or its snapshot to make it pass.

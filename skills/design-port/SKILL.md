@@ -1,6 +1,6 @@
 ---
 name: design-port
-description: Use for Scenario C only, after integration-planner returned PROCEED or PROCEED WITH CAUTION — Ports the Design export (any framework or plain HTML + CSS, read as a visual reference, never installed or run) into the project's existing templates and styles, one Screen per turn on the Work branch. Shows each Screen in the locally running app, waits for the Stakeholder's approval, then commits only that Screen. Never pushes or merges.
+description: Use for Scenario C only, after integration-planner returned PROCEED or PROCEED WITH CAUTION — Ports the Design export (any framework or plain HTML + CSS, read as a visual reference, never installed or run) into the project's existing templates and styles, one Screen per turn on the Work branch. Shows each Screen in the locally running app, waits for the Stakeholder's approval, then commits only that Screen. Also makes a change to a committed Screen once preview-deploy has moved the run back; a change asked for while the workflow is at the Preview step starts with preview-deploy, not here. Never pushes or merges.
 ---
 
 # Design Port
@@ -13,6 +13,7 @@ In Scenario C the project keeps its stack. The Design export is a visual referen
 
 - Scenario C, after `integration-planner` returned `PROCEED` or `PROCEED WITH CAUTION`
 - Each time the Stakeholder approves, or asks to change, the last Ported Screen
+- After `preview-deploy` moved the run back for a change to a committed Screen
 
 ## When NOT to Use
 
@@ -30,10 +31,11 @@ Read `.ui-workflow/state.md` at the project root before anything else. Take the 
 - The file is missing: say the Scenario has not been picked yet and give the command `/ui-workflow-skills:ui-scenario-picker`.
 - `Blocked` is not `none` and `Current step` is another step: repeat the reason and say a Developer must decide first. Re-running the step that stopped is allowed.
 - `Scenario` is not `C`: say this step is for Scenario C only and give the command for the recorded `Current step`.
+- `Current step` is `preview`: a change to a committed Screen goes back through the Preview step, which closes the Preview first. Give the command `/ui-workflow-skills:preview-deploy`.
 - `Completed steps` lacks `planner`. Name the first missing step and its command, and never guess its output.
 - `.ui-workflow/integration-plan.md` has Verdict `STOP` or a `decision: pending`: say the planner must be settled first and give its command.
 
-The step succeeds only after the Stakeholder approves the last Screen (step 6). Then append `port` to `Completed steps`, set `Current step: preview`, `Blocked: none`, update `Stakeholder language` if the Stakeholder switched language, and set `Updated: <YYYY-MM-DD> by design-port`. A STOP, a mismatch or an escalation never completes the step: leave `Completed steps` as it is, set `Current step: port` and write the reason in `Blocked`. Step commands: picker `/ui-workflow-skills:ui-scenario-picker`, audit `/ui-workflow-skills:ui-audit`, brief `/ui-workflow-skills:design-brief`, ingest `/ui-workflow-skills:ingest-design-export`, planner `/ui-workflow-skills:integration-planner`, port `/ui-workflow-skills:design-port`, wire `/ui-workflow-skills:integration-wire`, preview `/ui-workflow-skills:preview-deploy`.
+The step succeeds only after the Stakeholder approves the last Screen, or the last change that came back from the Preview (step 6). Then append `port` to `Completed steps`, set `Current step: preview`, `Blocked: none`, update `Stakeholder language` if the Stakeholder switched language, and set `Updated: <YYYY-MM-DD> by design-port`. A STOP, a mismatch or an escalation never completes the step: leave `Completed steps` as it is, set `Current step: port` and write the reason in `Blocked`. Step commands: picker `/ui-workflow-skills:ui-scenario-picker`, audit `/ui-workflow-skills:ui-audit`, brief `/ui-workflow-skills:design-brief`, ingest `/ui-workflow-skills:ingest-design-export`, planner `/ui-workflow-skills:integration-planner`, port `/ui-workflow-skills:design-port`, wire `/ui-workflow-skills:integration-wire`, preview `/ui-workflow-skills:preview-deploy`.
 
 ### 1. Get on the Work branch
 
@@ -52,13 +54,15 @@ The Screens and their order come from the Screens table of `.ui-workflow/integra
 
 If `Blocked` says a Screen was Ported but the app did not start, its uncommitted files are that Screen's, not the Stakeholder's. Go to step 4 and show it, without Porting it again.
 
-If a Screen was Ported and shown but is not committed yet, read the Stakeholder's latest message first:
+If a Screen was Ported and shown but is not committed yet, or a change listed under `## Return to the Port` in `.ui-workflow/preview.md` was made and shown (the Screen's files have uncommitted changes), read the Stakeholder's latest message first:
 
 - They approve it: commit it (step 5), then go on with the next Screen.
 - They ask for changes, even alongside an approval: change the same Screen, show it again (steps 3–4) and wait. Do not start another Screen.
 - Anything else: remind them which Screen waits for approval and where to see it, and stop.
 
-Then take the first Screen of the table that is not done. **One Screen per turn**: never Port two Screens before the Stakeholder approves the first.
+If `.ui-workflow/preview.md` has lines under `## Return to the Port` (`- <Screen>: <what to change>`), `preview-deploy` moved the run back. Take the first line not yet made: make only that change on that committed Screen, under the rules of step 3, and show it (step 4). If every Screen is done, `port` is not in `Completed steps` and there is no such line, ask which Screen to change and what; never guess.
+
+Otherwise take the first Screen of the table that is not done. **One Screen per turn**: never Port two Screens before the Stakeholder approves the first.
 
 ### 3. Port the Screen
 
@@ -135,18 +139,20 @@ The Screen's report is in the language of the Stakeholder's latest message, even
 Then stop and wait. Commit only after the Stakeholder approves:
 
 - Stage by path, never `git add -A`, `git add .` or `git commit -a`: the files this Screen changed (from its report; in a new session, the uncommitted front-end files that belong to this Screen, asking when unsure) and the workflow documents that are new or changed, `.ui-workflow/state.md`, `audit.md`, `design-prompt.md`, `integration-plan.md` (skip any that git ignores), and `.gitignore` when its only uncommitted change is the workflow's `.ui-workflow/` lines. Never the Stakeholder's own changes, never `.ui-workflow/export/` or `preview.md`.
-- For the last Screen, first update the Workflow state as in step 0, so the commit carries it.
+- For the last Screen, or the last line under `## Return to the Port`, first update the Workflow state as in step 0, so the commit carries it.
 - `git commit -m "ui-workflow: port <Screen>"`. Do not skip hooks. If the commit fails, show the Developer the error, undo a completion you just wrote (`Current step: port`, `port` out of `Completed steps`), write the reason in `Blocked` and stop.
+- A change from `## Return to the Port` is committed as `ui-workflow: port fix <Screen>: <what changed>`, the same way. Once it is committed, remove its line from `preview.md`, and the heading with the last line.
 
 ### 6. Next Screen, or finish
 
-After the commit, Port the next Screen (step 3) in the same turn. After the last Screen's commit, stop the app you started, then tell the Stakeholder every Screen is on the Work branch, nothing was pushed, and the next command is `/ui-workflow-skills:preview-deploy`.
+After the commit, go on with the next line under `## Return to the Port`, or Port the next Screen (step 3), in the same turn. After the last commit, stop the app you started, then tell the Stakeholder every Screen is on the Work branch, nothing was pushed, and the next command is `/ui-workflow-skills:preview-deploy`.
 
 ## Critical Rules
 
 - **One Screen per turn.** Wait for the Stakeholder's approval between Screens.
 - **Work branch only.** Never commit to the main branch; never push or merge.
-- **One commit per approved Screen**, holding only that Screen and its workflow documents, never the Stakeholder's own changes.
+- **One commit per approved Screen**, holding only that Screen and its workflow documents, never the Stakeholder's own changes. A later change gets its own commit, `ui-workflow: port fix <Screen>: <what changed>`.
+- **The way back starts at the Preview step.** Never move the Workflow state back or clear `Blocked` yourself.
 - **Seen before approved.** Each Screen is shown in the locally running app. No deploy per Screen.
 - **Every project check, failures first.** A check that fails or did not run opens the report, above the approval question.
 - **The export is never run.** Read its source; no install, build or run.
@@ -167,4 +173,4 @@ After the commit, Port the next Screen (step 3) in the same turn. After the last
 
 - `integration-planner` — must return PROCEED first; its Screens table drives the order
 - `ui-audit` — records the `Run` line used to show each Screen and the `Checks` line of commands to run
-- `preview-deploy` — runs after the last Screen is approved
+- `preview-deploy` — runs after the last Screen is approved, and moves the run back for a change to a committed Screen
