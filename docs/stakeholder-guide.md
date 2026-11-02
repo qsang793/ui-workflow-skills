@@ -188,7 +188,11 @@ Tick every box, on your real devices:
 
 All ticked: reply **preview approved**. If you only say it looks fine, Claude asks which boxes you checked. The link is then closed: Claude stops the tunnel, or waits for the Developer to switch off the Shareable Link.
 
-Something wrong: describe what broke and on which device, and do not approve. Claude closes the Preview and names the step that fixes it.
+Something wrong in a planned Screen: describe what broke and on which device, and do not approve. Claude closes the Preview and names the step that fixes it.
+
+In Scenario C you can also take back the approval of a Screen. Claude closes the Preview, records the change and names the Port step. The change is made on that Screen and shown to you, it is saved only after you approve it, and then a new Preview opens. If a step says `Blocked`, your change is still recorded, but a Developer must clear `Blocked` first.
+
+**Parts you left out of the brief.** The Preview is for the planned Screens. A part you left out of the brief was not redesigned, so this workflow has not tested its quality on a phone, and it may fall short there. If you find a problem in such a part, describe it. Claude records it for the Developer, no Screen changes, and the Preview stays open. It does not stop you from approving.
 
 ### After approval
 
@@ -212,6 +216,8 @@ Do not try to fix these yourself. Send the Developer Claude's whole message and 
 | Preview: Vercel is not logged in, the project needs its first placeholder deployment, a Shareable Link is needed or must be closed, no tunnel tool works, or the link fails from outside | Sets it up or fixes it |
 | Preview: Vercel reports something other than a preview, or the project's production address opens | Takes it off the public address, or confirms it is the released site |
 | The Preview still shows the old UI or its buttons do nothing, and running the step Claude names does not help | Finds the cause |
+| You took back an approval while a step says `Blocked` | Decides on the reason and clears `Blocked`, so the run can go back to the Port |
+| Claude recorded a problem outside the planned Screens | Decides whether and when to fix it |
 | The UI is approved | Reviews, merges and releases |
 
 A step that says `Blocked` will not move on until the Developer decides. Re-running the step that stopped is always allowed.

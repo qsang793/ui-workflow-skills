@@ -1,6 +1,6 @@
 ---
 name: preview-deploy
-description: Use after integration-wire (A, B) or design-port (C) has finished, before the Stakeholder approves the UI. Puts the changed project on a Preview the Stakeholder can click on their own phone and laptop. Picks the host by project shape: a Vercel preview (never production) for a static frontend that reaches a public backend; otherwise the app runs locally behind a temporary tunnel, or on the project's own staging. Verifies the link from outside, gives the click-test checklist, and closes the tunnel after approval.
+description: Use after integration-wire (A, B) or design-port (C) has finished, before the Stakeholder approves the UI. Puts the changed project on a Preview the Stakeholder can click on their own phone and laptop. Picks the host by project shape: a Vercel preview (never production) for a static frontend that reaches a public backend; otherwise the app runs locally behind a temporary tunnel, or on the project's own staging. Verifies the link from outside, gives the click-test checklist, and closes the tunnel after approval. Also handles a Stakeholder who withdraws an approval or reports a problem at the Preview: sends a change to a committed Screen back to the Port, and records a gap outside the planned Screens for the Developer.
 ---
 
 # Preview Deploy
@@ -14,7 +14,7 @@ The host depends on the project's shape (ADR-0003). A static deploy of a server-
 ## When to Use
 
 - After `integration-wire` (A, B) or `design-port` (C) has completed
-- When the Stakeholder approves or rejects an open Preview (see step 7)
+- When the Stakeholder approves or rejects an open Preview, withdraws the approval of a Screen, or reports a problem (see step 7)
 
 ## When NOT to Use
 
@@ -35,7 +35,7 @@ Read `.ui-workflow/state.md` at the project root before anything else. Take the 
 
 When this step succeeds, after the Stakeholder approves the Preview and it is closed, append `preview` to `Completed steps` and set `Current step: done`; also set `Blocked: none`, update `Stakeholder language` if the Stakeholder switched language, and set `Updated: <YYYY-MM-DD> by preview-deploy`. A STOP, a mismatch or an escalation never completes the step: leave `Completed steps` as it is, set `Current step: preview` and write the reason in `Blocked`. Step commands: picker `/ui-workflow-skills:ui-scenario-picker`, audit `/ui-workflow-skills:ui-audit`, brief `/ui-workflow-skills:design-brief`, ingest `/ui-workflow-skills:ingest-design-export`, planner `/ui-workflow-skills:integration-planner`, port `/ui-workflow-skills:design-port`, wire `/ui-workflow-skills:integration-wire`, preview `/ui-workflow-skills:preview-deploy`.
 
-If `.ui-workflow/preview.md` exists with `Status: open`, a Preview is already running: go to step 7 when the Stakeholder approves or reports a problem, otherwise give them its link and checklist again.
+If `Current step` is `done`, the UI is approved and the Preview is closed: a change now is the Developer's to decide. Say so and stop, without changing anything. If the Stakeholder withdraws an approval or reports a problem, go to step 7, whatever `preview.md` says. Go there too when `preview.md` has lines under `## Return to the Port`, even to re-run the step: a withdrawn approval is settled before any new Preview opens. If `.ui-workflow/preview.md` exists with `Status: open`, a Preview is already running: go to step 7 when the Stakeholder approves, otherwise give them its link and checklist again.
 
 ### 1. Choose the host by project shape
 
@@ -49,7 +49,7 @@ Look at the files yourself; do not ask the Stakeholder. Under Scenarios A and B 
 
 Use `staging` instead only when the project already has its own staging environment (named in the README, a deploy script or CI) and the Developer confirms it is the place to show this branch. Never deploy to production, in any host.
 
-Record the choice before going on: write `.ui-workflow/preview.md` (format in step 8) with `Host`, `Host reason` citing the files you saw, and `Status: chosen`. Make sure the project's `.gitignore` (create it at the project root if absent) covers it: if no existing line does (such as `.ui-workflow/preview.md` or `.ui-workflow/`), append `.ui-workflow/preview.md`. It holds a shareable link and local process ids, so it is never committed.
+Record the choice before going on: write `.ui-workflow/preview.md` (format in step 8) with `Host`, `Host reason` citing the files you saw, and `Status: chosen`. Make sure the project's `.gitignore` (create it at the project root if absent) covers it: if no existing line does (such as `.ui-workflow/preview.md` or `.ui-workflow/`), append `.ui-workflow/preview.md`. It holds a shareable link and local process ids, so it is never committed. Keep its `## Gaps for the Developer` section when this step runs again.
 
 From here on, whenever a step stops (the app does not start, no tunnel opens, Vercel is unavailable, the link fails from outside): close anything you opened (step 7), write `Status: failed: <reason>` in `preview.md` and the reason in `Blocked`, and tell the Stakeholder in plain words that no Preview link is ready. Never hand out a link that failed. Leave local addresses (`localhost`, `127.0.0.1`, a LAN IP) out of the reply, as a link, a workaround or an explanation: they open only on the computer that runs the app. Naming the command that starts the app is fine. When a Vercel check stops, name no Vercel address in the reply either: they go in `preview.md`, where the Developer reads them.
 
@@ -101,7 +101,7 @@ When it passes, write `URL` and `Status: open` in `preview.md`.
 
 Give the Stakeholder the output below. For a tunnel, repeat the public-link and real-data warning.
 
-### 7. Approve or close
+### 7. Approve, go back or record a gap
 
 Approval comes only after the Stakeholder says every checklist box is ticked. If they say "approved" without the checklist, ask which boxes they checked; do not approve on "looks fine".
 
@@ -111,9 +111,18 @@ On approval, close the Preview before anything else:
 - Vercel: ask the Developer to set the Shareable Link back to "Only people with access" and wait until they confirm it is done. The preview deployment itself may stay.
 - Staging: nothing to close.
 
-Then write `Status: closed` in `preview.md` and complete the step in the Workflow state (`Current step: done`). Tell the Stakeholder the UI is approved and that releasing it to production is the Developer's job.
+Then write `Status: closed` in `preview.md` and complete the step in the Workflow state (`Current step: done`). Tell the Stakeholder the UI is approved and that releasing it to production is the Developer's job. List any gaps from `preview.md` in a part addressed to the Developer.
 
-If the Stakeholder reports a problem, close the Preview the same way, list what broke, and point to the step that fixes it: `/ui-workflow-skills:design-port` (C) or `/ui-workflow-skills:integration-wire` (A, B). Do not complete the step.
+When the Stakeholder reports a problem, sort it before doing anything else. This step never changes code. Read the Screens table of `.ui-workflow/integration-plan.md` (C) or the `Frontend folder` of `wiring.md` (A, B), and the `(not redesigned)` marks in `.ui-workflow/design-prompt.md`. If you cannot tell where the problem is, ask where they saw it and stop. A message with both kinds: record the gap first, then go back.
+
+**A gap outside the planned Screens:** a part with no row in the Screens table (A, B: outside the `Frontend folder`), such as one marked `(not redesigned)`. Append `- <YYYY-MM-DD>: <part>: <what they saw, on which device>` under `## Gaps for the Developer` in `preview.md`. Leave the rest of `preview.md`, the Workflow state and the code as they are. Tell the Stakeholder it is outside the planned Screens and recorded for the Developer, that nothing changed, and that the Preview stays open so they can go on with the checklist. A gap does not hold up approval. Do not point to `/ui-workflow-skills:design-port`: it can only change the planned Screens.
+
+**A problem in a planned Screen, or a withdrawn approval, under A or B:** close the Preview the same way, list what broke, and point to `/ui-workflow-skills:integration-wire`. Do not complete the step.
+
+**The same under C** is the way back to the Port. Unless step 0 sent you here for lines already recorded, append `- <Screen>: <what to change, in the Stakeholder's words>` under `## Return to the Port` in `preview.md`, one line per Screen. Then:
+
+- `Blocked` is `none`: close the Preview the same way and write `Status: closed`. Set `Current step: port`, take `port` out of `Completed steps`, so the Preview cannot run again before the change is made, and set `Updated`. Give the command `/ui-workflow-skills:design-port` and stop. That step makes the change, shows it, and commits it after approval as `ui-workflow: port fix <Screen>: <what changed>`.
+- `Blocked` holds a reason: only a Developer may clear it, by saying so in this chat or by editing the Workflow state. A Stakeholder's withdrawal does not clear it, and you never clear it on your own. Until then leave the Workflow state and the rest of `preview.md` as they are: repeat the reason, say the change is recorded and that a Developer must clear `Blocked` first, and stop. When a Developer clears it in this chat, set `Blocked: none` and go on as above.
 
 ### 8. `.ui-workflow/preview.md`
 
@@ -128,7 +137,15 @@ If the Stakeholder reports a problem, close the Preview the same way, list what 
 - Processes: <app pid, tunnel pid> | none
 - Status: <chosen | open | failed: <reason> | closed>
 - Updated: <YYYY-MM-DD> by preview-deploy
+
+## Return to the Port
+- <Screen>: <what to change, in the Stakeholder's words>
+
+## Gaps for the Developer
+- <YYYY-MM-DD>: <part>: <what they saw, on which device>
 ```
+
+Each section appears only when it has a line. `design-port` removes a line under `## Return to the Port` once its change is committed. A Developer removes a gap once it is settled.
 
 ## Output
 
@@ -156,6 +173,7 @@ Reply **"preview approved"**. The link is then closed.
 
 ### If something is wrong
 Describe what broke and on which device. Do not approve.
+A part you left out of the brief was not redesigned: a problem there is recorded for the Developer, and this link stays open.
 ```
 
 ## Critical Rules
@@ -167,6 +185,8 @@ Describe what broke and on which device. Do not approve.
 - **Verify from outside before showing the link.** A link that opens a login page or 404s is worse than no link; report the failure.
 - **Always the checklist.** Approval only after every box is ticked.
 - **Close the tunnel after approval.** A forgotten tunnel is a public door into the Stakeholder's computer.
+- **Only a Developer clears `Blocked` to go back.** A withdrawn approval is recorded; it never clears a reason a Developer must decide.
+- **A gap is recorded, never fixed.** The Preview stays open and no code changes.
 
 ## Common Mistakes
 
@@ -177,6 +197,8 @@ Describe what broke and on which device. Do not approve.
 - **Sending the plain Vercel preview URL.** Deployment Protection shows the phone a login page; use the Shareable Link.
 - **Not setting the API URL variable for the Preview environment.** The page loads but has no data.
 - **Inventing the run command.** Use the audit's `Run` line, or confirm a detected one with the Developer.
+- **Closing the Preview for a gap outside the planned Screens.** `design-port` cannot fix it, so the run goes nowhere.
+- **Clearing `Blocked` because the Stakeholder withdrew an approval.** In the pilot the agent did this with no rule behind it.
 
 ## Red Flags — Stop and Re-check
 
@@ -185,6 +207,7 @@ Describe what broke and on which device. Do not approve.
 - About to give a link you have not fetched from outside → fetch it.
 - The Stakeholder says "skip the checklist" → refuse politely, restate why.
 - Approval given and the tunnel process is still running → close it now.
+- About to edit a template or stylesheet at the Stakeholder's request → this step changes no code.
 
 ## Related Skills
 

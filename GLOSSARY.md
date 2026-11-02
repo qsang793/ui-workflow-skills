@@ -66,6 +66,10 @@ _Avoid_: Feature branch
 A temporary running copy of the changed project, reachable from the Stakeholder's own phone and laptop, used to click-test before approval.
 _Avoid_: Staging (that is the project's own environment), demo
 
+**Gap**:
+A problem the Stakeholder finds at the Preview in a part outside the planned Screens; it is recorded for the Developer and no step of the workflow fixes it.
+_Avoid_: Bug, out of scope
+
 ## Release maturity
 
 **Production**:
