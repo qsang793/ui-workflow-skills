@@ -171,10 +171,10 @@ Claude chooses where the Preview runs from the project's shape; you do not choos
 | Project | Where it runs | What to expect |
 |---|---|---|
 | The backend serves the pages, the frontend needs a server, or a static frontend reaches a backend that runs only on this computer (if that cannot work through one address, a Developer takes over) | Your computer, through a temporary tunnel | The link is public: anyone who has it can open the app. It may read and change **real data**, so avoid delete, send and pay actions unless you know they are safe. This computer must stay on and online. Live updates may not work |
-| A static frontend with a public backend, or none | A Vercel preview, never production | A Developer logs in to Vercel once, and whoever owns the Vercel project creates a Shareable Link. Without that link your phone shows a login page |
+| A static frontend with a public backend, or none | A Vercel preview, never production | A Developer logs in to Vercel once, and whoever owns the Vercel project creates a Shareable Link. Without that link your phone shows a login page. A project never deployed before first needs one placeholder deployment from a Developer |
 | The project has its own staging environment | Staging | Only when a Developer confirms it |
 
-Claude checks that the link opens from outside before giving it to you. If it does not, you get no link and a Developer takes over.
+Claude checks that the link opens from outside before giving it to you. On Vercel it also confirms that Vercel reports a preview and that the project's production address is not open. If any check fails, you get no link and a Developer takes over. Claude never offers a local address for your phone, because it cannot open there.
 
 Tick every box, on your real devices:
 
@@ -209,7 +209,8 @@ Do not try to fix these yourself. Send the Developer Claude's whole message and 
 | Scenario B: the backend expects an API key or other shared secret from its callers | Puts those calls behind a server-side route |
 | A key or password was found in the export | Rotates it |
 | The build fails, cannot run, or wants to run install scripts | Fixes the build or decides on the scripts |
-| Preview: Vercel is not logged in, a Shareable Link is needed or must be closed, no tunnel tool works, or the link fails from outside | Sets it up or fixes it |
+| Preview: Vercel is not logged in, the project needs its first placeholder deployment, a Shareable Link is needed or must be closed, no tunnel tool works, or the link fails from outside | Sets it up or fixes it |
+| Preview: Vercel reports something other than a preview, or the project's production address opens | Takes it off the public address, or confirms it is the released site |
 | The Preview still shows the old UI or its buttons do nothing, and running the step Claude names does not help | Finds the cause |
 | The UI is approved | Reviews, merges and releases |
 

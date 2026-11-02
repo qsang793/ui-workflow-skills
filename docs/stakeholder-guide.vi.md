@@ -171,10 +171,10 @@ Claude chọn nơi chạy Preview dựa trên dạng của dự án; bạn khôn
 | Dự án | Chạy ở đâu | Cần biết |
 |---|---|---|
 | Backend trả về các trang, frontend cần server, hoặc frontend tĩnh gọi tới backend chỉ chạy trên máy này (nếu không thể gộp về một địa chỉ thì Developer xử lý tiếp) | Máy của bạn, qua một tunnel tạm | Link là công khai: ai có link đều mở được ứng dụng. Ứng dụng có thể đọc và đổi **dữ liệu thật**, nên tránh các thao tác xóa, gửi và thanh toán nếu không chắc là an toàn. Máy này phải luôn bật và có mạng. Cập nhật trực tiếp có thể không chạy |
-| Frontend tĩnh với backend công khai, hoặc không có backend | Một Vercel preview, không bao giờ là production | Developer đăng nhập Vercel một lần, và người sở hữu dự án Vercel tạo Shareable Link. Không có link đó, điện thoại của bạn sẽ thấy trang đăng nhập |
+| Frontend tĩnh với backend công khai, hoặc không có backend | Một Vercel preview, không bao giờ là production | Developer đăng nhập Vercel một lần, và người sở hữu dự án Vercel tạo Shareable Link. Không có link đó, điện thoại của bạn sẽ thấy trang đăng nhập. Dự án chưa từng deploy cần Developer tạo trước một bản deploy trang giữ chỗ |
 | Dự án có môi trường staging riêng | Staging | Chỉ khi Developer xác nhận |
 
-Claude kiểm tra link mở được từ bên ngoài rồi mới đưa cho bạn. Nếu không mở được, bạn không nhận link và Developer xử lý tiếp.
+Claude kiểm tra link mở được từ bên ngoài rồi mới đưa cho bạn. Với Vercel, Claude còn xác nhận Vercel báo đây là preview và địa chỉ production của dự án không mở được. Nếu có bước kiểm tra nào không đạt, bạn không nhận link và Developer xử lý tiếp. Claude không bao giờ đưa địa chỉ local cho điện thoại của bạn, vì điện thoại không mở được địa chỉ đó.
 
 Đánh dấu mọi ô, trên thiết bị thật của bạn:
 
@@ -209,7 +209,8 @@ UI đã duyệt nằm trên Work branch và chưa có gì được push. Push, m
 | Scenario B: backend đòi API key hoặc bí mật dùng chung từ phía gọi | Đưa các lời gọi đó ra sau một route phía server |
 | Tìm thấy khóa hoặc mật khẩu trong export | Đổi khóa |
 | Build thất bại, không chạy được, hoặc muốn chạy script cài đặt | Sửa build hoặc quyết định về các script |
-| Preview: chưa đăng nhập Vercel, cần tạo hoặc đóng Shareable Link, không có công cụ tunnel nào chạy được, hoặc link không mở được từ bên ngoài | Thiết lập hoặc sửa |
+| Preview: chưa đăng nhập Vercel, dự án cần bản deploy trang giữ chỗ đầu tiên, cần tạo hoặc đóng Shareable Link, không có công cụ tunnel nào chạy được, hoặc link không mở được từ bên ngoài | Thiết lập hoặc sửa |
+| Preview: Vercel báo không phải preview, hoặc địa chỉ production của dự án mở được | Gỡ khỏi địa chỉ công khai, hoặc xác nhận đó là trang đã phát hành |
 | Preview vẫn hiện UI cũ hoặc các nút không làm gì, và chạy bước Claude nêu cũng không khỏi | Tìm nguyên nhân |
 | UI đã được duyệt | Review, merge và phát hành |
 

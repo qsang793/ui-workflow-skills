@@ -42,6 +42,8 @@ The pilot runner found this by running `vercel inspect`, about three minutes aft
 
 **Proposed fix:** deploy with `--target preview`, read the target back with `vercel inspect` and stop unless it says `preview`, and check the project's production alias from outside. Add an eval for a project with no deployments. Recheck the Vercel path of Scenarios A and B too, because they use the same step.
 
+**Later correction (#31):** `--target preview` worked here only because the first production deployment already existed. On a project with no deployment, CLI 65.9.0 refuses it. The skill now stops in that state and asks the Developer for a placeholder deployment.
+
 ### 2. Port skipped a project check, and a regression passed approval (high)
 
 The project has two checks: `npm test` and `npm run test:browser`. Neither needs an install. Port ran only the first, on all three Screens, and said it had not run the second.

@@ -1,0 +1,45 @@
+#!/bin/bash
+# Stands in for curl next to vercel-stub, so the checks from outside give the same answers with no network. Logs each call to $VERCEL_STUB_LOG/curl.
+# Like a real project: deployment URLs and their own aliases go to the login page, and the production alias answers 404.
+# VERCEL_STUB_ALIAS: `after-deploy` makes the alias answer 200 once a deploy has run, `always` makes it answer from the start.
+log="${VERCEL_STUB_LOG:?}"
+mkdir -p "$log"
+echo "$*" >> "$log/curl"
+
+url="" format="" headers="" follow="" output=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -w | --write-out) format="$2"; shift ;;
+    -o | --output) output="$2"; shift ;;
+    -b | --cookie | -c | --cookie-jar | -H | --header | -m | --max-time | -A | --user-agent) shift ;;
+    --head | --include) headers=1 ;;
+    --location) follow=1 ;;
+    http*) url="$1" ;;
+    --*) ;;
+    -*)
+      case "$1" in *[Ii]*) headers=1 ;; esac
+      case "$1" in *L*) follow=1 ;; esac
+      ;;
+  esac
+  shift
+done
+
+status=200 effective="$url"
+case "$url" in
+  https://reminders-web.vercel.app*)
+    status=404
+    case "${VERCEL_STUB_ALIAS:-}" in
+      always) status=200 ;;
+      after-deploy) if [ -f "$log/target" ]; then status=200; fi ;;
+    esac
+    ;;
+  https://reminders-web-abc123.vercel.app* | https://reminders-web-seed00.vercel.app* | https://reminders-web-team.vercel.app*)
+    if [ -n "$follow" ]; then effective="https://vercel.com/login?next=%2Fsso-api"; else status=302; fi
+    ;;
+esac
+
+if [ -n "$headers" ]; then printf 'HTTP/2 %s\n\n' "$status"; fi
+if [ -z "$output" ]; then echo '{"stub":true}'; fi
+format="${format//%\{http_code\}/$status}"
+format="${format//%\{url_effective\}/$effective}"
+printf '%b' "$format"

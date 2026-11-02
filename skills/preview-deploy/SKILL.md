@@ -51,13 +51,13 @@ Use `staging` instead only when the project already has its own staging environm
 
 Record the choice before going on: write `.ui-workflow/preview.md` (format in step 8) with `Host`, `Host reason` citing the files you saw, and `Status: chosen`. Make sure the project's `.gitignore` (create it at the project root if absent) covers it: if no existing line does (such as `.ui-workflow/preview.md` or `.ui-workflow/`), append `.ui-workflow/preview.md`. It holds a shareable link and local process ids, so it is never committed.
 
-From here on, whenever a step stops (the app does not start, no tunnel opens, Vercel is unavailable, the link fails from outside): close anything you opened (step 7), write `Status: failed: <reason>` in `preview.md` and the reason in `Blocked`, and tell the Stakeholder in plain words that no Preview link is ready. Never hand out a link that failed.
+From here on, whenever a step stops (the app does not start, no tunnel opens, Vercel is unavailable, the link fails from outside): close anything you opened (step 7), write `Status: failed: <reason>` in `preview.md` and the reason in `Blocked`, and tell the Stakeholder in plain words that no Preview link is ready. Never hand out a link that failed. Leave local addresses (`localhost`, `127.0.0.1`, a LAN IP) out of the reply, as a link, a workaround or an explanation: they open only on the computer that runs the app. Naming the command that starts the app is fine. When a Vercel check stops, name no Vercel address in the reply either: they go in `preview.md`, where the Developer reads them.
 
 ### 2. Local run (host `tunnel`)
 
 Start the app with the `Run` line of `.ui-workflow/audit.md` (`- Run: <command> → <local URL>`), the same command `design-port` uses to show each Screen. Under Scenario B that line starts the backend; the new frontend also runs, from the `Run` line of `wiring.md`, and its URL is what the Preview exposes. Under Scenario A the `Run` line of `wiring.md` is the command. When there is no line to use or it says `unknown`, detect the command from the project (`package.json` scripts, `README`, `Procfile`, `uvicorn`/`flask`/`manage.py` entry points), tell the Developer the command you found and wait for them to confirm it before running it. Never guess silently.
 
-Run it in the background, wait until the local URL answers, and note its process id. If it does not start, stop and show the Developer the error output.
+Run it in the background, wait until the local URL answers, and note its process id. If it does not start, or cannot be run at all, stop and give the Developer the command and the error output in the reply.
 
 ### 3. Open the tunnel (host `tunnel`)
 
@@ -79,7 +79,11 @@ Detect Vercel by capability, not by tool name: look through the tools you have f
 - Link the project the first time (no `.vercel/` folder): the deploy tool's link option, or `vercel link --yes`.
 - Plain static HTML with no build: write `vercel.json` with `{ "buildCommand": null, "outputDirectory": "<static dir>" }`. Vite, Next.js and other frameworks need no config.
 - If the frontend reads its API URL from an environment variable (`VITE_API_URL`, `NEXT_PUBLIC_API_URL`), make sure it is set for the Preview environment (`vercel env add <NAME> preview`, or the tool's equivalent). Without it every API call fails.
-- Deploy as a preview: `vercel deploy` (no `--prod`), or the tool with production off. Never `--prod`, `production: true`, `vercel promote`, or an alias to a production domain.
+- Check the production aliases before deploying: `https://<projectName>.vercel.app`, with the name from `.vercel/project.json` or the tool's project details, plus every address under `Aliases` when you run `vercel inspect` on the latest deployment from `vercel list --environment production`, if there is one. Fetch each with the command in step 5. An address is not public when it ends in `404`, `401`, `403` or on a Vercel login page. If one opens any other way, the project may already be live, or the address may belong to someone else: this is a stop under step 1 (`Status: failed: <reason>` with the address, and `Blocked`), before any deploy. Ask a Developer, not the Stakeholder, to confirm that the address is the project's released site or not this project's. When a Developer has confirmed it, add it to `Released site` in `preview.md` and go on. Keep that line when this step runs again.
+- Deploy to the preview target by name: `vercel deploy --environment preview` (`--target preview` on a CLI that rejects `--environment`), or the tool with its target set to preview. Never a deploy that names no target: on a project with no deployment it goes to production. Never `--prod`, `production: true`, `vercel promote`, or an alias to a production domain.
+- If Vercel refuses because the project has no deployment yet (`first_deployment_production`; CLI 65.9.0 refuses every preview in that state), nothing was published. Stop, and never retry with `--prod`, even when the message suggests it. Ask the Developer to make the first deployment from a placeholder, so no UI work reaches production: in an empty folder with a copy of the project's `.vercel/` folder, a `public/index.html` holding an empty page and a `vercel.json` of `{ "framework": null, "buildCommand": null, "outputDirectory": "public" }`, run `vercel deploy --prod --skip-domain`. `--skip-domain` leaves the production alias unassigned. Then they re-invoke `/ui-workflow-skills:preview-deploy`.
+- Read the target back: `vercel inspect <deployment URL>` prints `target` on stderr (`--json` gives it on stdout), or use the tool's deployment details. The deploy's own output may show no target, so it does not count. Then fetch the production aliases again, except those in `Released site`.
+- Unless the target is exactly `preview` and no alias is public, stop: the work may be public. Do not remove or fix anything yourself. Write the deployment URL, its target and each public alias with its status code in `Status: failed: <reason>` in `preview.md`, for the Developer. Tell the Stakeholder in plain words what happened, that no Preview link is ready, and that a Developer must take it off the public address.
 
 Vercel protects previews by default (Deployment Protection), so the plain preview URL shows a Vercel login page on a phone. Ask the Developer, or whoever owns the Vercel project, to create a Shareable Link: Vercel dashboard → Deployments → this preview → Share → "Anyone with the link" → Copy Link. Hobby allows one such link per account. Do not turn off Deployment Protection, do not use Password Protection or the automation bypass secret: they open every deployment of the project.
 
@@ -89,7 +93,7 @@ Check the link the Stakeholder will get, not `localhost`, with no login and a fr
 
 - It must end in `200` on the Preview's own host. A `401`/`403`, or a redirect to `vercel.com/login` or `vercel.com/sso`, means Deployment Protection is still on: get the Shareable Link (step 4) and check again.
 - Also fetch one data request the main page makes, at the address the page really calls (`<link>/api/...` for a tunnel, the public API URL for a static frontend), and check it answers with data, not `404` or a `localhost` URL.
-- If anything fails, stop and show the Developer the status code and the URL that failed.
+- If anything fails, stop and show the Developer the status code and the URL that failed. A check that could not run (no network, status `000`) is a failure, not a pass.
 
 When it passes, write `URL` and `Status: open` in `preview.md`.
 
@@ -119,6 +123,7 @@ If the Stakeholder reports a problem, close the Preview the same way, list what 
 - Host: <vercel | tunnel | staging>
 - Host reason: <one sentence citing what you saw in the files>
 - Run: <command> → <local URL> | none
+- Released site: <addresses a Developer confirmed> | none
 - URL: <the link given to the Stakeholder> | none
 - Processes: <app pid, tunnel pid> | none
 - Status: <chosen | open | failed: <reason> | closed>
@@ -156,7 +161,9 @@ Describe what broke and on which device. Do not approve.
 ## Critical Rules
 
 - **Host by project shape, decided first.** Never put a server-rendered app on Vercel.
-- **Never production.** No `--prod`, no promote, no production alias.
+- **Never production.** No `--prod`, no promote, no production alias, no deploy without a named preview target.
+- **Confirm what Vercel reports.** The target reads `preview` and no production alias is public, or nothing reaches the Stakeholder.
+- **No local address in the reply,** even when stopping.
 - **Verify from outside before showing the link.** A link that opens a login page or 404s is worse than no link; report the failure.
 - **Always the checklist.** Approval only after every box is ticked.
 - **Close the tunnel after approval.** A forgotten tunnel is a public door into the Stakeholder's computer.
@@ -165,13 +172,16 @@ Describe what broke and on which device. Do not approve.
 
 - **Deploying a FastAPI/Jinja app's static folder to Vercel.** The templates never render and every API call 404s.
 - **Checking `localhost` instead of the public link.** It always works on your machine.
+- **Trusting `vercel deploy` with no target.** On a project with no deployment it went to production, with a public alias.
+- **Checking only the deployment's own URL.** It sits behind the login page while the production alias answers to anyone.
 - **Sending the plain Vercel preview URL.** Deployment Protection shows the phone a login page; use the Shareable Link.
 - **Not setting the API URL variable for the Preview environment.** The page loads but has no data.
 - **Inventing the run command.** Use the audit's `Run` line, or confirm a detected one with the Developer.
 
 ## Red Flags — Stop and Re-check
 
-- About to type `--prod` → stop, this is preview only.
+- About to type `--prod`, even because Vercel's message suggests it → stop, this is preview only.
+- About to write `localhost` or a LAN IP in the reply → leave it out; say no link is ready.
 - About to give a link you have not fetched from outside → fetch it.
 - The Stakeholder says "skip the checklist" → refuse politely, restate why.
 - Approval given and the tunnel process is still running → close it now.

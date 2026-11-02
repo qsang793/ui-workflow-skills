@@ -1,0 +1,2382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.2.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.2.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.307</span>
+<span class="num">2026-11-02 01:37 UTC</span>
+<span class="num">14m 27s</span>
+<span class="num">$2.51</span>
+<span class="num">21 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 80%</span>
+<span>filtered: --case preview-*</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">96.5%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">7</span><span class="sub">7 of 7 ≥ 80% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">76.2%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 80% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>preview-alias-answers</h2>
+<span class="muted mono">evals/preview-alias-answers</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.13 · 01:37:44 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready yet, so you can&apos;t click through it on your phone. I stopped the deploy as a safety check.
+
+- **What I did:** I deployed the new frontend to Vercel as a preview, not production. Vercel confirms the target is `preview`.
+- **What went wrong:** The project&apos;s main public address returned &quot;not found&quot; before the deploy and opens for anyone after it. I can&apos;t tell whether this deploy caused that or whether the address belongs to this project. The work may now be visible publicly.
+- **What I didn&apos;t do:** I didn&apos;t change or remove anything on Vercel. I also haven&apos;t verified the preview link from outside or given you a link, because I won&apos;t hand out one that failed the checks.
+
+**What a Developer needs to do**
+1. Find out what the project&apos;s main address (`reminders-web.vercel.app`) now serves.
+2. Say whether it is this project&apos;s released site. If it is, tell me and I&apos;ll record it and carry on. If the preview content is exposed on it, they should take it off.
+3. Set up a Shareable Link for the preview (Vercel dashboard → Deployments → this preview → Share → &quot;Anyone with the link&quot;). The plain preview address shows a Vercel login page on a phone.
+
+Once that&apos;s done, run `/ui-workflow-skills:preview-deploy` again and I&apos;ll check the link from outside and give you the click-test checklist.
+
+I recorded the details for the Developer in `.ui-workflow/preview.md`. I also marked the workflow as blocked in `.ui-workflow/state.md` and added `.ui-workflow/preview.md` to `.gitignore`.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.13 · 01:38:33 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The preview isn&apos;t ready for your phone yet. I deployed it, but I&apos;m not giving you a link because one check failed.
+
+- **The deploy:** Vercel confirms it as a preview, not production. Your `VITE_API_URL` was already set for Preview.
+- **What failed:** `https://reminders-web.vercel.app` returned a 404 before I deployed. Afterwards it opens publicly with a 200. The other two production addresses still sit behind the Vercel login.
+- **What I don&apos;t know:** I can&apos;t tell whether that address now shows this work or belongs to someone else. I didn&apos;t touch it and I didn&apos;t retry the deploy.
+
+A Developer needs to look at `reminders-web.vercel.app` and check whether it serves this project. If it should stay private, they can take it off the public address. If it&apos;s the project&apos;s released site, they can confirm that. After that, run `/ui-workflow-skills:preview-deploy` again.
+
+I wrote the details to `.ui-workflow/preview.md` and set `Blocked` in `.ui-workflow/state.md`. I also created a `.gitignore` containing `.ui-workflow/preview.md` so the preview notes stay out of git.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">11 turns · $0.12 · 01:39:12 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">There&apos;s no preview link for your phone yet. I stopped after the deploy because of a safety check.
+
+**What happened**
+- The deploy went to Preview, not production. Vercel reports the target as `preview`, and `VITE_API_URL` was already set for Preview.
+- The project&apos;s main address, `reminders-web.vercel.app`, returned a 404 before my deploy. After it, that address opens a page for anyone without a login.
+- I don&apos;t know whether my deploy caused that. The project may already be live, or the address may belong to someone else. My rule is to stop and not hand out a link when the production address could be public.
+- I didn&apos;t change or remove anything on Vercel.
+
+**What I need from a Developer or the Vercel project owner**
+1. Check whether `reminders-web.vercel.app` is meant to be public, and whether the page it shows is this project&apos;s released site or something else.
+2. If it&apos;s the released site, tell me and I&apos;ll record that and carry on. If it isn&apos;t meant to be public, they need to take it off that address.
+3. Once that&apos;s settled, create a Shareable Link for the new preview: Vercel dashboard → Deployments → the preview → Share → &quot;Anyone with the link&quot; → Copy Link. Without it, your phone would only see a Vercel login page. I&apos;ll test that link from outside before I give it to you.
+
+I recorded the details in `.ui-workflow/preview.md` and marked the workflow as blocked. When the address question is answered, re-run `/ui-workflow-skills:preview-deploy`.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Vercel is logged in on this machine, this project already has a deployment, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:\\s*(?!none\\b)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">checks-production-alias</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/curl&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;https://reminders-web\\.vercel\\.app&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">deploys-as-preview</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/target&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;^preview\\s*$&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-to-production</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy(?![^\\n]*--(?:target|environment)[= ]preview)|--prod\\b|\\bpromote\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-link</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;URL:\\W*https?://&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reads-target-back</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)inspect\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">records-the-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Status:\\W*failed&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says the project's production address answers from outside after the deploy, so the work may be public and no Preview link is ready, and it asks a Developer to act. It does not offer any link for the Stakeholder to open (naming the production address to explain the problem is not offering it) and offers no local address such as localhost, 127.0.0.1 or a LAN IP.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-2">
+<div class="case-head">
+<h2>preview-first-deploy</h2>
+<span class="muted mono">evals/preview-first-deploy</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">93.3%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:93.3%"></span></span>
+<span class="num">93.3%</span>
+<span class="muted num">33.3% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:90.0%"></span></span>
+<span class="num">90%</span>
+<span class="muted num">10 turns · $0.12 · 01:39:56 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-published</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply-asks-developer</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready yet, and nothing was published. Vercel refused the deploy because this project has never been deployed. Its first deployment is always treated as Production, and this Vercel CLI (65.9.0) won&apos;t create a preview in that state. I didn&apos;t force it with `--prod`, because that would put the new UI on a public production address.
+
+**What I checked:**
+- The frontend is a static Vite app that calls a public API, so Vercel is the right host.
+- `VITE_API_URL` is set for Preview.
+- The project is linked as `eval-user/reminders-web`.
+- `reminders-web.vercel.app` returns 404, so nothing is public.
+
+**What you need to do:** make a placeholder first deployment that doesn&apos;t contain the UI. `--skip-domain` leaves the production address unassigned.
+1. Make an empty folder and copy this project&apos;s `.vercel/` folder into it.
+2. Add `public/index.html` containing an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. From that folder, run `vercel deploy --prod --skip-domain`.
+
+Then run `/ui-workflow-skills:preview-deploy` again. The next deploy will be a normal preview.
+
+**Shareable Link:** Vercel puts a login page in front of previews, so your phone would hit it. After the preview deploys, open the Vercel dashboard and go to Deployments, then this preview, then Share. Choose &quot;Anyone with the link&quot; and copy the link. Send that link to your phone. Don&apos;t turn off Deployment Protection.
+
+I added `.ui-workflow/preview.md` to `.gitignore`. I also recorded the block in `.ui-workflow/state.md` and `.ui-workflow/preview.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready yet, and nothing was published. Vercel refused the deploy because this project has never been deployed. Its first deployment is always treated as Production, and this Vercel CLI (65.9.0) won&apos;t create a preview in that state. I didn&apos;t force it with `--prod`, because that would put the new UI on a public production address.
+
+**What I checked:**
+- The frontend is a static Vite app that calls a public API, so Vercel is the right host.
+- `VITE_API_URL` is set for Preview.
+- The project is linked as `eval-user/reminders-web`.
+- `reminders-web.vercel.app` returns 404, so nothing is public.
+
+**What you need to do:** make a placeholder first deployment that doesn&apos;t contain the UI. `--skip-domain` leaves the production address unassigned.
+1. Make an empty folder and copy this project&apos;s `.vercel/` folder into it.
+2. Add `public/index.html` containing an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. From that folder, run `vercel deploy --prod --skip-domain`.
+
+Then run `/ui-workflow-skills:preview-deploy` again. The next deploy will be a normal preview.
+
+**Shareable Link:** Vercel puts a login page in front of previews, so your phone would hit it. After the preview deploys, open the Vercel dashboard and go to Deployments, then this preview, then Share. Choose &quot;Anyone with the link&quot; and copy the link. Send that link to your phone. Don&apos;t turn off Deployment Protection.
+
+I added `.ui-workflow/preview.md` to `.gitignore`. I also recorded the block in `.ui-workflow/state.md` and `.ui-workflow/preview.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-offers-nothing</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready yet, and nothing was published. Vercel refused the deploy because this project has never been deployed. Its first deployment is always treated as Production, and this Vercel CLI (65.9.0) won&apos;t create a preview in that state. I didn&apos;t force it with `--prod`, because that would put the new UI on a public production address.
+
+**What I checked:**
+- The frontend is a static Vite app that calls a public API, so Vercel is the right host.
+- `VITE_API_URL` is set for Preview.
+- The project is linked as `eval-user/reminders-web`.
+- `reminders-web.vercel.app` returns 404, so nothing is public.
+
+**What you need to do:** make a placeholder first deployment that doesn&apos;t contain the UI. `--skip-domain` leaves the production address unassigned.
+1. Make an empty folder and copy this project&apos;s `.vercel/` folder into it.
+2. Add `public/index.html` containing an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. From that folder, run `vercel deploy --prod --skip-domain`.
+
+Then run `/ui-workflow-skills:preview-deploy` again. The next deploy will be a normal preview.
+
+**Shareable Link:** Vercel puts a login page in front of previews, so your phone would hit it. After the preview deploys, open the Vercel dashboard and go to Deployments, then this preview, then Share. Choose &quot;Anyone with the link&quot; and copy the link. Send that link to your phone. Don&apos;t turn off Deployment Protection.
+
+I added `.ui-workflow/preview.md` to `.gitignore`. I also recorded the block in `.ui-workflow/state.md` and `.ui-workflow/preview.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)deploy[^\n]*--(?:target|environment)[= ]preview</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">10 turns · $0.12 · 01:40:43 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-published</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-asks-developer</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No Preview link is ready, and nothing was published.
+
+Vercel won&apos;t create a preview for a project that has never been deployed. The first deployment always goes to Production, and the Vercel CLI here (65.9.0) refuses previews in that state. It suggested `--prod`, but I didn&apos;t use it because that would put the unapproved UI on the live address.
+
+What I did:
+- **Host:** Vercel, because this is a static Vite frontend that calls a public API.
+- **Project:** linked it as `reminders-web`.
+- **Environment variable:** confirmed `VITE_API_URL` is set for Preview.
+- **Production address:** checked it and it isn&apos;t public (404).
+
+**A Developer needs to do this once.** It makes the first deployment from an empty placeholder page, so none of the new UI goes live:
+1. In an empty folder, copy in this project&apos;s `.vercel/` folder.
+2. Add `public/index.html` with an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+Then re-run `/ui-workflow-skills:preview-deploy`. I&apos;ll deploy the real frontend as a preview, check the link from outside, and give you the click-test checklist.
+
+Vercel protects previews by default, so a phone would hit a login page. When the link is ready, someone who owns the Vercel project will need to create a Shareable Link (&quot;Anyone with the link&quot;) for it.
+
+I also added `.ui-workflow/preview.md` to a new `.gitignore`, recorded the stop in `preview.md`, and set `Blocked` in `.ui-workflow/state.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No Preview link is ready, and nothing was published.
+
+Vercel won&apos;t create a preview for a project that has never been deployed. The first deployment always goes to Production, and the Vercel CLI here (65.9.0) refuses previews in that state. It suggested `--prod`, but I didn&apos;t use it because that would put the unapproved UI on the live address.
+
+What I did:
+- **Host:** Vercel, because this is a static Vite frontend that calls a public API.
+- **Project:** linked it as `reminders-web`.
+- **Environment variable:** confirmed `VITE_API_URL` is set for Preview.
+- **Production address:** checked it and it isn&apos;t public (404).
+
+**A Developer needs to do this once.** It makes the first deployment from an empty placeholder page, so none of the new UI goes live:
+1. In an empty folder, copy in this project&apos;s `.vercel/` folder.
+2. Add `public/index.html` with an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+Then re-run `/ui-workflow-skills:preview-deploy`. I&apos;ll deploy the real frontend as a preview, check the link from outside, and give you the click-test checklist.
+
+Vercel protects previews by default, so a phone would hit a login page. When the link is ready, someone who owns the Vercel project will need to create a Shareable Link (&quot;Anyone with the link&quot;) for it.
+
+I also added `.ui-workflow/preview.md` to a new `.gitignore`, recorded the stop in `preview.md`, and set `Blocked` in `.ui-workflow/state.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-offers-nothing</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No Preview link is ready, and nothing was published.
+
+Vercel won&apos;t create a preview for a project that has never been deployed. The first deployment always goes to Production, and the Vercel CLI here (65.9.0) refuses previews in that state. It suggested `--prod`, but I didn&apos;t use it because that would put the unapproved UI on the live address.
+
+What I did:
+- **Host:** Vercel, because this is a static Vite frontend that calls a public API.
+- **Project:** linked it as `reminders-web`.
+- **Environment variable:** confirmed `VITE_API_URL` is set for Preview.
+- **Production address:** checked it and it isn&apos;t public (404).
+
+**A Developer needs to do this once.** It makes the first deployment from an empty placeholder page, so none of the new UI goes live:
+1. In an empty folder, copy in this project&apos;s `.vercel/` folder.
+2. Add `public/index.html` with an empty page.
+3. Add `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+Then re-run `/ui-workflow-skills:preview-deploy`. I&apos;ll deploy the real frontend as a preview, check the link from outside, and give you the click-test checklist.
+
+Vercel protects previews by default, so a phone would hit a login page. When the link is ready, someone who owns the Vercel project will need to create a Shareable Link (&quot;Anyone with the link&quot;) for it.
+
+I also added `.ui-workflow/preview.md` to a new `.gitignore`, recorded the stop in `preview.md`, and set `Blocked` in `.ui-workflow/state.md`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)deploy[^\n]*--(?:target|environment)[= ]preview</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:90.0%"></span></span>
+<span class="num">90%</span>
+<span class="muted num">10 turns · $0.12 · 01:41:31 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">nothing-published</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply-asks-developer</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready, and nothing was published. Vercel refused the preview deploy, and I stopped there.
+
+**What happened:** Vercel treats a project&apos;s first deployment as Production, so a preview deploy is refused until the project has one. I didn&apos;t retry with `--prod`, because that would put the unapproved UI on your live address.
+
+**What I checked:**
+- The project is a static Vite frontend that calls a public API, so a Vercel preview is the right host.
+- I linked it to the Vercel project `reminders-web`.
+- `VITE_API_URL` is set for Preview.
+- The production address `reminders-web.vercel.app` returns 404, so nothing is live there.
+
+**What a Developer needs to do once:** make an empty placeholder first deployment that leaves the production address unassigned, so no UI work goes live:
+1. In an empty folder, copy this project&apos;s `.vercel/` folder.
+2. Add a `public/index.html` containing an empty page.
+3. Add a `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+After that, run `/ui-workflow-skills:preview-deploy` again and I&apos;ll deploy the real preview.
+
+Vercel will also show a login page on your phone by default. So the Developer will need to create a Shareable Link: Vercel dashboard → Deployments → the preview → Share → &quot;Anyone with the link&quot;. Send me that link and I&apos;ll check it opens from outside before you click through it.
+
+I recorded the stop in `.ui-workflow/preview.md` and `state.md`. I also added `.ui-workflow/preview.md` to a new `.gitignore`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready, and nothing was published. Vercel refused the preview deploy, and I stopped there.
+
+**What happened:** Vercel treats a project&apos;s first deployment as Production, so a preview deploy is refused until the project has one. I didn&apos;t retry with `--prod`, because that would put the unapproved UI on your live address.
+
+**What I checked:**
+- The project is a static Vite frontend that calls a public API, so a Vercel preview is the right host.
+- I linked it to the Vercel project `reminders-web`.
+- `VITE_API_URL` is set for Preview.
+- The production address `reminders-web.vercel.app` returns 404, so nothing is live there.
+
+**What a Developer needs to do once:** make an empty placeholder first deployment that leaves the production address unassigned, so no UI work goes live:
+1. In an empty folder, copy this project&apos;s `.vercel/` folder.
+2. Add a `public/index.html` containing an empty page.
+3. Add a `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+After that, run `/ui-workflow-skills:preview-deploy` again and I&apos;ll deploy the real preview.
+
+Vercel will also show a login page on your phone by default. So the Developer will need to create a Shareable Link: Vercel dashboard → Deployments → the preview → Share → &quot;Anyone with the link&quot;. Send me that link and I&apos;ll check it opens from outside before you click through it.
+
+I recorded the stop in `.ui-workflow/preview.md` and `state.md`. I also added `.ui-workflow/preview.md` to a new `.gitignore`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply-offers-nothing</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready, and nothing was published. Vercel refused the preview deploy, and I stopped there.
+
+**What happened:** Vercel treats a project&apos;s first deployment as Production, so a preview deploy is refused until the project has one. I didn&apos;t retry with `--prod`, because that would put the unapproved UI on your live address.
+
+**What I checked:**
+- The project is a static Vite frontend that calls a public API, so a Vercel preview is the right host.
+- I linked it to the Vercel project `reminders-web`.
+- `VITE_API_URL` is set for Preview.
+- The production address `reminders-web.vercel.app` returns 404, so nothing is live there.
+
+**What a Developer needs to do once:** make an empty placeholder first deployment that leaves the production address unassigned, so no UI work goes live:
+1. In an empty folder, copy this project&apos;s `.vercel/` folder.
+2. Add a `public/index.html` containing an empty page.
+3. Add a `vercel.json` containing `{ &quot;framework&quot;: null, &quot;buildCommand&quot;: null, &quot;outputDirectory&quot;: &quot;public&quot; }`.
+4. Run `vercel deploy --prod --skip-domain`.
+
+After that, run `/ui-workflow-skills:preview-deploy` again and I&apos;ll deploy the real preview.
+
+Vercel will also show a login page on your phone by default. So the Developer will need to create a Shareable Link: Vercel dashboard → Deployments → the preview → Share → &quot;Anyone with the link&quot;. Send me that link and I&apos;ll check it opens from outside before you click through it.
+
+I recorded the stop in `.ui-workflow/preview.md` and `state.md`. I also added `.ui-workflow/preview.md` to a new `.gitignore`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">tries-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)deploy[^\n]*--(?:target|environment)[= ]preview</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Vercel is logged in on this machine, this project has never been deployed, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:\\s*(?!none\\b)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-to-production</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy(?![^\\n]*--(?:target|environment)[= ]preview)|--prod\\b|\\bpromote\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-link</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;URL:\\W*https?://&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">nothing-published</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.vercel-calls/target&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">records-the-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Status:\\W*failed&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply-asks-developer</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply asks a Developer to make a first deployment of a placeholder page without the production address (<code>--prod --skip-domain</code>), and then to re-invoke <code>/ui-workflow-skills:preview-deploy</code>.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply-no-link</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says no Preview link is ready and nothing was published, because this project has no deployment yet and Vercel would make the first one production.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply-offers-nothing</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply offers the Stakeholder nothing to open: no link, and no local address such as localhost, 127.0.0.1 or a LAN IP. Naming the production address only to report that it does not answer is not offering it.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">tries-preview</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy[^\\n]*--(?:target|environment)[= ]preview&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+</details>
+</article>
+<article class="case" id="case-3">
+<div class="case-head">
+<h2>preview-later-deploy</h2>
+<span class="muted mono">evals/preview-later-deploy</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.13 · 01:42:22 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">preview-url-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The preview is deployed, but I can&apos;t give you a phone link yet. Vercel puts a login page in front of every preview, and I didn&apos;t turn that off.
+
+- **Deploy:** The frontend is a static Vite app that calls a public API. I deployed it as a Vercel preview, not production. Vercel confirms the target is `preview`.
+- **Production addresses:** None of them are public. They either return 404 or go to a Vercel login page. Nothing was published to production.
+- **API URL:** `VITE_API_URL` was already set for Preview, so I left it alone.
+- **Login page:** Fetched from outside, the preview redirects to a Vercel login page, so a phone would show that instead of the app.
+
+**What I need from you:** someone who owns the Vercel project has to create a Shareable Link. In the Vercel dashboard, go to Deployments, open the latest preview, click Share, choose &quot;Anyone with the link&quot; and copy the link. Send me that link.
+
+Once I have it, I&apos;ll check that it opens from outside and that the API call returns data. Then I&apos;ll give you the click-test checklist. After you approve, someone needs to set the link back to &quot;Only people with access&quot;.
+
+I recorded the stop in `.ui-workflow/preview.md` and `.ui-workflow/state.md`. I also created a `.gitignore` with `.ui-workflow/preview.md` so the preview notes aren&apos;t committed. The state file names `ui-workflow/2026-10-27` as the work branch, but the repo is on `main`, so you may want to check that.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">11 turns · $0.13 · 01:43:05 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">preview-url-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The preview is deployed, but I can&apos;t give you a link yet. It&apos;s behind Vercel&apos;s login page, so your phone would only see a sign-in screen.
+
+- **What&apos;s deployed:** it went out as a preview, and Vercel confirms the target is `preview`. None of the project&apos;s production addresses are public. One returns a 404, and the other two redirect to the Vercel login.
+- **API setting:** `VITE_API_URL` was already set for Preview, so the deployed app should reach your API.
+- **What&apos;s missing:** someone with access to the Vercel project needs to create a Shareable Link. In the Vercel dashboard, go to Deployments, open this preview, click Share, choose &quot;Anyone with the link&quot;, and copy the link. I didn&apos;t turn off Deployment Protection or use a password or bypass secret, because those open every deployment of the project.
+
+Send me the Shareable Link and I&apos;ll check that it opens without a login and that the app loads data. If it does, I&apos;ll give you the click-test checklist for your phone and laptop. The deployment address is in `.ui-workflow/preview.md`.
+
+I added `.ui-workflow/preview.md` to a new `.gitignore`. In `.ui-workflow/state.md`, the step stays at `preview` and is marked blocked until the link exists.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.13 · 01:43:44 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">preview-url-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">The preview is deployed, but I can&apos;t give you a link yet. Vercel puts a login page in front of it, so your phone would hit that instead of the app.
+
+- **Deploy:** The new frontend is on Vercel as a preview, not production. I read the deployment back and it shows `target: preview`. The project&apos;s other addresses (`reminders-web.vercel.app`, `reminders-web-team.vercel.app`, `reminders-web-seed00.vercel.app`) don&apos;t serve the app to the public. One returns 404 and the other two go to a login page.
+- **Config:** `VITE_API_URL` was already set for Preview, so I didn&apos;t touch it.
+- **What&apos;s blocking:** Someone who owns the Vercel project needs to create a Shareable Link. In the Vercel dashboard, go to Deployments, open the latest preview (`reminders-web-abc123`), then Share, then &quot;Anyone with the link&quot;, then Copy Link. I didn&apos;t turn off Deployment Protection, because that would open every deployment of the project.
+- **Next:** Send me the Shareable Link, or re-run `/ui-workflow-skills:preview-deploy`. I&apos;ll check that it opens without a login and loads data from the API, then give you the link with the phone click-test checklist. I haven&apos;t tested the API call yet, since I can&apos;t reach the app past the login page.
+
+I also added `.ui-workflow/preview.md` to a new `.gitignore`. The workflow state is marked blocked on the Shareable Link.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Vercel is logged in on this machine, this project already has a deployment, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">checks-production-alias</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/curl&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;https://reminders-web\\.vercel\\.app&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">deploys-as-preview</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/target&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;^preview\\s*$&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-to-production</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy(?![^\\n]*--(?:target|environment)[= ]preview)|--prod\\b|\\bpromote\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">preview-url-only</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;URL:\\W*https://reminders-web-abc123\\.vercel\\.app&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reads-target-back</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)inspect\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says the deployment went to a Vercel preview, not production, and that the plain link shows a login page on a phone, so a Developer or the owner of the Vercel project must create a Shareable Link before the Stakeholder can open it. It does not call a link ready, and it offers no local address such as localhost, 127.0.0.1 or a LAN IP for a phone or any other device.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-4">
+<div class="case-head">
+<h2>preview-live-site</h2>
+<span class="muted mono">evals/preview-live-site</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.11 · 01:44:26 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-deploy</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I haven&apos;t deployed anything, so there&apos;s no preview link yet. I stopped because of a check that runs before every deploy.
+
+**What I found**
+- The frontend is a static Vite app that calls a public API. `VITE_API_URL` is already set for Preview, so a Vercel preview is the right host.
+- Before deploying, I checked whether the project&apos;s production address already serves a live site. It does: `reminders-web.vercel.app` opens publicly without a login.
+- That means one of two things. This project may already be live, or the address may belong to someone else. A preview deploy gets ahead of neither case, so I stopped.
+
+**What I need from a Developer**
+Ask a Developer to confirm whether `reminders-web.vercel.app` is this project&apos;s released site or not this project&apos;s. Once they&apos;ve confirmed it, re-run `/ui-workflow-skills:preview-deploy` and I&apos;ll deploy a preview only, never production. I&apos;ll then check the link from outside before giving it to you.
+
+**What comes after that**
+Vercel protects previews with a login page by default, so your phone would hit that page. Someone with access to the Vercel project will need to create a Shareable Link: Deployments → this preview → Share → &quot;Anyone with the link&quot;. I&apos;ll ask for it at that point.
+
+**Files changed**
+- I added `.ui-workflow/preview.md` to `.gitignore`.
+- I recorded the failure in `.ui-workflow/preview.md` and `.ui-workflow/state.md`. The workflow step stays open.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.11 · 01:45:06 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-deploy</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I stopped before deploying, so nothing is online and there is no link for your phone yet.
+
+**Why I stopped:** The project&apos;s standard production address, `reminders-web.vercel.app`, opens for anyone with no login. That could mean the project is already live. It could also mean the address belongs to someone else. The deploy rules say to confirm that before publishing anything. I didn&apos;t deploy, because a mistake here could put unfinished UI on a public site.
+
+**What I checked:**
+- **Host:** This is a static Vite frontend that calls a public API, so a Vercel preview is the right place for it.
+- **Setup:** Vercel is logged in, `VITE_API_URL` is set for Preview, and the project is linked.
+- **Production aliases:** `reminders-web-seed00.vercel.app` and `reminders-web-team.vercel.app` both go to a Vercel login page, so they&apos;re not public. Only `reminders-web.vercel.app` is open.
+
+**What I need from you or a Developer:**
+1. Confirm whether `https://reminders-web.vercel.app` is this project&apos;s released site, or isn&apos;t this project&apos;s at all.
+2. Tell me which, and I&apos;ll re-run the deploy. It will go to the preview target only, never production.
+
+**After the deploy:** Vercel protects previews by default, so a phone would see a login page. Someone who owns the Vercel project will need to create a Shareable Link (Deployments → this preview → Share → &quot;Anyone with the link&quot;). I&apos;ll check that link from outside before sending it to you.
+
+I wrote the reason into `.ui-workflow/preview.md` and into `Blocked` in `state.md`. I also created a `.gitignore` containing `.ui-workflow/preview.md`.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.11 · 01:45:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">checks-production-alias</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched https://reminders-web\.vercel\.app</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-deploy</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.vercel-calls/target absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I haven&apos;t deployed anything, so there&apos;s no link for your phone yet.
+
+**Why I stopped:** the project&apos;s main address, `https://reminders-web.vercel.app`, opens for anyone with no login. That means the project may already be live, or the address may belong to someone else. A preview deploy risks touching a public site, so the preview-deploy workflow makes me stop and ask a Developer first.
+
+**What&apos;s ready:**
+- The frontend is a static Vite app that calls a public API, so Vercel is the right host.
+- You&apos;re logged in to Vercel, and `VITE_API_URL` is already set for Preview.
+
+**What a Developer needs to do:** confirm which of these is true for `https://reminders-web.vercel.app`:
+- It&apos;s the project&apos;s released site. Tell me, and I&apos;ll record it and go ahead with the preview deploy.
+- It isn&apos;t this project&apos;s. Someone needs to sort out the project name or link first.
+
+I&apos;ve recorded the stop in `.ui-workflow/preview.md` and `.ui-workflow/state.md`, and added `.ui-workflow/preview.md` to a new `.gitignore`.
+
+**Next steps once that&apos;s settled:**
+1. I deploy to the preview target only, never production.
+2. Vercel protects previews with a login page, so someone who owns the Vercel project has to create a Shareable Link: Deployments → this preview → Share → &quot;Anyone with the link&quot;.
+3. I check that link from outside and send it to you with the click-test checklist.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Vercel is logged in on this machine, this project already has a deployment, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:\\s*(?!none\\b)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">checks-production-alias</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/curl&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;https://reminders-web\\.vercel\\.app&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-to-production</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy(?![^\\n]*--(?:target|environment)[= ]preview)|--prod\\b|\\bpromote\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-deploy</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.vercel-calls/target&quot;</code></div><div class="kv"><span>exists</span><code>false</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-link</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;URL:\\W*https?://&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">records-the-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Status:\\W*failed&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says the project's production address already answers from outside before anything was deployed, says nothing new was deployed, and asks a Developer to confirm whether that address is the project's released site. It offers no link to open as a Preview (naming the production address to ask about it is not offering it) and offers no local address such as localhost, 127.0.0.1 or a LAN IP.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-5">
+<div class="case-head">
+<h2>preview-server-rendered</h2>
+<span class="muted mono">evals/preview-server-rendered</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:86.7%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">86.7%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:86.7%"></span></span>
+<span class="num">86.7%</span>
+<span class="muted num">33.3% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">8 turns · $0.12 · 01:46:14 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*tunnel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-local-address</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet. No Preview is running, and nothing was published.
+
+**What I found**
+- The app is FastAPI serving a Jinja template, so it has to run on a server. It can&apos;t go on Vercel. The plan is to run it on this computer and share it through a temporary public tunnel.
+- The app won&apos;t start. `fastapi` and `uvicorn` aren&apos;t installed here. I haven&apos;t installed anything.
+- `cloudflared` (the tunnel tool) isn&apos;t installed either.
+
+**What a Developer needs to do**
+1. Install the dependencies: `pip install -r requirements.txt`. A virtual environment is best.
+2. Install the tunnel tool: `brew install cloudflared`. As a fallback I can use an SSH tunnel through localhost.run, which is already available.
+3. Confirm the start command: `uvicorn app.main:app --port 8000`. It comes from the audit.
+
+Then run `/ui-workflow-skills:preview-deploy` again. I&apos;ll start the app, open the tunnel, check the link from outside and send you the link with the click-test checklist.
+
+I can also install the dependencies in a virtual environment and try the SSH tunnel now, if you tell me to.
+
+The tunnel link will be public while it&apos;s open. The app runs with this computer&apos;s settings, so avoid actions that delete, send or pay. Right now the app only holds sample reminders in memory.
+
+I recorded the failure in `.ui-workflow/preview.md` and `.ui-workflow/state.md`. I also added `preview.md` to a new `.gitignore`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet. No Preview is running, and nothing was published.
+
+**What I found**
+- The app is FastAPI serving a Jinja template, so it has to run on a server. It can&apos;t go on Vercel. The plan is to run it on this computer and share it through a temporary public tunnel.
+- The app won&apos;t start. `fastapi` and `uvicorn` aren&apos;t installed here. I haven&apos;t installed anything.
+- `cloudflared` (the tunnel tool) isn&apos;t installed either.
+
+**What a Developer needs to do**
+1. Install the dependencies: `pip install -r requirements.txt`. A virtual environment is best.
+2. Install the tunnel tool: `brew install cloudflared`. As a fallback I can use an SSH tunnel through localhost.run, which is already available.
+3. Confirm the start command: `uvicorn app.main:app --port 8000`. It comes from the audit.
+
+Then run `/ui-workflow-skills:preview-deploy` again. I&apos;ll start the app, open the tunnel, check the link from outside and send you the link with the click-test checklist.
+
+I can also install the dependencies in a virtual environment and try the SSH tunnel now, if you tell me to.
+
+The tunnel link will be public while it&apos;s open. The app runs with this computer&apos;s settings, so avoid actions that delete, send or pay. Right now the app only holds sample reminders in memory.
+
+I recorded the failure in `.ui-workflow/preview.md` and `.ui-workflow/state.md`. I also added `preview.md` to a new `.gitignore`.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:80.0%"></span></span>
+<span class="num">80%</span>
+<span class="muted num">9 turns · $0.13 · 01:46:56 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*tunnel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-local-address</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet, because the preview couldn&apos;t start. Nothing was published and nothing is left running.
+
+**What I found**
+- **Host:** The app is FastAPI serving a Jinja template, so Vercel is out. The preview has to be the app running on your computer behind a temporary tunnel.
+- **App dependencies:** `fastapi`, `uvicorn` and `jinja2` aren&apos;t installed. The sandbox blocked my attempt to install them from `pypi.org`.
+- **Tunnel tool:** `cloudflared` isn&apos;t installed either, so there&apos;s nothing to open the public link with yet.
+
+**What I changed**
+- I added `.ui-workflow/preview.md` with the failure recorded, and added it to a new `.gitignore`.
+- I set `Blocked` in `.ui-workflow/state.md`, so the workflow stays on the preview step.
+
+**What you can do**
+1. Run `pip install -r requirements.txt`, ideally in a virtualenv, and `brew install cloudflared`. Then run `/ui-workflow-skills:preview-deploy` again.
+2. Or allow `pypi.org` in the sandbox settings. I&apos;ll install the dependencies myself, though `cloudflared` would still need installing.
+
+When it runs, the link will be public while the tunnel is open. The app uses this computer&apos;s data, so avoid delete, send and pay actions while you click through it. I&apos;ll give you the full click-test checklist with the link.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet, because the preview couldn&apos;t start. Nothing was published and nothing is left running.
+
+**What I found**
+- **Host:** The app is FastAPI serving a Jinja template, so Vercel is out. The preview has to be the app running on your computer behind a temporary tunnel.
+- **App dependencies:** `fastapi`, `uvicorn` and `jinja2` aren&apos;t installed. The sandbox blocked my attempt to install them from `pypi.org`.
+- **Tunnel tool:** `cloudflared` isn&apos;t installed either, so there&apos;s nothing to open the public link with yet.
+
+**What I changed**
+- I added `.ui-workflow/preview.md` with the failure recorded, and added it to a new `.gitignore`.
+- I set `Blocked` in `.ui-workflow/state.md`, so the workflow stays on the preview step.
+
+**What you can do**
+1. Run `pip install -r requirements.txt`, ideally in a virtualenv, and `brew install cloudflared`. Then run `/ui-workflow-skills:preview-deploy` again.
+2. Or allow `pypi.org` in the sandbox settings. I&apos;ll install the dependencies myself, though `cloudflared` would still need installing.
+
+When it runs, the link will be public while the tunnel is open. The app uses this computer&apos;s data, so avoid delete, send and pay actions while you click through it. I&apos;ll give you the full click-test checklist with the link.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:80.0%"></span></span>
+<span class="num">80%</span>
+<span class="muted num">7 turns · $0.11 · 01:48:01 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*tunnel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-local-address</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet. The app won&apos;t start on this computer, and nothing has been published.
+
+**What&apos;s blocking it:**
+1. **The app can&apos;t run.** The project is a FastAPI app with Jinja templates, so it has to run on this computer and be shared through a temporary tunnel. `uvicorn` isn&apos;t installed, and `python3 -c &quot;import uvicorn,fastapi,jinja2&quot;` fails with `ModuleNotFoundError: No module named &apos;uvicorn&apos;`. I didn&apos;t install anything myself. The start command from the audit is `uvicorn app.main:app --port 8000`.
+2. **No tunnel tool.** `cloudflared` isn&apos;t installed either. Installing it is the preferred route, and `ssh` is available as a fallback.
+
+**What a Developer needs to do:**
+- Install the dependencies: `python3 -m pip install -r requirements.txt` (this should pull in uvicorn).
+- Install the tunnel tool: `brew install cloudflared`.
+- Run `/ui-workflow-skills:preview-deploy` again.
+
+**Other things to know:**
+- The git branch is `main`, not the work branch `ui-workflow/2026-10-27` that `design-port` recorded. Please check that the ported screens are on the branch you expect before the preview goes up.
+- Once the tunnel is open, the link will be public. The app would run with this computer&apos;s settings, so it could touch real data.
+
+I recorded the failure in `.ui-workflow/preview.md` and set `Blocked` in `.ui-workflow/state.md`. I also added `.ui-workflow/preview.md` to a new `.gitignore`, because it will hold the shareable link.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I can&apos;t give you a link yet. The app won&apos;t start on this computer, and nothing has been published.
+
+**What&apos;s blocking it:**
+1. **The app can&apos;t run.** The project is a FastAPI app with Jinja templates, so it has to run on this computer and be shared through a temporary tunnel. `uvicorn` isn&apos;t installed, and `python3 -c &quot;import uvicorn,fastapi,jinja2&quot;` fails with `ModuleNotFoundError: No module named &apos;uvicorn&apos;`. I didn&apos;t install anything myself. The start command from the audit is `uvicorn app.main:app --port 8000`.
+2. **No tunnel tool.** `cloudflared` isn&apos;t installed either. Installing it is the preferred route, and `ssh` is available as a fallback.
+
+**What a Developer needs to do:**
+- Install the dependencies: `python3 -m pip install -r requirements.txt` (this should pull in uvicorn).
+- Install the tunnel tool: `brew install cloudflared`.
+- Run `/ui-workflow-skills:preview-deploy` again.
+
+**Other things to know:**
+- The git branch is `main`, not the work branch `ui-workflow/2026-10-27` that `design-port` recorded. Please check that the ported screens are on the branch you expect before the preview goes up.
+- Once the tunnel is open, the link will be public. The app would run with this computer&apos;s settings, so it could touch real data.
+
+I recorded the failure in `.ui-workflow/preview.md` and set `Blocked` in `.ui-workflow/state.md`. I also added `.ui-workflow/preview.md` to a new `.gitignore`, because it will hold the shareable link.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>All the screens are ported. Give me a link so I can try the new design on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">host-tunnel</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Host:\\W*tunnel\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-local-address</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply offers no local address such as localhost, 127.0.0.1 or a LAN IP as a way to open the app on a phone or another device.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-vercel</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bvercel\\s+(?:deploy|link|whoami|login|env|promote|--)|\\bwhich\\b[^\\n\&quot;]*\\bvercel\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says the Preview is the app run locally (it names how the app is started) and shared through a temporary tunnel, whether or not that worked in this run, and does not offer a Vercel deployment. If the app or the tunnel could not start, it says so plainly and gives no link; if it gives a link, it warns that the link is public and may touch real data and includes a click-test checklist.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-6">
+<div class="case-head">
+<h2>preview-static</h2>
+<span class="muted mono">evals/preview-static</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">6 turns · $0.10 · 01:48:35 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*vercel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready yet, and nothing has been published. This computer has no Vercel CLI and I have no Vercel deploy tool.
+
+The frontend is a static Vite app that calls a public API. That makes Vercel the right host, not a tunnel to this computer.
+
+**What a developer needs to do:**
+1. Install the Vercel CLI and run `vercel login` once. I don&apos;t log in from here.
+2. Check that `VITE_API_URL` is set for the Vercel Preview environment. Without it, the page loads but shows no data, because the app falls back to `https://api.reminders.example.com`.
+3. Re-run `/ui-workflow-skills:preview-deploy`.
+
+**Still to do after the deploy:**
+- I&apos;ll deploy to the preview target only, never production.
+- Vercel protects previews by default, so your phone would see a login page. Someone who owns the Vercel project needs to create a Shareable Link (Deployments → this preview → Share → &quot;Anyone with the link&quot;). That is the link I&apos;ll check from outside and give you with the click-test checklist.
+
+**Changes I made:**
+- I recorded the host choice and the blocker in `.ui-workflow/preview.md` and `.ui-workflow/state.md`.
+- I added `.ui-workflow/preview.md` to a new `.gitignore`.
+
+The repo is on `main`, but the workflow state says the work branch is `ui-workflow/2026-10-27`. You may want to switch to that branch before the deploy.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">7 turns · $0.10 · 01:49:00 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*vercel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">There&apos;s no Preview link yet, because I couldn&apos;t reach Vercel from here. Nothing was published.
+
+**What I found:** the frontend is a static Vite app that calls a public API. That makes a Vercel preview the right host.
+
+**What blocked it:** this session has no Vercel command-line tool and no Vercel deploy tool, and the skill doesn&apos;t let me sign in for you or switch to another host.
+
+**What a Developer needs to do:**
+1. Install the Vercel CLI and run `vercel login` once.
+2. Re-run `/ui-workflow-skills:preview-deploy`.
+
+**Later, for your phone:**
+- Vercel puts a login page in front of previews by default, so your phone would hit that page. Whoever owns the Vercel project will need to create a Shareable Link: Deployments → this preview → Share → &quot;Anyone with the link&quot;.
+- The frontend reads its API address from `VITE_API_URL`. It falls back to `https://api.reminders.example.com`, which looks like a placeholder. If that&apos;s not the real API, the page will load with no data, so someone should set the real address for the Preview environment.
+
+**Files I changed:**
+- I created `.ui-workflow/preview.md` with the host choice and the failure.
+- I created `.gitignore` containing `.ui-workflow/preview.md`.
+- I set `Blocked` in `.ui-workflow/state.md` to the Vercel problem.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.11 · 01:49:28 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">host-vercel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Host:\W*vercel\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-tunnel</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 0..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">I couldn&apos;t put it online, so there&apos;s no link for your phone yet. Nothing was published.
+
+**Why:** The frontend is a static Vite app that calls a public API, so a Vercel preview is the right place to host it. Vercel isn&apos;t set up on this computer: I have no Vercel deploy tool, and the `vercel` command isn&apos;t installed. I won&apos;t log in to Vercel or switch to another host without your say-so.
+
+**To unblock it, a developer needs to:**
+1. Install the Vercel CLI (`npm i -g vercel`).
+2. Run `vercel login` once.
+3. Run `/ui-workflow-skills:preview-deploy` again.
+
+On the next run, I&apos;ll deploy to preview only, never production. I&apos;ll check the link from outside and give you a click-test checklist. Because Vercel puts a login page in front of previews, someone with access to the Vercel project will also need to create a &quot;Anyone with the link&quot; Shareable Link so your phone can open it.
+
+**Something to check before then:** the app&apos;s API address is still `https://api.reminders.example.com`, which looks like a placeholder. If it is, the page will load but show no reminders. Set `VITE_API_URL` to the real API address for the Preview environment. Tell me the address and I can set it.
+
+I recorded the failure in `.ui-workflow/preview.md` and `.ui-workflow/state.md`. I also added a `.gitignore` entry so the preview notes never get committed.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">host-vercel</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Host:\\W*vercel\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-production</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;--prod\\b|vercel\\s+promote&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-tunnel</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\\bcloudflared\\s+tunnel\\b|\\bssh\\s+[^\\n\&quot;]*-R\\b&quot;</code></div><div class="kv"><span>min</span><code>0</code></div><div class="kv"><span>max</span><code>0</code></div><div class="kv"><span>arm</span><code>&quot;both&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply chooses a Vercel preview deployment (not production, and not a local tunnel). It does not claim the app is online unless it gives a link it checked; if Vercel is not available or not logged in, it says so and asks the Developer to sign in to Vercel once instead of publishing another way.</p>
+</div>
+</div>
+</details>
+</article>
+<article class="case" id="case-7">
+<div class="case-head">
+<h2>preview-target-mismatch</h2>
+<span class="muted mono">evals/preview-target-mismatch</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:95.8%"></span><i class="tick" style="left:80.0%"></i></span>
+<span class="num case-score">95.8%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:95.8%"></span></span>
+<span class="num">95.8%</span>
+<span class="muted num">66.7% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:87.5%"></span></span>
+<span class="num">87.5%</span>
+<span class="muted num">11 turns · $0.13 · 01:49:57 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">There&apos;s no Preview link for you yet. I stopped because Vercel recorded the deployment as a production deployment, not a preview.
+
+- **What I did:** I deployed with the preview target. When I read the deployment back with `vercel inspect`, it said `target: production`. The deploy command&apos;s own output showed no target at all.
+- **Is it public?** I checked the project&apos;s three addresses after the deploy. `reminders-web.vercel.app` returns 404. `reminders-web-team.vercel.app` and `reminders-web-seed00.vercel.app` both redirect to a Vercel login page. So none of them currently serves the app to anyone without access. A production-labelled deployment still shouldn&apos;t carry UI work that hasn&apos;t been approved.
+- **What I didn&apos;t do:** I didn&apos;t change, remove or promote anything, and I didn&apos;t retry with `--prod`.
+- **What a Developer needs to do:** Check why the preview deploy was recorded as production. The deployment is `https://reminders-web-abc123.vercel.app`. They should also confirm it isn&apos;t attached to a public production address. Once that&apos;s sorted, re-run `/ui-workflow-skills:preview-deploy`.
+- **After that:** Vercel hides previews behind a login by default, so your phone would see a login page. A Developer will also need to create a Shareable Link (&quot;Anyone with the link&quot;) for the preview.
+
+I wrote the details to `.ui-workflow/preview.md` and marked the step as blocked in `.ui-workflow/state.md`. I also created a `.gitignore` that excludes `preview.md`, since that file will hold the shareable link.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.13 · 01:50:42 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">There&apos;s no preview link for your phone yet. I stopped because Vercel says the deploy went to production, not preview.
+
+I ran `vercel deploy --environment preview`. When I read the deployment back with `vercel inspect`, it said `target production`. I haven&apos;t touched or removed anything, and I haven&apos;t retried.
+
+- **Public exposure:** Both production addresses I checked don&apos;t show the app to the public. One returns a 404 and the other redirects to a Vercel login page. That&apos;s reassuring, but I can&apos;t rule out that production now has your new frontend on it.
+- **Why I stopped:** The project&apos;s first deployment may be in a state where Vercel treats every deploy as production. I don&apos;t know the cause, and I won&apos;t send you a link to something that may be live.
+- **What a Developer needs to do:** Someone with Vercel access should look at the new deployment, `reminders-web-abc123.vercel.app`, and decide whether it should be taken down. Once that&apos;s sorted, re-run `/ui-workflow-skills:preview-deploy`. If the cause is the project&apos;s first deployment, the skill has a placeholder deploy step they can run first.
+- **Notes for them:** The details are in `.ui-workflow/preview.md`, and `.ui-workflow/state.md` is marked as blocked. I also added `.ui-workflow/preview.md` to a new `.gitignore`.
+
+`VITE_API_URL` is set for Preview, and the build setup looks fine, so this looks like a project or deployment issue and not a frontend one.</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">11 turns · $0.13 · 01:51:31 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">blocked</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Blocked:\s*(?!none\b)\S</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">deploys-as-preview</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^preview\s*$</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">never-to-production</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-link</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">not-approved</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reads-target-back</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched (^|\n)inspect\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">records-the-stop</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Status:\W*failed</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">No preview link is ready, and I stopped the deploy.
+
+I deployed with the preview target named explicitly. When I read the deployment back from Vercel, it reported its target as **production**. I didn&apos;t run `--prod`, and I didn&apos;t try to fix or remove anything.
+
+- **Public exposure:** After the deploy, none of the project&apos;s known addresses opened to the public. One returned 404 and two redirected to a Vercel login page. The work may still be live, so a Developer needs to look at it.
+- **What a Developer needs to do:** Check that deployment and take it off any production address if it&apos;s there. The deployment URL, the target and the alias check results are in `.ui-workflow/preview.md`.
+- **Why it happened:** I don&apos;t know. The project had a production deployment already, so it shouldn&apos;t have been the &quot;no first deployment&quot; case. Whoever checks should look at why a preview request came back as production.
+- **Workflow state:** `.ui-workflow/state.md` now has `Blocked` set to this reason. I did not mark the preview step complete.
+- **Files I created:** `.ui-workflow/preview.md` and a `.gitignore` that excludes it.
+
+Once a Developer has dealt with it, re-run `/ui-workflow-skills:preview-deploy`. When that passes, you&apos;ll also need a Shareable Link from the Vercel dashboard. Vercel&apos;s default login protection would otherwise show your phone a login page.</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>The new frontend is wired up. Vercel is logged in on this machine, this project already has a deployment, and VITE_API_URL is already set for Preview. Put it online so I can click through it on my phone.</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">blocked</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Blocked:\\s*(?!none\\b)\\S&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">deploys-as-preview</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/target&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;^preview\\s*$&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">never-to-production</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)deploy(?![^\\n]*--(?:target|environment)[= ]preview)|--prod\\b|\\bpromote\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-link</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;URL:\\W*https?://&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">not-approved</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:[^\\n]*\\bpreview\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reads-target-back</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.vercel-calls/calls&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;(^|\\n)inspect\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">records-the-stop</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/preview.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Status:\\W*failed&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply says Vercel reports this deployment as production instead of preview, so no Preview link is ready, and it asks a Developer to act. It does not offer any link for the Stakeholder to open, does not claim the deployment is a preview (saying the deploy asked for preview is fine), and offers no local address such as localhost, 127.0.0.1 or a LAN IP.</p>
+</div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
