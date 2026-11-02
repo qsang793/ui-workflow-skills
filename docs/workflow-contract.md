@@ -197,6 +197,7 @@ The section follows `=== END COPY ===`, so it is never pasted into the Design to
 
 ## Needs Stakeholder decision
 - <Screen>: <design-only action> | backend missing | decision: <pending | drop | disabled "coming soon"> | none
+- <Screen>: variations <Export file>, <Export file> | which one to use | decision: <pending | use <Export file>>
 
 ## Not checked
 - <what the planner did not verify> | none
@@ -205,7 +206,7 @@ The section follows `=== END COPY ===`, so it is never pasted into the Design to
 | Screen | Export file | Target template | Data it displays | Actions | Backend source |
 ```
 
-Screens are found from what the Design export renders (routes, pages, and named views shown conditionally, such as tabs or steps), not from folder or file names. Export file is the source file that renders the Screen, followed by `#<view>` when that file renders several Screens (`src/routes/dashboard.tsx`, `src/App.tsx#settings`, `dashboard.html`). When the planner cannot tell what the Screens are, it asks instead of guessing.
+Screens are found from what the Design export renders (routes, pages, and named views shown conditionally, such as tabs or steps), not from folder or file names. Export file is the source file that renders the Screen, followed by `#<view>` when that file renders several Screens (`src/routes/dashboard.tsx`, `src/App.tsx#settings`, `dashboard.html`). When the planner cannot tell what the Screens are, it asks instead of guessing. Under Scenario C, routes or views that show one Screen in different looks are variations of it: the planner asks which one to use, with no default, and the Screens table holds only the chosen one. Until then the Screen's row says `pending` in every column but Screen and Target template.
 
 A Blocker is displayed data or Required behaviour that the backend cannot supply. An action that appears only in the design and has no backend is not a Blocker: it goes under Needs Stakeholder decision, and the planner asks the Stakeholder to drop it from the UI (the default) or show it disabled with a "coming soon" label. The planner completes its step only when no decision is `pending`.
 
@@ -214,7 +215,7 @@ The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` pl
 ### `design-port` input
 
 - `.ui-workflow/export/`: the Design export as staged by ingest, in any framework (TanStack Start, React + Vite, Next, Angular) or plain HTML + CSS. It is a visual reference (ADR-0004): `design-port` reads its source and never installs, builds or runs it.
-- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest. `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). Read before any markup is written, it checks layout and resolves values the source does not settle.
+- `.ui-workflow/export/screenshots/<Screen>.png`: optional, one screenshot per Screen from the Design tool's preview, collected by ingest, or by the planner once a variation is chosen. `<Screen>` is the Screen's name in lowercase with hyphens (`all-reminders.png`). Read before any markup is written, it checks layout and resolves values the source does not settle.
 - `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION`, no `pending` decision, and the Screens table naming, per Screen, the export file, the target template, the data and the actions.
 - `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen, and the `Checks` line, every command in the project that passes or fails, or `none found`.
 

@@ -90,7 +90,7 @@ Bạn nhận `.ui-workflow/design-prompt.md`. Prompt luôn bằng tiếng Anh, d
 
 ### 4. Làm việc trong Design tool
 
-Claude không tham gia bước này. Dán prompt vào công cụ và chỉnh đến khi ưng ý. Sau đó lấy code ra:
+Claude không tham gia bước này. Dán prompt vào công cụ. Prompt yêu cầu dựng mọi Screen theo một phong cách chung ngay trong tin nhắn đầu tiên, vì có thể bạn không gửi được tin nhắn tiếp theo trong cùng ngày: trong một lần chạy thật trên gói Free của Lovable, sau một lần dựng, tin nhắn kế tiếp bị từ chối vì hết credit. Nếu vẫn gửi được tin nhắn, hãy chỉnh đến khi ưng ý. Nếu không, hãy dùng kết quả đang có: ở Scenario C, bạn có thể yêu cầu những thay đổi còn lại khi Claude cho bạn xem từng Screen. Sau đó lấy code ra:
 
 | Design tool | Cách lấy code |
 |---|---|
@@ -98,6 +98,8 @@ Claude không tham gia bước này. Dán prompt vào công cụ và chỉnh đ�
 | Google AI Studio (Build) | Tải ZIP, hoặc sync sang GitHub |
 
 Tên các menu này lấy từ tài liệu của nhà cung cấp, kiểm tra ngày 2026-10-27, và có thể đã đổi chỗ.
+
+Link preview từ connector của Lovable, loại link mà trợ lý AI đưa cho bạn khi tạo dự án giúp bạn, cần đăng nhập. Ở trình duyệt chưa đăng nhập Lovable, link này mở trang đăng nhập thay vì bản thiết kế. Hãy đăng nhập trước, và gửi ảnh chụp cho người không có tài khoản.
 
 Ở Scenario C framework nào cũng được, vì chỉ dùng phần giao diện. Với Google AI Studio ở Scenario C, hãy mở Settings trước khi dán: chọn plain HTML nếu có, không thì chọn framework nhẹ nhất (React thay vì Next.js hay Angular). Lời khuyên này chưa được thử; nếu không có lựa chọn đó, cứ dán.
 
@@ -118,7 +120,7 @@ Nói cho Claude biết export ở đâu:
 
 Repository private chỉ sao chép được nếu máy này có quyền truy cập. Nếu không sao chép được, hãy dùng ZIP hoặc hỏi Developer.
 
-Claude chép file vào `.ui-workflow/export/` và không bao giờ cài đặt hay chạy chúng. Nếu đã có export trước đó, Claude hỏi trước khi chuyển nó sang bản backup. Claude báo framework tìm thấy và liệt kê các Screen, rồi xin các ảnh chụp (không bắt buộc) và cho biết tên file của từng ảnh.
+Claude chép file vào `.ui-workflow/export/` và không bao giờ cài đặt hay chạy chúng. Nếu đã có export trước đó, Claude hỏi trước khi chuyển nó sang bản backup. Claude báo framework tìm thấy và liệt kê các Screen, rồi xin các ảnh chụp (không bắt buộc) và cho biết tên file của từng ảnh. Ở Scenario C, nhiều biến thể của cùng một Screen được liệt kê là một Screen, và bước sau sẽ hỏi bạn dùng biến thể nào.
 
 Hai trường hợp dừng: file ZIP bị từ chối vì không an toàn (hãy tải lại từ Design tool), và 🚨 SCENARIO MISMATCH, nghĩa là export không hợp với Scenario của bạn. Làm theo thông báo; nếu không được, hãy gọi Developer.
 
@@ -133,6 +135,8 @@ Scenario A bỏ qua bước này. Design tool không biết backend của bạn,
 | PROCEED | Thiết kế khớp với backend | Chạy lệnh tiếp theo |
 | PROCEED WITH CAUTION | Khớp, nhưng cần chỉnh nhỏ hoặc có phần Claude không kiểm tra được | Đọc danh sách Not checked, chạy lệnh tiếp theo |
 | STOP | Có ít nhất một Blocker | Đưa plan cho Developer. Không bước nào sau đó được chạy |
+
+Nếu export có nhiều biến thể của cùng một Screen, Claude hỏi bạn dùng biến thể nào. Không có lựa chọn mặc định, bước này chờ bạn trả lời, và plan chỉ giữ biến thể bạn chọn. Sau đó Claude xin một ảnh chụp (không bắt buộc) của biến thể đó.
 
 Với nút chỉ có trong thiết kế, Claude hỏi bạn bỏ nó đi (mặc định) hay hiện ở trạng thái vô hiệu với nhãn "coming soon". Sau khi bạn trả lời, Claude có thể yêu cầu chạy lại bước này. Hành vi màn hình đang có và những thứ bắt buộc của bạn không bao giờ bị bỏ: nếu backend không làm được, đó là Blocker. Dữ liệu thiết kế hiển thị mà backend không có cũng vậy, kể cả khi Design tool tự nghĩ ra, như một lời chứng thực; Developer sẽ quyết định.
 

@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T04:20:33.344Z",
+  "durationSeconds": 22,
+  "costUsd": 0.10505599999999998,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "ingest-react-scenario-c",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.2.0",
+        "path": "~/Documents/chill/ui-workflow-skills/.claude/worktrees/fix-34-one-message-design-prompt"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "ingest-react-scenario-c",
+      "dir": "evals/ingest-react-scenario-c",
+      "source": "mixed",
+      "promptMarkdown": "I'm done in Lovable. I downloaded the project as downloads/reminders-design.zip. I don't have screenshots, so skip that part.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "gitignored",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".gitignore"
+            },
+            "pattern": "\\.ui-workflow/export",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "ingest-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "next-is-planner",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*planner\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "nothing-installed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "files",
+            "pattern": "node_modules|/dist/",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "reply",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The final reply accepts the Design export for Scenario C without reporting a mismatch, says it is React (with Vite or React Router), and lists three Screens, Today, All reminders and Settings, each with the source file that renders it. It names `/ui-workflow-skills:integration-planner` as the next step.",
+          "config": {
+            "criteria": "The final reply accepts the Design export for Scenario C without reporting a mismatch, says it is React (with Vite or React Router), and lists three Screens, Today, All reminders and Settings, each with the source file that renders it. It names `/ui-workflow-skills:integration-planner` as the next step.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "staged-flat",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": ".ui-workflow/export/src/App.tsx",
+            "exists": true
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.10505599999999998,
+            "judgeCostUsd": 0.00020210000000000003,
+            "durationSeconds": 22,
+            "startedAt": "2026-11-02T04:20:33.575Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-IS4eHS/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "gitignored",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\.ui-workflow/export",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "ingest-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief,\\s*ingest\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-planner",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*planner\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "nothing-installed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reply",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: FAIL PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  true,
+                  true
+                ],
+                "evidence": "## ✅ Design export staged to `.ui-workflow/export/`\n\n- **Source:** ZIP, `downloads/reminders-design.zip`\n- **Framework:** React + Vite (with `react-router-dom` and Tailwind). Under Scenario C this is only a visual reference. Nothing was installed or run.\n- **Files:** 8 (`index.html`, `package.json`, `src/App.tsx`, `src/main.tsx`, `src/index.css`, and three files in `src/pages/`)\n- **Backup:** none, because there was no earlier export.\n- **Safety:** the ZIP passed the safety checks. It had no symlinks and no nested `.git`.\n- **Git:** I created `.gitignore` with `.ui-workflow/export*/` so the export stays out of git.\n\n### Screens\n- **Today:** `src/pages/Today.tsx`\n- **All reminders:** `src/pages/AllReminders.tsx`\n- **Settings:** `src/pages/Settings.tsx`\n\nNone of these look like variations of one another.\n\n### Workflow state\n`ingest` is now in the completed steps and the current step is `planner`.\n\n### Next step\nRun `/ui-workflow-skills:integration-planner`.\n\n### Screenshots\nYou said you have none, so I skipped that step. It doesn't block anything."
+              },
+              {
+                "name": "staged-flat",
+                "passed": true,
+                "weight": 1,
+                "explanation": ".ui-workflow/export/src/App.tsx exists as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

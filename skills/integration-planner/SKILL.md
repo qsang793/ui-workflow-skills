@@ -51,6 +51,8 @@ List what the existing backend provides, from its source:
 
 **Find the Screens from what the export renders**: routes, pages, and named views shown conditionally (tabs, steps, `view === 'x'` branches). Never from folder or file names. Export file is the source file that renders the Screen, followed by `#<view>` when that file renders several Screens (`src/routes/dashboard.tsx`, `src/App.tsx#settings`, `dashboard.html`). Name each Screen as the export labels it in the UI (tab text, page title, route name), not by its code key: `view === "acct"` shown under the tab "My account" is the Screen "My account", Export file `src/App.tsx#acct`. If you cannot tell what the Screens are, ask the Stakeholder which screens the design has before going on. Never guess.
 
+**Variations of one Screen.** Routes or views that show the same heading, fields and purpose in different looks are variations of one Screen; route names alone never decide this, and when unsure, ask. They get one Screens row, named without the variation, and one entry under Needs Stakeholder decision. Ask which one to use, telling them apart in plain words (the route and how it looks). There is no default: never pick one yourself. If the Stakeholder has already named one, or an earlier plan records one whose file is still in the export, apply it and do not ask again. Record the answer as `decision: use <Export file>`, then ask for one optional screenshot of that variation, saved as `.ui-workflow/export/screenshots/<Screen>.png` with the Screen's name in lowercase with hyphens (`today.png`), in place of any already there; skipping it blocks nothing. Until it is answered it stays `decision: pending`, the row says `pending` in every column but Screen and Target template, and the step is not completed. Only the chosen variation is read for the steps below: no field or action of the others becomes a Screens row, a Blocker or a decision.
+
 For each Screen, list:
 
 - **Data it displays**: every field the Screen shows. Mock data, fixtures and hard-coded sample lists are read as a list of displayed fields, never as values to keep.
@@ -111,6 +113,7 @@ File: `.ui-workflow/integration-plan.md`. Then update the Workflow state (step 0
 
 ## Needs Stakeholder decision
 - <Screen>: <design-only action> | backend missing | decision: <pending | drop | disabled "coming soon">
+- <Screen>: variations <Export file>, <Export file> | which one to use | decision: <pending | use <Export file>>
 (or `- none`)
 
 ## Not checked
@@ -141,6 +144,7 @@ One Screens row per Screen. Leave out the sections of the other Scenario.
 
 - Any Blocker → Verdict `STOP`, Next step "show to a Developer", step not completed.
 - A design-only action is never a Blocker and never silently kept: it waits for the Stakeholder's decision.
+- Only the variation the Stakeholder chose enters the Screens table; until then its row says `pending`.
 - Required behaviour is never dropped to fit the design.
 
 Non-technical Stakeholders are tempted to skip past Blockers because the design looks good. Make stopping the loud default.
@@ -150,6 +154,7 @@ Non-technical Stakeholders are tempted to skip past Blockers because the design 
 - **Reading the export's mock values as real data.** They only tell you which fields the Screen shows.
 - **Finding Screens from file names.** One `App.tsx` can hold several Screens; a `components/` file is not a Screen.
 - **Classifying a design-only action as a Blocker,** or a Required behaviour as a design-only action.
+- **Asking about a button only an unchosen variation has.** Settle which variation first.
 - **Under-counting auth mismatches (B).** Auth changes are almost always Blockers.
 - **Treating "endpoint name differs" as a Blocker.** That is an adapter.
 - **Writing "Not checked: none" without having checked.** Say what you skipped.

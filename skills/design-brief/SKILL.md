@@ -151,6 +151,7 @@ The assembled prompt asks for the **look only** (layout, spacing, colours, fonts
 - **Question wall.** All 9 questions at once → the Stakeholder gives lazy answers. Ask one, wait, then next.
 - **Skipping the brand block** because the Stakeholder "doesn't have one". "No brand" is still information — record it.
 - **Forbidding React in Scenario C.** Lovable cannot comply and AI Studio defaults to React, so the Stakeholder would stall at ingest.
+- **Relying on a second message.** On a free plan the next message can be refused for lack of credits, so the first one asks for one shared style on every Screen.
 - **Inventing copy or field names.** Scenario C quotes them from the project's templates.
 - **Writing Required behaviour from the new design.** It is what each screen does today, plus the must-haves.
 - **Not asking about device priority.** Mobile-first vs desktop-first changes the entire layout.
@@ -160,6 +161,7 @@ The assembled prompt asks for the **look only** (layout, spacing, colours, fonts
 - Output prompt is < 500 words → too thin, ask follow-up questions on weak answers.
 - For scenario C, the prompt says "do not use React" or any framework, or threatens to discard framework code → remove it.
 - For scenario C, `## Required behaviour` is missing a screen the audit lists → add it.
+- The prompt asks for variations, or for anything to wait for a later message → remove it.
 - The Design prompt contains non-English text other than UI copy quoted from the project → translate it.
 - The Stakeholder answered "I don't know" to 4+ questions → pause and explain, don't generate a junk prompt.
 
