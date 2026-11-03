@@ -25,14 +25,10 @@ A Claude Code plugin that walks a non-technical Stakeholder from "this UI looks 
 
 ## How it works
 
-```mermaid
-flowchart LR
-    A[Pick a Scenario] --> B[Write the Design prompt]
-    B --> C[Generate the UI<br/>in Lovable or AI Studio]
-    C --> D[Bring the export<br/>into the project]
-    D --> E[Wire or port it]
-    E --> F[Preview on<br/>phone and laptop]
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/how-it-works-dark.svg">
+  <img src="docs/assets/how-it-works-light.svg" alt="Workflow: pick a Scenario, write the prompt, generate the UI in Lovable or AI Studio, bring it in, wire or port it, preview" width="100%">
+</picture>
 
 | Scenario | When |
 |---|---|

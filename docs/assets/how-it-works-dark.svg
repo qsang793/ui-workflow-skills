@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="328" viewBox="0 0 1200 328" role="img" aria-label="Workflow: pick a Scenario, write the prompt, generate the UI in the design tool, bring it in, wire or port it, preview">
+<style>.t{font:600 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}.s{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.l{font:600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.06em}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b949e"/></marker></defs>
+<rect x="16" y="16" width="1168" height="150" rx="16" fill="#161b22" stroke="#30363d"/>
+<rect x="16" y="182" width="1168" height="130" rx="16" fill="#10231b" stroke="#1f5a40"/>
+<text x="40" y="44" class="l" fill="#9da7b3">IN CLAUDE CODE</text>
+<text x="40" y="210" class="l" fill="#3fbf8a">IN THE DESIGN TOOL</text>
+<path d="M208 104 H230" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#a)"/>
+<path d="M316 146 V214 Q316 254 356 254 H422" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#a)"/>
+<path d="M592 254 H660 Q700 254 700 214 V150" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#a)"/>
+<path d="M784 104 H806" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#a)"/>
+<path d="M976 104 H998" fill="none" stroke="#8b949e" stroke-width="1.5" marker-end="url(#a)"/>
+<rect x="40" y="62" width="168" height="84" rx="12" fill="#0d1117" stroke="#3d444d" stroke-width="1"/>
+<text x="124.0" y="100" text-anchor="middle" class="t" fill="#e6edf3">Pick a Scenario</text>
+<text x="124.0" y="122" text-anchor="middle" class="s" style="" fill="#8b949e">ui-scenario-picker</text>
+<rect x="232" y="62" width="168" height="84" rx="12" fill="#0d1117" stroke="#3d444d" stroke-width="1"/>
+<text x="316.0" y="100" text-anchor="middle" class="t" fill="#e6edf3">Write the prompt</text>
+<text x="316.0" y="122" text-anchor="middle" class="s" style="" fill="#8b949e">design-brief</text>
+<rect x="424" y="212" width="168" height="84" rx="12" fill="#0d1117" stroke="#3fbf8a" stroke-width="1.5"/>
+<text x="508.0" y="250" text-anchor="middle" class="t" fill="#e6edf3">Generate the UI</text>
+<text x="508.0" y="272" text-anchor="middle" class="t" style="font-size:12px;font-weight:400" fill="#3fbf8a">Lovable or AI Studio</text>
+<rect x="616" y="62" width="168" height="84" rx="12" fill="#0d1117" stroke="#3d444d" stroke-width="1"/>
+<text x="700.0" y="100" text-anchor="middle" class="t" fill="#e6edf3">Bring it in</text>
+<text x="700.0" y="122" text-anchor="middle" class="s" style="" fill="#8b949e">ingest-design-export</text>
+<rect x="808" y="62" width="168" height="84" rx="12" fill="#0d1117" stroke="#3d444d" stroke-width="1"/>
+<text x="892.0" y="100" text-anchor="middle" class="t" fill="#e6edf3">Wire or port</text>
+<text x="892.0" y="122" text-anchor="middle" class="s" style="" fill="#8b949e">port / wire</text>
+<rect x="1000" y="62" width="168" height="84" rx="12" fill="#3fbf8a" stroke="#3fbf8a" stroke-width="1.5"/>
+<text x="1084.0" y="100" text-anchor="middle" class="t" fill="#07130d">Preview</text>
+<text x="1084.0" y="122" text-anchor="middle" class="s" style="" fill="#07130d">preview-deploy</text>
+</svg>
