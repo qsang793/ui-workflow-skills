@@ -1,18 +1,48 @@
+<div align="center">
+
 <img src=".claude-plugin/icon.png" alt="" width="96" height="96">
 
 # UI Workflow Skills
 
-A Claude Code plugin that lets a non-technical Stakeholder drive the UI improvement of any project: 8 skills around an external AI Design tool (Lovable or Google AI Studio). A Developer steps in only when a skill stops on a Blocker, and does the push, merge and release at the end.
+**Redesign any project's UI by talking to Claude. No code needed.**
 
-> **Status: Beta.** All three Scenarios are Beta until a real end-to-end pilot passes ([#13](https://github.com/qsang793/ui-workflow-skills/issues/13)). See [Status](#status).
+A Claude Code plugin that walks a non-technical Stakeholder from "this UI looks dated" to a new UI live on a Preview link, using Lovable or Google AI Studio as the design tool.
 
-**Stakeholders:** read the guide, in [English](docs/stakeholder-guide.md) or [Vietnamese](docs/stakeholder-guide.vi.md). It needs no code. The rest of this page is for whoever installs and maintains the plugin.
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fqsang793%2Fui-workflow-skills%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)](CHANGELOG.md)
+[![validate](https://github.com/qsang793/ui-workflow-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/qsang793/ui-workflow-skills/actions/workflows/validate.yml)
+[![Status: Beta](https://img.shields.io/badge/status-beta-orange)](docs/status.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+[Stakeholder guide](docs/stakeholder-guide.md) · [Hướng dẫn tiếng Việt](docs/stakeholder-guide.vi.md) · [Install](docs/install.md) · [Status](docs/status.md)
+
+</div>
+
+## Why
+
+- **The Stakeholder drives.** Claude asks plain questions, writes the design prompt and brings the generated UI into the project.
+- **The Developer only unblocks.** A skill stops on a Blocker and names it; the Developer pushes, merges and releases at the end.
+- **Nothing reaches production.** Skills commit only to a `ui-workflow/<date>` Work branch and stop at an approved Preview.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Pick a Scenario] --> B[Write the Design prompt]
+    B --> C[Generate the UI<br/>in Lovable or AI Studio]
+    C --> D[Bring the export<br/>into the project]
+    D --> E[Wire or port it]
+    E --> F[Preview on<br/>phone and laptop]
+```
+
+| Scenario | When |
+|---|---|
+| **A. Greenfield** | No frontend yet |
+| **B. Stack migration** | Rewrite the frontend in a new stack |
+| **C. Keep stack** | Restyle the frontend in its current stack |
+
+Every step is one command, and `.ui-workflow/state.md` remembers where you are. The full step-by-step walkthrough is in the [Stakeholder guide](docs/stakeholder-guide.md).
 
 ## Install
-
-Tested with Claude Code 2.1.307, the version CI pins.
-
-### Plugin (recommended)
 
 ```bash
 claude plugin marketplace add qsang793/ui-workflow-skills
@@ -22,112 +52,25 @@ claude plugin marketplace add qsang793/ui-workflow-skills
 claude plugin install ui-workflow-skills@ui-workflow-skills
 ```
 
-Skills are then named under the plugin, such as `/ui-workflow-skills:ui-scenario-picker`. To update, refresh the marketplace, update the plugin, and restart Claude Code:
+Updating, a symlink install with short command names, and the Vercel or cloudflared setup for the Preview step: [docs/install.md](docs/install.md).
 
-```bash
-claude plugin marketplace update ui-workflow-skills
+## Quick start
+
+Open the project in Claude Code (it must be a git repository) and run:
+
+```
+/ui-workflow-skills:ui-scenario-picker
 ```
 
-```bash
-claude plugin update ui-workflow-skills@ui-workflow-skills
-```
-
-Plugin users get a new release only when `version` changes in `.claude-plugin/plugin.json`.
-
-### Symlink
-
-For short names such as `/ui-scenario-picker`, or to follow the repository:
-
-```bash
-git clone https://github.com/qsang793/ui-workflow-skills.git ~/projects/ui-workflow-skills
-mkdir -p ~/.claude/skills
-ln -sf ~/projects/ui-workflow-skills/skills/* ~/.claude/skills/
-```
-
-Check that the 8 skills are there:
-
-```bash
-ls ~/.claude/skills/ | grep -E '^(ui-|design-|ingest-|integration-|preview-)'
-```
-
-Update with `git pull`. The skills still print the long `ui-workflow-skills:` names in their replies, so a Stakeholder on a symlink install drops that part when typing a command.
-
-### For the Preview step
-
-`preview-deploy` picks the host from the project's shape and never installs these itself:
-
-- A static frontend goes to a Vercel preview. Run `npm i -g vercel` and `vercel login` once, unless Claude already has a logged-in Vercel tool. Vercel also protects previews by default, so someone with access to the Vercel project creates a Shareable Link for each Preview; the Hobby plan allows one per account. A project that has never been deployed cannot get a preview: the skill stops and asks a Developer for one placeholder deployment first.
-- A backend that renders the UI runs locally behind a temporary tunnel. Run `brew install cloudflared`; no account is needed.
-
-## Flow
-
-Pick a Scenario once, then follow its path. `.ui-workflow/state.md` in the project records the Scenario and the current step, and every skill reads it first and names any step that is missing.
-
-| Scenario | When | Status | Path |
-|---|---|---|---|
-| A. Greenfield | No frontend yet | Beta | picker → brief → ingest → wire → preview |
-| B. Stack migration | Rewrite the frontend in a new stack | Beta | picker → audit → brief → ingest → planner → wire → preview |
-| C. Keep stack | Restyle the frontend in its current stack | Beta | picker → audit → brief → ingest → planner → port → preview |
-
-| Step | Command | What it does | Writes |
-|---|---|---|---|
-| picker | `/ui-workflow-skills:ui-scenario-picker` | Reads the files, asks a few questions, picks the Scenario | `.ui-workflow/state.md` |
-| audit | `/ui-workflow-skills:ui-audit` | Maps the stack, pages and pain points | `.ui-workflow/audit.md` |
-| brief | `/ui-workflow-skills:design-brief` | Interviews the Stakeholder, writes the English Design prompt | `.ui-workflow/design-prompt.md` |
-| (Design tool) | none | The Stakeholder generates the UI and gets the code out | |
-| ingest | `/ui-workflow-skills:ingest-design-export` | Stages the Design export without running it, lists its Screens | `.ui-workflow/export/` |
-| planner | `/ui-workflow-skills:integration-planner` | Compares the design with the backend. Any Blocker means STOP | `.ui-workflow/integration-plan.md` |
-| port (C) | `/ui-workflow-skills:design-port` | Rebuilds one Screen per turn in the existing stack, shows it in the local app, commits after approval | Work branch |
-| wire (A, B) | `/ui-workflow-skills:integration-wire` | Places the new frontend, wires it, passes the build, commits after approval | Work branch, `.ui-workflow/wiring.md` |
-| preview | `/ui-workflow-skills:preview-deploy` | Opens a Preview for the phone and laptop, checks the link from outside, runs the click-test checklist | `.ui-workflow/preview.md` |
-
-The skills commit only to the Work branch, `ui-workflow/<yyyy-mm-dd>`. They never push, merge or deploy to production; the workflow stops at an approved Preview.
-
-What the skills hand each other: [docs/workflow-contract.md](docs/workflow-contract.md). Vocabulary: [GLOSSARY.md](GLOSSARY.md). Decisions: [docs/adr/](docs/adr/).
+It reads the project, asks a few questions and picks the Scenario. After each step, the skill tells you the next command to run.
 
 ## Status
 
-No Scenario has passed a real end-to-end run. Behavioural evals cover the skills on small fixtures ([evals/README.md](evals/README.md)), but:
-
-- One real Lovable export has gone through the workflow, in a pilot that stopped before an approved Preview ([report](docs/pilots/2026-11-01-scenario-c-pilot.md)). It was an easy one, with one plain CSS file. No Google AI Studio export has, and neither has a Lovable export built on Tailwind classes. The Port rules were also tried on one Screen of a Google Stitch export ([note](docs/research/2026-10-31-stitch-source-only-port-spike.md)) and on fixtures.
-- The eval sandbox cannot open local ports or install real frameworks, so it does not reach a Screen viewed in the running app, a real framework build, or a live tunnel or Vercel link.
-
-Scenario C becomes Production once its pilot passes; Scenarios A and B stay Beta (ADR-0001). The first pilot covered only the early steps of v0.1.0: [docs/pilots/2026-05-21-retrospective.md](docs/pilots/2026-05-21-retrospective.md). The second ran Scenario C on a private project with an agent as Stakeholder and stopped before approval, so the next one needs another project and a person.
-
-## Repository layout
-
-```
-.claude-plugin/    plugin.json (the single source of the version), marketplace.json, icon.png
-skills/            the 8 skills; design-brief/templates/ holds the prompt templates
-docs/              Stakeholder guides, workflow contract, ADRs, pilots, research
-evals/             behavioural evals for `claude plugin eval`
-scripts/           static validator and its tests
-GLOSSARY.md        domain vocabulary
-CHANGELOG.md       version history
-```
+**Beta.** The skills pass behavioural evals, but no Scenario has finished a real end-to-end pilot yet. Details: [docs/status.md](docs/status.md).
 
 ## Contributing
 
-Each skill is one Markdown file. Before pushing, run the static checks (CI runs them on every pull request):
-
-```bash
-python3 -m unittest discover -s scripts -p "test_*.py"
-```
-
-```bash
-python3 scripts/validate.py
-```
-
-```bash
-claude plugin validate ./ --strict
-```
-
-`validate.py` also checks commands. Every `/ui-workflow-skills:` command in current Markdown must be an existing skill. In the Stakeholder guides every command must have that form, and the English and Vietnamese guides must share the same headings and commands in the same order, so change both together. To change a skill's behaviour, run its eval too; see [evals/README.md](evals/README.md).
-
-To release:
-
-1. Bump `version` in `.claude-plugin/plugin.json` and add an entry with the same number at the top of `CHANGELOG.md`. CI fails if they differ.
-2. Commit and tag: `git tag -a v<version> -m "v<version>"`, then `git push --tags`.
+Checks, release steps and the repository layout: [CONTRIBUTING.md](CONTRIBUTING.md). Vocabulary: [GLOSSARY.md](GLOSSARY.md). Decisions: [docs/adr/](docs/adr/).
 
 ## License
 
