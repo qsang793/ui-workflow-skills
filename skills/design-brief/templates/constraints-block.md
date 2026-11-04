@@ -1,4 +1,4 @@
-<!-- Reusable constraints block. Filled by the design-brief skill from Q5+Q8 answers. -->
+<!-- Reusable constraints block. Filled by the design-brief skill from Q8+Q10 answers. -->
 <!-- Substitute into the {{constraints-block}} placeholder in scenario templates. -->
 
 ## Constraints
@@ -37,7 +37,7 @@
 4. **Error** — readable error message + a retry path where applicable
 
 ### Hard constraints
-<list anything user mentioned in Q8 — examples:>
+<list anything user mentioned in Q10 — examples:>
 - Must work offline (PWA + service worker — design with this in mind)
 - Must be SEO-friendly (server-rendered or static)
 - Must respect `prefers-reduced-motion`

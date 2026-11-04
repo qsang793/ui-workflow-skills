@@ -84,7 +84,7 @@ Trước tiên Claude hỏi bạn sẽ dùng Design tool nào:
 | B | Lovable cho React; Google AI Studio cho Angular hoặc Next.js | Lovable không cho chọn framework |
 | C | Công cụ nào cũng được | Export chỉ là tham chiếu về giao diện |
 
-Sau đó Claude hỏi chín hoặc mười câu ngắn, mỗi lần một câu: ai dùng UI, các thao tác chính, thương hiệu, phong cách, thiết bị, nguồn cảm hứng, những thứ bắt buộc phải có, ràng buộc, và phần cần giữ nguyên. Hãy nghiêm túc với những thứ bắt buộc phải có: chúng không bao giờ bị bỏ để vừa với thiết kế. Nếu bạn trả lời "không biết", Claude đưa ví dụ; lần thứ hai Claude chọn một mặc định an toàn và báo cho bạn.
+Sau đó Claude hỏi tối đa mười hai câu ngắn, mỗi lần một câu, câu nào cũng kèm một gợi ý để bạn đồng ý hoặc sửa. Với B và C, Claude bắt đầu bằng hướng thiết kế: giao diện nên thay đổi đến đâu (làm gọn, nâng cấp rõ rệt, hay làm mới hoàn toàn), vấn đề nào trong số audit tìm ra làm bạn khó chịu nhất, và những gì phải giữ để người dùng vẫn nhận ra. Tiếp theo: ai dùng UI, các thao tác chính, thương hiệu, một trang web hay ứng dụng mà bạn muốn giống về cảm giác và bạn thích điểm gì ở đó, thiết bị, những thứ bắt buộc phải có, ràng buộc, và phần cần giữ nguyên. Nếu chưa có thương hiệu, Claude đưa ba hướng màu và font để bạn chọn. Hãy nghiêm túc với những thứ bắt buộc phải có: chúng không bao giờ bị bỏ để vừa với thiết kế. Nếu bạn trả lời "không biết", Claude đưa ví dụ; lần thứ hai Claude chọn gợi ý của mình và báo cho bạn.
 
 Bạn nhận `.ui-workflow/design-prompt.md`. Prompt luôn bằng tiếng Anh, dù bạn dùng ngôn ngữ nào. Chỉ sao chép phần nằm giữa dòng `=== COPY EVERYTHING BELOW ...` và dòng `=== END COPY ===`. Phần bên dưới các dòng đó dành cho các bước sau.
 

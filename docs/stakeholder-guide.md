@@ -84,7 +84,7 @@ Claude first asks which Design tool you will use:
 | B | Lovable for React; Google AI Studio for Angular or Next.js | Lovable offers no choice of framework |
 | C | Either | The export is only a visual reference |
 
-Then it asks nine or ten short questions, one at a time: who uses the UI, the top actions, brand, tone, device, inspiration, must-haves, constraints, and sections to leave alone. Take the must-haves seriously: they can never be dropped to fit a design. If you answer "I don't know", Claude offers examples; the second time it picks a safe default and tells you.
+Then it asks up to twelve short questions, one at a time, each with a suggested answer you can accept or change. For B and C it starts with the direction: how far the look should change (tidy up, a clear upgrade, or a brand-new look), which of the problems the audit found bothers you most, and what must stay recognisable. Then: who uses the UI, the top actions, brand, a site or app it should feel like and what you like about it, device, must-haves, constraints, and sections to leave alone. With no brand, Claude offers three colour and font directions to pick from. Take the must-haves seriously: they can never be dropped to fit a design. If you answer "I don't know", Claude offers examples; the second time it picks its suggestion and tells you.
 
 You get `.ui-workflow/design-prompt.md`. The prompt is always in English, whatever language you use. Copy only what sits between the `=== COPY EVERYTHING BELOW ...` line and the `=== END COPY ===` line. The part below those lines is for later steps.
 

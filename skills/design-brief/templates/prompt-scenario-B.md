@@ -40,6 +40,8 @@ You are redesigning the frontend of an existing web application. The **backend s
 2. <action 2>
 3. <action 3>
 
+{{direction-block}}
+
 {{brand-block}}
 
 {{constraints-block}}
@@ -59,6 +61,6 @@ You are redesigning the frontend of an existing web application. The **backend s
 
 ## One shared style
 This may be the only message I can send, so build everything now.
-- Choose one visual style yourself and use it on every page, from the same colours, fonts and components.
+- Use the Direction and Brand above as one visual style on every page, from the same colours, fonts and components.
 - Build every page above in this first build. Do not stop after the first page, and do not ask me to choose anything first.
 - Build one version of each page: no alternative versions, variations or style switchers.
