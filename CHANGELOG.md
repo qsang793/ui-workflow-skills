@@ -2,6 +2,48 @@
 
 All notable changes to this skill bundle are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0] — 2026-11-05
+
+Every Scenario stays Beta: the end-to-end pilot with a person as Stakeholder is still open (#13). This release makes `design-brief` settle a design Direction before it writes the Design prompt, so the Design tool stops falling back on its generic default look.
+
+### Migrating from 0.3.0
+
+No file, command or Workflow state field changed. A `.ui-workflow/design-prompt.md` written by 0.3.0 has no Direction; run `/ui-workflow-skills:design-brief` again before the next Design tool run to get one. `## Required behaviour` is unchanged, so the planner reads old and new files alike.
+
+### Changed
+
+- `design-brief` interview: for Scenarios B and C it opens with the change level (tidy up, a clear upgrade, or a brand-new look), the audit's pain points per Screen for the Stakeholder to rank, and what must stay recognisable. Every question carries a recommended answer. Tone and inspiration merge into one Feel question that asks what to borrow from a reference. With no brand, it offers three palette and font directions instead of a generic default, and a second "I don't know" picks the recommendation instead of "minimal/calm". Up to 12 questions, from 9 or 10.
+- Design prompt: a new Direction block (kind of UI, change level, fix first, keep, feel like) with fixed Craft rules, an Avoid list of generic AI patterns and a self-check, distilled from taste-skill, stitch-design-taste and impeccable. Brand, existing design tokens and real copy win over the Craft rules and the Avoid list. The brand block lost its default examples (`#2563eb`, Inter, slate).
+- README: shorter, with an SVG flow diagram for light and dark themes. Install, status and contributing moved to `docs/install.md`, `docs/status.md` and `CONTRIBUTING.md`.
+- GLOSSARY.md defines Direction. Both Stakeholder guides and the workflow contract describe the new interview.
+
+### Fixed
+
+- `scripts/eval.sh` cleared `ANTHROPIC_API_KEY` with `env -i`, so a run with an API key and no Claude login lost its auth. The key now passes through when set.
+
+### Evals
+
+- `brief-scenario-c-vietnamese` pre-answers the new questions and gains a `direction` grader.
+- Its LLM grader `prompt-content` failed 2 of 5 runs on prompts that met it (judge votes split, long-file warning; one is `evals/results/2026-11-04T08-30-42-491Z/`). Four regex graders scoped to the copy block replace it: `prompt-english`, `prompt-look-only`, `prompt-screens`, `prompt-real-copy`.
+
+### Results
+
+- **Only the `design-brief` cases ran on this release, one run each, on the merged code:** `brief-scenario-c-vietnamese` 1.00 (`evals/results/2026-11-05T02-56-01-885Z/`), `brief-scenario-a-skips-audit` 1.00 (`evals/results/2026-11-05T02-57-34-066Z/`), `brief-names-missing-audit` 1.00 (`evals/results/2026-11-05T02-57-47-008Z/`).
+- **Full suite not rerun.** No other skill changed; the last full run is the 0.3.0 one below.
+- Static checks: unit tests, `scripts/validate.py` and `claude plugin validate --strict` pass, locally and in CI.
+
+### Not tested by anyone
+
+- The new interview with a Stakeholder who hesitates. The eval pre-answers every question, so it proves the prompt is assembled, not that the questions land.
+- A real Design tool receiving the new prompt, so whether the result looks less generic is unknown.
+- `scripts/eval.sh` with an API key only.
+- Everything listed under 0.3.0, including a full run to an approved Preview on a real phone.
+
+### Known limits
+
+- The `direction` grader is an LLM judge. The regex graders are pinned to the templates' wording, and `prompt-english` reads the whole file and misses Vietnamese written without diacritics.
+- Question numbers (Q1 to Q12) are written in several places in `design-brief` and its templates; reordering the questions means editing all of them.
+
 ## [0.3.0] — 2026-11-02
 
 Every Scenario stays Beta. A pilot of Scenario C on a private project stopped before an approved Preview, and its Stakeholder was an agent, not a person. ADR-0001 stands: Scenario C becomes Production only after a real pilot passes (#13). Report: [docs/pilots/2026-11-01-scenario-c-pilot.md](docs/pilots/2026-11-01-scenario-c-pilot.md).

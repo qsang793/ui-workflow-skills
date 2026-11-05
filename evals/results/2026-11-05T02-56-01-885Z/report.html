@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — ui-workflow-skills v0.3.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>ui-workflow-skills v0.3.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.316</span>
+<span class="num">2026-11-05 02:56 UTC</span>
+<span class="num">1m 31s</span>
+<span class="num">$0.23</span>
+<span class="num">1 runs</span>
+
+
+<span>model sonnet</span>
+<span>judge default</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case brief-scenario-c-vietnamese</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">1 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li><strong>No baseline arm was run</strong> (ablation off) — this report shows absolute scores only and cannot say whether the plugin caused them. Re-run with <code>--ablation with-without</code> to measure the plugin’s effect.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>brief-scenario-c-vietnamese</h2>
+<span class="muted mono">evals/brief-scenario-c-vietnamese</span>
+<span class="spacer"></span>
+
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $0.23 · 02:56:02 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">brief-completed</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Completed steps:\s*picker,\s*audit,\s*brief\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">copy-markers</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===[\s\S]*=== END COPY ===</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">design-tool-recorded</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Design tool:\s*Google AI Studio</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">direction</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.
+- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.
+- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.
+- `Settings` — one field, the time of day the user wants to be notified, and a Save button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Product name: `Reminders` (text only, bold)
+- Greeting: `Hello Lan` (the name is a variable called `owner`; use &quot;Lan&quot; as sample)
+
+Tabs (on every Screen): `Today`, `All reminders`, `Settings`
+
+Today and All reminders:
+- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).
+- Button text on each line: `Done`
+- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).
+- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example &quot;Nothing left for today.&quot;).
+
+Settings:
+- Label: `Notification time`
+- Field id: `notify-time` (a time of day)
+- Button text: `Save`
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.
+- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.
+- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.
+
+## Target users
+About 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.
+
+## Most important user actions
+1. See what needs doing today (the Today tab, only unfinished reminders).
+2. Mark a reminder as done, quickly, with one clear tap.
+3. Set the time of day they get notifications.
+
+## Direction
+
+- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration
+- **Change level**: A clear upgrade that current users still recognise
+- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.
+- **Keep**: the main blue (#2b6cb0) and the word &quot;Reminders&quot;
+- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.
+
+Commit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.
+
+### Craft rules
+The brand, the existing design tokens and the real copy listed in this prompt win over these rules.
+- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.
+- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.
+- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.
+- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.
+- Icons: one icon set with one stroke weight.
+- New copy (only where this prompt gives none): a button says what it does (&quot;Export report&quot;, not &quot;Submit&quot;). An error says what went wrong and how to fix it.
+- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.
+
+### Avoid
+These make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.
+- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos
+- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow
+- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards
+- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03
+- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data
+- A centred headline over a gradient blob
+- A thick coloured stripe on one side of a card or alert
+- Emoji used as icons, or more than one icon style
+- Inter, Roboto or the platform font as the only typeface
+- Pure black (#000000) text or backgrounds
+- Filler words such as &quot;Elevate&quot;, &quot;Seamless&quot;, &quot;Unleash&quot;, &quot;Next-gen&quot;; invented numbers, testimonials or logos
+- The same entrance animation on every section, or animations that loop forever without showing a state
+
+### Before you finish
+Check every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab
+- **Secondary / accent color**: none: one accent only
+- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces
+- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only
+- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, in Inter bold. No image, no icon.
+- **Tone**: minimal
+
+## Visual personality (free-form, 2–3 lines)
+Calm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)
+- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required** unless explicitly noted below
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+Keep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.
+- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.
+- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.
+- Does: `Save` only shows a browser alert `Saved &lt;value&gt;`. It sends nothing to the server and stores nothing, so the notification time is not saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">existing-tokens</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched --color-primary</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">next-is-ingest</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched Current step:\s*ingest\b</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">no-framework-ban</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">one-shared-style</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.
+- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.
+- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.
+- `Settings` — one field, the time of day the user wants to be notified, and a Save button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Product name: `Reminders` (text only, bold)
+- Greeting: `Hello Lan` (the name is a variable called `owner`; use &quot;Lan&quot; as sample)
+
+Tabs (on every Screen): `Today`, `All reminders`, `Settings`
+
+Today and All reminders:
+- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).
+- Button text on each line: `Done`
+- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).
+- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example &quot;Nothing left for today.&quot;).
+
+Settings:
+- Label: `Notification time`
+- Field id: `notify-time` (a time of day)
+- Button text: `Save`
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.
+- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.
+- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.
+
+## Target users
+About 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.
+
+## Most important user actions
+1. See what needs doing today (the Today tab, only unfinished reminders).
+2. Mark a reminder as done, quickly, with one clear tap.
+3. Set the time of day they get notifications.
+
+## Direction
+
+- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration
+- **Change level**: A clear upgrade that current users still recognise
+- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.
+- **Keep**: the main blue (#2b6cb0) and the word &quot;Reminders&quot;
+- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.
+
+Commit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.
+
+### Craft rules
+The brand, the existing design tokens and the real copy listed in this prompt win over these rules.
+- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.
+- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.
+- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.
+- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.
+- Icons: one icon set with one stroke weight.
+- New copy (only where this prompt gives none): a button says what it does (&quot;Export report&quot;, not &quot;Submit&quot;). An error says what went wrong and how to fix it.
+- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.
+
+### Avoid
+These make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.
+- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos
+- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow
+- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards
+- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03
+- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data
+- A centred headline over a gradient blob
+- A thick coloured stripe on one side of a card or alert
+- Emoji used as icons, or more than one icon style
+- Inter, Roboto or the platform font as the only typeface
+- Pure black (#000000) text or backgrounds
+- Filler words such as &quot;Elevate&quot;, &quot;Seamless&quot;, &quot;Unleash&quot;, &quot;Next-gen&quot;; invented numbers, testimonials or logos
+- The same entrance animation on every section, or animations that loop forever without showing a state
+
+### Before you finish
+Check every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab
+- **Secondary / accent color**: none: one accent only
+- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces
+- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only
+- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, in Inter bold. No image, no icon.
+- **Tone**: minimal
+
+## Visual personality (free-form, 2–3 lines)
+Calm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)
+- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required** unless explicitly noted below
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+Keep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.
+- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.
+- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.
+- Does: `Save` only shows a browser alert `Saved &lt;value&gt;`. It sends nothing to the server and stores nothing, so the notification time is not saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-english</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern absent as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-look-only</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===(?=(?:(?!=== END COPY)[\s\S])*only the look)(?=(?:(?!=== END COPY)[\s\S])*[Pp]lain[^\n]{0,20}HTML)(?=(?:(?!=== END COPY)[\s\S])*CSS variable)(?=(?:(?!=== END COPY)[\s\S])*[Nn]o routing[^\n]*no state[^\n]*backend)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-real-copy</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===(?=(?:(?!=== END COPY)[\s\S])*[`&quot;“”*]Done[`&quot;“”*])(?=(?:(?!=== END COPY)[\s\S])*[`&quot;“”*]Notification time[`&quot;“”*])(?=(?:(?!=== END COPY)[\s\S])*[`&quot;“”*]Save[`&quot;“”*])</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-screens</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === COPY EVERYTHING BELOW INTO[^\n]*===(?=(?:(?!=== END COPY)[\s\S])*one page or route per Screen)(?=(?:(?!=== END COPY)[\s\S])*Today)(?=(?:(?!=== END COPY)[\s\S])*All reminders)(?=(?:(?!=== END COPY)[\s\S])*Settings)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">prompt-written</span>  </summary>
+<div class="grader-body">
+<p class="explanation">.ui-workflow/design-prompt.md exists as expected</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">reply</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">✅ Mình đã lưu prompt vào `.ui-workflow/design-prompt.md`. Bạn đã trả lời đủ nên mình không hỏi thêm câu nào.
+
+**Hướng thiết kế mình chốt từ các câu trả lời:**
+- **Loại giao diện:** ứng dụng để làm việc, nên ưu tiên rõ ràng và tiết chế, không trang trí. Nếu bạn thấy không đúng thì nói mình sửa.
+- **Mức thay đổi:** nâng cấp rõ rệt, người dùng hiện tại vẫn nhận ra.
+- **Sửa trước:** tab Hôm nay (danh sách rối, nút Xong nhỏ). Sau đó là chiều rộng cố định 800px làm điện thoại bị cuộn ngang, tab không báo đang ở tab nào, và chưa có trạng thái trống.
+- **Giữ:** xanh dương #2b6cb0 và chữ &quot;Reminders&quot;.
+- **Cảm giác:** theo Things 3 (bình tĩnh, mỗi việc một dòng) và Todoist (đánh dấu xong nhanh).
+- **Thương hiệu:** xanh lá #38a169 cho trạng thái xong, font Inter, logo chỉ là chữ &quot;Reminders&quot; đậm.
+- **Thiết bị:** điện thoại là ưu tiên chính, máy tính vẫn dùng tốt. Nút Xong tối thiểu 44×44px.
+- **Màu và chữ:** các màu còn lại (xám, cảnh báo, nguy hiểm) mình chọn thêm cho đồng bộ với xanh dương. Chữ giữ nguyên tiếng Anh như trong dự án.
+
+**Điểm bạn nên biết:**
+- **Nút Lưu (Save)** ở tab Cài đặt hiện chỉ hiện hộp thoại &quot;Saved …&quot;, chưa lưu giờ thông báo vào đâu. Mình ghi rõ điều này vào phần &quot;Required behaviour&quot; để bước sau không hiểu nhầm là đã có tính năng lưu. Vì &quot;đặt giờ nhận thông báo&quot; là một trong ba việc quan trọng nhất của bạn, nên đây có thể là việc cần nhờ lập trình viên làm riêng.
+- **Câu chữ cho trạng thái trống:** dự án chưa có, nên prompt cho phép công cụ thêm câu ngắn kiểu &quot;Nothing left for today.&quot;
+
+**Bước tiếp theo:**
+1. Mở file `.ui-workflow/design-prompt.md`. Chép phần giữa hai dòng `=== COPY ===` và dán vào Google AI Studio (Build). Phần &quot;Required behaviour&quot; nằm bên dưới, không cần dán.
+2. Trước khi dán, mở Settings. Nếu có tuỳ chọn HTML thuần thì chọn nó, không thì chọn framework nhẹ nhất (React, không chọn Next.js hay Angular). Mình chưa kiểm chứng được; nếu không thấy lựa chọn nào thì cứ dán, framework nào cũng dùng được.
+3. Khi ưng kết quả, tải về dạng ZIP hoặc đồng bộ lên GitHub. Sau đó quay lại chạy `/ui-workflow-skills:ingest-design-export`.
+
+Trạng thái workflow đã cập nhật: bước `brief` xong, công cụ là Google AI Studio, bước kế tiếp là `ingest`.</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour-heading</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched === END COPY ===[\s\S]*\n## Required behaviour[ \t]*\r?\n</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">required-behaviour</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">&lt;!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. --&gt;
+
+=== COPY EVERYTHING BELOW INTO Google AI Studio ===
+
+You are designing the **look** of an existing web application called &quot;Reminders&quot;. A developer will rebuild your design by hand in the project&apos;s existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.
+
+## What to design
+
+Design only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).
+
+## How to build it
+
+- Prefer **plain semantic HTML** (`&lt;header&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;form&gt;`, `&lt;button&gt;`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.
+- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.
+- Avoid markup that only makes sense for one component library.
+- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.
+- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.
+- Describe every interaction in a plain-English comment next to the element, for example:
+  ```html
+  &lt;!-- interaction: clicking Done marks this reminder as done --&gt;
+  ```
+
+## Screens to redesign (only the look changes)
+Today, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.
+- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.
+- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.
+- `Settings` — one field, the time of day the user wants to be notified, and a Save button.
+
+## Real copy and field names (use these exactly)
+Header (on every Screen):
+- Product name: `Reminders` (text only, bold)
+- Greeting: `Hello Lan` (the name is a variable called `owner`; use &quot;Lan&quot; as sample)
+
+Tabs (on every Screen): `Today`, `All reminders`, `Settings`
+
+Today and All reminders:
+- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).
+- Button text on each line: `Done`
+- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).
+- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example &quot;Nothing left for today.&quot;).
+
+Settings:
+- Label: `Notification time`
+- Field id: `notify-time` (a time of day)
+- Button text: `Save`
+
+## What needs to look better
+- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.
+- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.
+- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.
+- The tabs give no sign of which one is active.
+- There is no empty state when there are no reminders.
+- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.
+
+## Target users
+About 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.
+
+## Most important user actions
+1. See what needs doing today (the Today tab, only unfinished reminders).
+2. Mark a reminder as done, quickly, with one clear tap.
+3. Set the time of day they get notifications.
+
+## Direction
+
+- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration
+- **Change level**: A clear upgrade that current users still recognise
+- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.
+- **Keep**: the main blue (#2b6cb0) and the word &quot;Reminders&quot;
+- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.
+
+Commit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.
+
+### Craft rules
+The brand, the existing design tokens and the real copy listed in this prompt win over these rules.
+- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.
+- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.
+- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.
+- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.
+- Icons: one icon set with one stroke weight.
+- New copy (only where this prompt gives none): a button says what it does (&quot;Export report&quot;, not &quot;Submit&quot;). An error says what went wrong and how to fix it.
+- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.
+
+### Avoid
+These make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.
+- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos
+- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow
+- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards
+- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03
+- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data
+- A centred headline over a gradient blob
+- A thick coloured stripe on one side of a card or alert
+- Emoji used as icons, or more than one icon style
+- Inter, Roboto or the platform font as the only typeface
+- Pure black (#000000) text or backgrounds
+- Filler words such as &quot;Elevate&quot;, &quot;Seamless&quot;, &quot;Unleash&quot;, &quot;Next-gen&quot;; invented numbers, testimonials or logos
+- The same entrance animation on every section, or animations that loop forever without showing a state
+
+### Before you finish
+Check every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.
+
+## Brand
+
+- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab
+- **Secondary / accent color**: none: one accent only
+- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces
+- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only
+- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.
+- **Heading font family**: same as body
+- **Logo**: text-only logo: &quot;Reminders&quot;, in Inter bold. No image, no icon.
+- **Tone**: minimal
+
+## Visual personality (free-form, 2–3 lines)
+Calm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.
+
+## Constraints
+
+### Responsive
+- **Mobile-first** design
+- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)
+- Tap targets minimum **44 × 44 px**
+- No horizontal scroll on any viewport ≥ 320px
+- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)
+- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.
+
+### Accessibility
+- **WCAG 2.1 AA** minimum
+- Every `&lt;img&gt;` has an `alt` attribute
+- Form fields have **visible labels** (not placeholder-only)
+- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text
+- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)
+- Interactive elements are real `&lt;button&gt;` / `&lt;a&gt;` (not styled `&lt;div&gt;`s)
+
+### Performance
+- No animations longer than 300ms
+- No autoplay video
+- Lazy-load images below the fold (`loading=&quot;lazy&quot;`)
+- No blocking 3rd-party scripts above the fold
+
+### Browser support
+- Latest Chrome, Safari, Firefox, Edge (last 2 versions)
+- iOS Safari 15+
+- Android Chrome 100+
+- **No IE support required** unless explicitly noted below
+
+### State coverage (required for every async interaction)
+1. **Loading** — visible feedback during fetch / submit
+2. **Success** — default rendered state
+3. **Empty** — explicit empty-state UI (not a blank page)
+4. **Error** — readable error message + a retry path where applicable
+
+### Hard constraints
+- none
+
+## Existing design tokens (REUSE — do not invent new colors)
+```css
+:root {
+  --color-primary: #2b6cb0;
+  --color-success: #38a169;
+  --color-text: #1a202c;
+  --space-2: 8px;
+}
+```
+Keep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.
+
+## Deliverable
+- One page or route per Screen above, with the real copy and field names.
+- One CSS file with the design tokens as CSS variables at the top.
+- Every component state above shown at least once.
+- A plain-English interaction comment on every interactive element.
+- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.
+
+## One shared style
+This may be the only message I can send, so build everything now.
+- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.
+- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.
+- Build one version of each Screen: no alternative versions, variations or style switchers.
+
+## Out of scope (do not produce)
+- Routing, state management, data fetching, backend or server code, auth, database, API keys
+- Screens, features or fields not listed above
+- Extra dependencies or build configuration beyond what your tool needs by default
+
+=== END COPY ===
+
+## Required behaviour
+
+### Today — app/templates/index.html#today
+- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.
+- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.
+
+### All reminders — app/templates/index.html#all
+- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.
+- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.
+
+### Settings — app/templates/index.html#settings
+- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.
+- Does: `Save` only shows a browser alert `Saved &lt;value&gt;`. It sends nothing to the server and stores nothing, so the notification time is not saved today.
+
+### Stakeholder must-haves
+- Each reminder can still be marked done individually.
+- The Today tab shows only reminders that are not done yet.
+</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>Mình viết prompt cho công cụ thiết kế luôn nhé. Mình trả lời trước hết các câu hỏi để khỏi phải hỏi lại:</p>
+<ul>
+<li>Công cụ thiết kế: Google AI Studio.</li>
+<li>Mức thay đổi: nâng cấp rõ rệt nhưng người dùng hiện tại vẫn nhận ra.</li>
+<li>Khó chịu nhất: tab Hôm nay rối, nút Xong quá nhỏ trên điện thoại.</li>
+<li>Phải giữ: màu xanh dương chính và chữ "Reminders".</li>
+<li>Người dùng: nội bộ, khoảng 20 nhân viên văn phòng, không rành kỹ thuật.</li>
+<li>Ba việc quan trọng nhất: xem việc cần làm hôm nay, đánh dấu một nhắc việc là đã xong, đặt giờ nhận thông báo.</li>
+<li>Thương hiệu: giữ màu xanh dương #2b6cb0 làm màu chính và xanh lá #38a169 cho trạng thái thành công. Font Inter. Chưa có logo, chỉ dùng chữ "Reminders" đậm.</li>
+<li>Cảm giác: tối giản, bình tĩnh, nhiều khoảng trắng.</li>
+<li>Thiết bị: điện thoại quan trọng nhất, máy tính cũng phải dùng tốt.</li>
+<li>Tham khảo: Things 3, thích sự bình tĩnh và mỗi việc một dòng; Todoist, thích cách đánh dấu xong nhanh.</li>
+<li>Bắt buộc phải có: vẫn đánh dấu xong được từng nhắc việc, và tab Hôm nay chỉ hiện những việc chưa xong.</li>
+<li>Ràng buộc kỹ thuật: không có.</li>
+<li>Phần không cần thiết kế lại: không có, làm lại cả ba tab.</li>
+</ul>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">brief-completed</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Completed steps:\\s*picker,\\s*audit,\\s*brief\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">copy-markers</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== COPY EVERYTHING BELOW INTO[^\\n]*===[\\s\\S]*=== END COPY ===&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">design-tool-recorded</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Design tool:\\s*Google AI Studio&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">direction</span><span class="badge">llm</span></div>
+<div class="md"><p>The part of this file between the COPY markers has a <code>## Direction</code> section, in English, that names a change level of a clear upgrade current users still recognise, puts the Today screen and its small Done button on a phone first among what to fix, keeps the primary blue and the "Reminders" wordmark, and says what to borrow from Things 3 and Todoist without copying them. It says the UI is an app people use to get work done. Under it come craft rules (at least 16px body text, one job per colour, border or shadow but not both), an <code>### Avoid</code> list that names gradient backgrounds and rows of same-size cards, and a request to check every Screen against both before finishing. Nothing in it tells the tool to change the real copy, such as replacing "Save" with a longer label.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">existing-tokens</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;--color-primary&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">next-is-ingest</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/state.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;Current step:\\s*ingest\\b&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-framework-ban</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;([Dd]o\\s+\\*{0,2}[Nn][Oo][Tt]\\*{0,2}|[Dd]on.t|[Nn]ever|[Mm]ust\\s+not)\\s+use\\s+(React|Vue|Svelte|Angular|JSX|any|a\\s+(JS\\s+)?framework|(JS\\s+)?frameworks)|[Dd]iscard everything&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">one-shared-style</span><span class="badge">llm</span></div>
+<div class="md"><p>The part of this file between the COPY markers asks for one visual style shared by every Screen and for every Screen to be built in this first message. It does not ask for several variations of a Screen, and nothing in it depends on a later message, such as "I will pick one, then you apply it to every Screen".</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-english</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;[ăâđêôơưĂÂĐÊÔƠƯáàãéèíìĩóòõúùũýạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;not_contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-look-only</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*only the look)(?=(?:(?!=== END COPY)[\\s\\S])*[Pp]lain[^\\n]{0,20}HTML)(?=(?:(?!=== END COPY)[\\s\\S])*CSS variable)(?=(?:(?!=== END COPY)[\\s\\S])*[Nn]o routing[^\\n]*no state[^\\n]*backend)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-real-copy</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*[`\&quot;“”*]Done[`\&quot;“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\&quot;“”*]Notification time[`\&quot;“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\&quot;“”*]Save[`\&quot;“”*])&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-screens</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*one page or route per Screen)(?=(?:(?!=== END COPY)[\\s\\S])*Today)(?=(?:(?!=== END COPY)[\\s\\S])*All reminders)(?=(?:(?!=== END COPY)[\\s\\S])*Settings)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">prompt-written</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.ui-workflow/design-prompt.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">reply</span><span class="badge">llm</span></div>
+<div class="md"><p>The final reply is written in Vietnamese, says the Design prompt was saved to <code>.ui-workflow/design-prompt.md</code>, tells the Stakeholder to copy it into Google AI Studio, and names the next step <code>/ui-workflow-skills:ingest-design-export</code>. It does not ask the interview questions the Stakeholder already answered.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">required-behaviour-heading</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>{&quot;source&quot;:&quot;file&quot;,&quot;path&quot;:&quot;.ui-workflow/design-prompt.md&quot;}</code></div><div class="kv"><span>pattern</span><code>&quot;=== END COPY ===[\\s\\S]*\\n## Required behaviour[ \\t]*\\r?\\n&quot;</code></div><div class="kv"><span>flags</span><code>&quot;&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">required-behaviour</span><span class="badge">llm</span></div>
+<div class="md"><p>After the COPY block, a <code>## Required behaviour</code> section in English covers each existing screen (Today, All reminders, Settings) with what it does today: Today and All reminders list reminders from <code>/api/reminders</code> and let the user mark one done through <code>/api/reminders/{id}/done</code>; Settings has a notification time field and a Save button. It also lists the Stakeholder's must-haves: marking each reminder done keeps working, and Today shows only reminders that are not done.</p>
+</div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

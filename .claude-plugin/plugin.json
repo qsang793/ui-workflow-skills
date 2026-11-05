@@ -1,6 +1,6 @@
 {
   "name": "ui-workflow-skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Claude Code skills for non-technical stakeholders to drive UI improvement work via Lovable or Google AI Studio.",
   "author": {
     "name": "qsang793",
