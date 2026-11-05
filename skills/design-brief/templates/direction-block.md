@@ -20,11 +20,11 @@ The brand, the existing design tokens and the real copy listed in this prompt wi
 - Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.
 - Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.
 - Icons: one icon set with one stroke weight.
-- New copy (only where this prompt gives none): a button says what it does ("Save reminder time", not "Submit"). An error says what went wrong and how to fix it.
+- New copy (only where this prompt gives none): a button says what it does ("Export report", not "Submit"). An error says what went wrong and how to fix it.
 - States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.
 
 ### Avoid
-These make a design look generic. Do not use them unless the brand above asks for them.
+These make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.
 - Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos
 - Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow
 - Rows of same-size cards with an icon, a heading and a line of text; cards inside cards
@@ -33,7 +33,7 @@ These make a design look generic. Do not use them unless the brand above asks fo
 - A centred headline over a gradient blob
 - A thick coloured stripe on one side of a card or alert
 - Emoji used as icons, or more than one icon style
-- Inter, Roboto or the platform font as the only typeface, unless the brand above names it
+- Inter, Roboto or the platform font as the only typeface
 - Pure black (#000000) text or backgrounds
 - Filler words such as "Elevate", "Seamless", "Unleash", "Next-gen"; invented numbers, testimonials or logos
 - The same entrance animation on every section, or animations that loop forever without showing a state

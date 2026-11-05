@@ -64,7 +64,9 @@ Wait for each answer before sending the next. Do **not** dump all questions at o
 2. **Worst part**: name the audit's top two or three pain points in plain words, each tied to a Screen ("on Today, the Done button is small on a phone"), then ask: "Which of these bothers you most, and is anything else worse?" If the Stakeholder pastes a screenshot, read it before going on.
 3. **Keep**: "What must stay so people still recognise it: the logo, the main colour, where things sit on a Screen?" Recommend from the change level and the audit's `Design tokens` line. For (c), "nothing" is a real answer.
 
-**Kind of UI** is not a question: set it yourself from the audit and the answers (an app people work in, a marketing page, or docs), and say it back to the Stakeholder with the Direction so they can correct it. Most projects here are apps, which want restraint, not decoration.
+**Scenario A** has no current UI and no audit: skip Q1-Q3, and in the Direction write "New product: no current look to keep." under Change level and drop Fix first and Keep.
+
+**Kind of UI** is not a question: set it yourself from the audit (Scenario A: from the pages and top actions) and the answers (an app people work in, a marketing page, or docs), and say it back to the Stakeholder with the Direction so they can correct it. Most projects here are apps, which want restraint, not decoration.
 
 **Then, for every Scenario:**
 
@@ -90,7 +92,7 @@ Wait for each answer before sending the next. Do **not** dump all questions at o
 
 **No brand (Q6 "none").** Do not leave colours and fonts to the Design tool. Offer three directions built from the audience and the feel, each one neutral palette, one accent colour (hex) and a font pair, and let the Stakeholder pick. None of them is the generic default of slate grey, Tailwind blue (`#2563eb`) and Inter unless the Stakeholder asks for it.
 
-Never accept "idk" twice on the same question: pick the option you recommended, tell the Stakeholder that is what you assumed, and go on. "None" is a real answer for Q3, Q10 and Q11.
+Never accept "idk" twice on the same question: pick the option you recommended (for Q6 with no brand, the one of the three directions that best fits the audience and feel), tell the Stakeholder that is what you assumed, and go on. "None" is a real answer for Q3, Q10 and Q11.
 
 ### 3. Pick the right template
 
