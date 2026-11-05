@@ -90,7 +90,7 @@ You get `.ui-workflow/design-prompt.md`. The prompt is always in English, whatev
 
 ### 4. Work in the Design tool
 
-Claude is not part of this step. Paste the prompt into the tool. It asks for every Screen, in one shared style, in that first message, because a follow-up may not be possible the same day: in one real run on Lovable's Free plan, the next message after one build was refused for lack of credits. If you can still send messages, adjust the result until you like it. If not, use what you have: in Scenario C you can ask for the remaining changes when Claude shows you each Screen. Then get the code out:
+Claude is not part of this step. Paste the prompt into the tool. It asks for every Screen, in one shared style, in that first message, because a plan's message or credit limits may prevent a follow-up. If you can still send messages, adjust the result until you like it. If not, use what you have: in Scenario C you can ask for the remaining changes when Claude shows you each Screen. Then get the code out:
 
 | Design tool | How to get the code |
 |---|---|
@@ -232,9 +232,8 @@ Your progress is saved in `.ui-workflow/state.md`, so you can close Claude Code 
 
 ## What has not been proven yet
 
-- **No real end-to-end run.** No Scenario has gone from the first step to an approved Preview on a real project. A pilot of Scenario C on a private project stopped before approval, with an agent as the Stakeholder. A [new pilot](https://github.com/qsang793/ui-workflow-skills/issues/13) on another project, with a person, is next. Only if it passes does C become Production; A and B stay Beta after that.
-- **Only one real export has gone through the workflow.** It came from Lovable in that pilot, and it was an easy one with one plain CSS file. No Google AI Studio export has gone through, and neither has a Lovable export built on Tailwind classes. The Port rules were also tried on one Screen from another tool's export (Google Stitch) and on small sample exports.
-- **The rest was tested on sample projects.** Automated tests ran each skill on small samples, and that testing cannot open a local app. So viewing a Screen in the running app has not been tested by it, and no real framework project has been installed and built.
-- **The Preview has not been run to the end.** In the pilot, one link opened on a real phone, but the skill never checked that link. Nobody has gone through the checklist, approval and closing of a Preview. The tests check which host Claude chooses, not a live tunnel or Vercel link.
+- **No accepted end-to-end run.** No Scenario has completed the workflow through an approved Preview on a real project. Scenario C becomes Production after its real end-to-end pilot passes; A and B stay Beta.
+- **Fixture coverage is limited.** Automated evaluations cover selected behavior on fixtures. They do not establish comprehensive compatibility with Design tool exports, a real framework build, or behavior in a running app. No Google AI Studio export, and no Lovable export built on Tailwind classes, has gone through the workflow outside these samples.
+- **Preview acceptance is unverified.** Fixture checks do not establish a live tunnel or Vercel link, or completion of the Preview checklist, approval and closing.
 - **Nobody non-technical has followed these replies yet.** Tell your Developer when one does not make sense.
 - **Vendor details can change.** Design tool menus and plans come from documentation checked on 2026-10-27.

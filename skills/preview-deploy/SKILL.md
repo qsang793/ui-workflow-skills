@@ -198,7 +198,7 @@ A part you left out of the brief was not redesigned: a problem there is recorded
 - **Not setting the API URL variable for the Preview environment.** The page loads but has no data.
 - **Inventing the run command.** Use the audit's `Run` line, or confirm a detected one with the Developer.
 - **Closing the Preview for a gap outside the planned Screens.** `design-port` cannot fix it, so the run goes nowhere.
-- **Clearing `Blocked` because the Stakeholder withdrew an approval.** In the pilot the agent did this with no rule behind it.
+- **Clearing `Blocked` because the Stakeholder withdrew an approval.** Record the withdrawal without clearing `Blocked`; only a Developer can clear it.
 
 ## Red Flags — Stop and Re-check
 

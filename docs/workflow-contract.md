@@ -219,7 +219,7 @@ The Verdict is `STOP` if and only if at least one Blocker is listed. A `STOP` pl
 - `.ui-workflow/integration-plan.md`: Verdict `PROCEED` or `PROCEED WITH CAUTION`, no `pending` decision, and the Screens table naming, per Screen, the export file, the target template, the data and the actions.
 - `.ui-workflow/audit.md`: the `Run` line, used to show the Stakeholder each Ported Screen, and the `Checks` line, every command in the project that passes or fails, or `none found`.
 
-What `design-port` extracts from each Screen. These rules were tested on one Screen of a Google Stitch export (plain HTML + Tailwind v3, [the spike note](research/2026-10-31-stitch-source-only-port-spike.md)) and by evals on fixture exports. One real Lovable export went through them in [the pilot](pilots/2026-11-01-scenario-c-pilot.md), an easy one with one plain CSS file; resolving Tailwind classes from a Lovable export is untested.
+What `design-port` extracts from each Screen. Fixture evaluations cover selected behavior; they do not establish comprehensive Design tool export compatibility, framework builds, or end-to-end acceptance. Resolving Tailwind classes from a real Lovable export, and any Google AI Studio export, is untested.
 
 - Markup structure: element tree, semantic tags, order. Components defined inside the export (for example `components/ui/button.tsx`) are read to see what they render.
 - Style values: Tailwind classes resolved through the export's own Tailwind config and CSS variables, then Tailwind's default scale; plain CSS read as is. The version comes from the export; when none is pinned, the assumed version is named in the report. Class order is not CSS order, and filters compose in Tailwind's fixed order.

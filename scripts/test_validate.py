@@ -73,7 +73,7 @@ class ValidateTest(unittest.TestCase):
     def test_old_name_allowed_in_history(self):
         errors = self.run_case(files={
             "CHANGELOG.md": "## [1.0.0] — 2026-01-01\nRenamed `ui-translator`.\n",
-            "docs/pilots/2026-05-21-retrospective.md": "Wrote `LOVABLE_PROMPT.md`.\n",
+            "docs/history/example-retrospective.md": "Wrote `LOVABLE_PROMPT.md`.\n",
             "README.md": "# Demo\n\n## Migrating from 0.x\n\n```bash\n# move it\nmv lovable-export .ui-workflow/export\n```\n\n"
                          "`/ingest-lovable-export` is gone.\n",
         })

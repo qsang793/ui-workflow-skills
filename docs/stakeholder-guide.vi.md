@@ -90,7 +90,7 @@ Bạn nhận `.ui-workflow/design-prompt.md`. Prompt luôn bằng tiếng Anh, d
 
 ### 4. Làm việc trong Design tool
 
-Claude không tham gia bước này. Dán prompt vào công cụ. Prompt yêu cầu dựng mọi Screen theo một phong cách chung ngay trong tin nhắn đầu tiên, vì có thể bạn không gửi được tin nhắn tiếp theo trong cùng ngày: trong một lần chạy thật trên gói Free của Lovable, sau một lần dựng, tin nhắn kế tiếp bị từ chối vì hết credit. Nếu vẫn gửi được tin nhắn, hãy chỉnh đến khi ưng ý. Nếu không, hãy dùng kết quả đang có: ở Scenario C, bạn có thể yêu cầu những thay đổi còn lại khi Claude cho bạn xem từng Screen. Sau đó lấy code ra:
+Claude không tham gia bước này. Dán prompt vào công cụ. Prompt yêu cầu dựng mọi Screen theo một phong cách chung ngay trong tin nhắn đầu tiên, vì giới hạn tin nhắn hoặc credit của gói dịch vụ có thể khiến bạn không gửi được tin nhắn tiếp theo. Nếu vẫn gửi được tin nhắn, hãy chỉnh đến khi ưng ý. Nếu không, hãy dùng kết quả đang có: ở Scenario C, bạn có thể yêu cầu những thay đổi còn lại khi Claude cho bạn xem từng Screen. Sau đó lấy code ra:
 
 | Design tool | Cách lấy code |
 |---|---|
@@ -232,9 +232,8 @@ Tiến độ được lưu trong `.ui-workflow/state.md`, nên bạn có thể �
 
 ## Những gì chưa được kiểm chứng
 
-- **Chưa có lần chạy thật từ đầu đến cuối.** Chưa Scenario nào đi từ bước đầu tiên tới một Preview được duyệt trên dự án thật. Một pilot của Scenario C trên một dự án riêng đã dừng trước khi duyệt, với một agent đóng vai Stakeholder. [Pilot mới](https://github.com/qsang793/ui-workflow-skills/issues/13) trên một dự án khác, với người thật, là việc tiếp theo. Chỉ khi pilot đó qua thì C mới thành Production; A và B vẫn là Beta sau đó.
-- **Mới có một export thật đi qua quy trình.** Export đó từ Lovable trong pilot trên, và là một trường hợp dễ, chỉ có một file CSS thuần. Chưa có export nào từ Google AI Studio đi qua, cũng chưa có export Lovable nào dùng class Tailwind. Các quy tắc Port còn được thử trên một Screen từ export của công cụ khác (Google Stitch) và trên các export mẫu nhỏ.
-- **Phần còn lại mới thử trên dự án mẫu.** Test tự động chạy từng skill trên các mẫu nhỏ, và kiểu test đó không mở được ứng dụng local. Vì vậy việc xem một Screen trong ứng dụng đang chạy chưa được nó kiểm tra, và chưa dự án framework thật nào được cài đặt và build.
-- **Preview chưa được chạy đến cuối.** Trong pilot, một link đã mở được trên điện thoại thật, nhưng skill chưa bao giờ kiểm tra link đó. Chưa ai đi hết checklist, bước duyệt và bước đóng một Preview. Các test kiểm tra Claude chọn host nào, không kiểm tra tunnel hay link Vercel đang chạy.
+- **Chưa có lần chạy từ đầu đến cuối được chấp nhận.** Chưa Scenario nào hoàn thành quy trình qua bước duyệt Preview trên dự án thật. Scenario C sẽ thành Production sau khi pilot thật từ đầu đến cuối của Scenario đó qua; A và B vẫn là Beta.
+- **Độ bao phủ của fixture còn giới hạn.** Đánh giá tự động kiểm tra một số hành vi trên fixture. Chúng chưa chứng minh được khả năng tương thích toàn diện với export từ Design tool, build framework thật hoặc hoạt động trong ứng dụng đang chạy. Chưa có export nào từ Google AI Studio, cũng chưa có export Lovable nào dùng class Tailwind, đi qua quy trình ngoài các mẫu này.
+- **Chưa kiểm chứng việc nghiệm thu Preview.** Kiểm tra trên fixture chưa chứng minh được tunnel hoặc link Vercel đang chạy, hay việc hoàn thành checklist, bước duyệt và đóng Preview.
 - **Chưa có người không chuyên kỹ thuật nào làm theo các câu trả lời này.** Hãy báo Developer khi có câu trả lời nào bạn không hiểu.
 - **Thông tin của nhà cung cấp có thể đổi.** Menu và gói của Design tool lấy từ tài liệu kiểm tra ngày 2026-10-27.
