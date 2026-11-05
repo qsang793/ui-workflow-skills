@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-05T02:57:34.066Z",
+  "durationSeconds": 11,
+  "costUsd": 0.0763545,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "brief-scenario-a-skips-audit",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.3.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "brief-scenario-a-skips-audit",
+      "dir": "evals/brief-scenario-a-skips-audit",
+      "source": "mixed",
+      "promptMarkdown": "Let's write the prompt for the design tool now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 400,
+      "maxTurns": 20,
+      "graders": [
+        {
+          "name": "no-audit-command",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "/ui-workflow-skills:ui-audit",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "reply",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The final reply starts the Design prompt interview by asking the Stakeholder a question (for example which Design tool they will use, or who the audience is). Saying that Scenario A has no audit step is fine. It fails only if it says the audit is missing, needed or must run first, or if it stops instead of asking a question.",
+          "config": {
+            "criteria": "The final reply starts the Design prompt interview by asking the Stakeholder a question (for example which Design tool they will use, or who the audience is). Saying that Scenario A has no audit step is fine. It fails only if it says the audit is missing, needed or must run first, or if it stops instead of asking a question.",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0763545,
+            "judgeCostUsd": 0.0001242,
+            "durationSeconds": 11,
+            "startedAt": "2026-11-05T02:57:34.345Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-5nHMJa/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "no-audit-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reply",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "The state is fine. It's Scenario A (new frontend from scratch) and the picker step is done. Scenario A has no audit, so I'll start the interview.\n\n**Which design tool will you paste this prompt into: Lovable or Google AI Studio?**\n\nI recommend **Lovable**. It builds a whole React app, and its export is the simplest for a non-technical person. You can sync to GitHub on every plan, and download a ZIP on paid plans. Google AI Studio also works if you prefer it.\n\nYou can reply \"Lovable\" to accept that."
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

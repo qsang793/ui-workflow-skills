@@ -1,0 +1,428 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-05T02:56:01.885Z",
+  "durationSeconds": 91,
+  "costUsd": 0.2315971,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "brief-scenario-c-vietnamese",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.3.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "brief-scenario-c-vietnamese",
+      "dir": "evals/brief-scenario-c-vietnamese",
+      "source": "mixed",
+      "promptMarkdown": "Mình viết prompt cho công cụ thiết kế luôn nhé. Mình trả lời trước hết các câu hỏi để khỏi phải hỏi lại:\n\n- Công cụ thiết kế: Google AI Studio.\n- Mức thay đổi: nâng cấp rõ rệt nhưng người dùng hiện tại vẫn nhận ra.\n- Khó chịu nhất: tab Hôm nay rối, nút Xong quá nhỏ trên điện thoại.\n- Phải giữ: màu xanh dương chính và chữ \"Reminders\".\n- Người dùng: nội bộ, khoảng 20 nhân viên văn phòng, không rành kỹ thuật.\n- Ba việc quan trọng nhất: xem việc cần làm hôm nay, đánh dấu một nhắc việc là đã xong, đặt giờ nhận thông báo.\n- Thương hiệu: giữ màu xanh dương #2b6cb0 làm màu chính và xanh lá #38a169 cho trạng thái thành công. Font Inter. Chưa có logo, chỉ dùng chữ \"Reminders\" đậm.\n- Cảm giác: tối giản, bình tĩnh, nhiều khoảng trắng.\n- Thiết bị: điện thoại quan trọng nhất, máy tính cũng phải dùng tốt.\n- Tham khảo: Things 3, thích sự bình tĩnh và mỗi việc một dòng; Todoist, thích cách đánh dấu xong nhanh.\n- Bắt buộc phải có: vẫn đánh dấu xong được từng nhắc việc, và tab Hôm nay chỉ hiện những việc chưa xong.\n- Ràng buộc kỹ thuật: không có.\n- Phần không cần thiết kế lại: không có, làm lại cả ba tab.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "brief-completed",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Completed steps:\\s*picker,\\s*audit,\\s*brief\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "copy-markers",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "=== COPY EVERYTHING BELOW INTO[^\\n]*===[\\s\\S]*=== END COPY ===",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "design-tool-recorded",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Design tool:\\s*Google AI Studio",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "direction",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The part of this file between the COPY markers has a `## Direction` section, in English, that names a change level of a clear upgrade current users still recognise, puts the Today screen and its small Done button on a phone first among what to fix, keeps the primary blue and the \"Reminders\" wordmark, and says what to borrow from Things 3 and Todoist without copying them. It says the UI is an app people use to get work done. Under it come craft rules (at least 16px body text, one job per colour, border or shadow but not both), an `### Avoid` list that names gradient backgrounds and rows of same-size cards, and a request to check every Screen against both before finishing. Nothing in it tells the tool to change the real copy, such as replacing \"Save\" with a longer label.",
+          "config": {
+            "criteria": "The part of this file between the COPY markers has a `## Direction` section, in English, that names a change level of a clear upgrade current users still recognise, puts the Today screen and its small Done button on a phone first among what to fix, keeps the primary blue and the \"Reminders\" wordmark, and says what to borrow from Things 3 and Todoist without copying them. It says the UI is an app people use to get work done. Under it come craft rules (at least 16px body text, one job per colour, border or shadow but not both), an `### Avoid` list that names gradient backgrounds and rows of same-size cards, and a request to check every Screen against both before finishing. Nothing in it tells the tool to change the real copy, such as replacing \"Save\" with a longer label.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            }
+          }
+        },
+        {
+          "name": "existing-tokens",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "--color-primary",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "next-is-ingest",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/state.md"
+            },
+            "pattern": "Current step:\\s*ingest\\b",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-framework-ban",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "([Dd]o\\s+\\*{0,2}[Nn][Oo][Tt]\\*{0,2}|[Dd]on.t|[Nn]ever|[Mm]ust\\s+not)\\s+use\\s+(React|Vue|Svelte|Angular|JSX|any|a\\s+(JS\\s+)?framework|(JS\\s+)?frameworks)|[Dd]iscard everything",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "one-shared-style",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The part of this file between the COPY markers asks for one visual style shared by every Screen and for every Screen to be built in this first message. It does not ask for several variations of a Screen, and nothing in it depends on a later message, such as \"I will pick one, then you apply it to every Screen\".",
+          "config": {
+            "criteria": "The part of this file between the COPY markers asks for one visual style shared by every Screen and for every Screen to be built in this first message. It does not ask for several variations of a Screen, and nothing in it depends on a later message, such as \"I will pick one, then you apply it to every Screen\".",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            }
+          }
+        },
+        {
+          "name": "prompt-english",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "[ăâđêôơưĂÂĐÊÔƠƯáàãéèíìĩóòõúùũýạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "prompt-look-only",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*only the look)(?=(?:(?!=== END COPY)[\\s\\S])*[Pp]lain[^\\n]{0,20}HTML)(?=(?:(?!=== END COPY)[\\s\\S])*CSS variable)(?=(?:(?!=== END COPY)[\\s\\S])*[Nn]o routing[^\\n]*no state[^\\n]*backend)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "prompt-real-copy",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Done[`\"“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Notification time[`\"“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Save[`\"“”*])",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "prompt-screens",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "=== COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*one page or route per Screen)(?=(?:(?!=== END COPY)[\\s\\S])*Today)(?=(?:(?!=== END COPY)[\\s\\S])*All reminders)(?=(?:(?!=== END COPY)[\\s\\S])*Settings)",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "prompt-written",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": ".ui-workflow/design-prompt.md",
+            "exists": true
+          }
+        },
+        {
+          "name": "reply",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The final reply is written in Vietnamese, says the Design prompt was saved to `.ui-workflow/design-prompt.md`, tells the Stakeholder to copy it into Google AI Studio, and names the next step `/ui-workflow-skills:ingest-design-export`. It does not ask the interview questions the Stakeholder already answered.",
+          "config": {
+            "criteria": "The final reply is written in Vietnamese, says the Design prompt was saved to `.ui-workflow/design-prompt.md`, tells the Stakeholder to copy it into Google AI Studio, and names the next step `/ui-workflow-skills:ingest-design-export`. It does not ask the interview questions the Stakeholder already answered.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "required-behaviour-heading",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            },
+            "pattern": "=== END COPY ===[\\s\\S]*\\n## Required behaviour[ \\t]*\\r?\\n",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "required-behaviour",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "After the COPY block, a `## Required behaviour` section in English covers each existing screen (Today, All reminders, Settings) with what it does today: Today and All reminders list reminders from `/api/reminders` and let the user mark one done through `/api/reminders/{id}/done`; Settings has a notification time field and a Save button. It also lists the Stakeholder's must-haves: marking each reminder done keeps working, and Today shows only reminders that are not done.",
+          "config": {
+            "criteria": "After the COPY block, a `## Required behaviour` section in English covers each existing screen (Today, All reminders, Settings) with what it does today: Today and All reminders list reminders from `/api/reminders` and let the user mark one done through `/api/reminders/{id}/done`; Settings has a notification time field and a Save button. It also lists the Stakeholder's must-haves: marking each reminder done keeps working, and Today shows only reminders that are not done.",
+            "focus": {
+              "source": "file",
+              "path": ".ui-workflow/design-prompt.md"
+            }
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 0.2315971,
+            "judgeCostUsd": 0.006739399999999999,
+            "durationSeconds": 90,
+            "startedAt": "2026-11-05T02:56:02.240Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Baz6MJ/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "brief-completed",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Completed steps:\\s*picker,\\s*audit,\\s*brief\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "copy-markers",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched === COPY EVERYTHING BELOW INTO[^\\n]*===[\\s\\S]*=== END COPY ===",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "design-tool-recorded",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Design tool:\\s*Google AI Studio",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "direction",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "<!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. -->\n\n=== COPY EVERYTHING BELOW INTO Google AI Studio ===\n\nYou are designing the **look** of an existing web application called \"Reminders\". A developer will rebuild your design by hand in the project's existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.\n\n## What to design\n\nDesign only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).\n\n## How to build it\n\n- Prefer **plain semantic HTML** (`<header>`, `<nav>`, `<main>`, `<section>`, `<form>`, `<button>`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.\n- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.\n- Avoid markup that only makes sense for one component library.\n- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.\n- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.\n- Describe every interaction in a plain-English comment next to the element, for example:\n  ```html\n  <!-- interaction: clicking Done marks this reminder as done -->\n  ```\n\n## Screens to redesign (only the look changes)\nToday, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.\n- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.\n- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.\n- `Settings` — one field, the time of day the user wants to be notified, and a Save button.\n\n## Real copy and field names (use these exactly)\nHeader (on every Screen):\n- Product name: `Reminders` (text only, bold)\n- Greeting: `Hello Lan` (the name is a variable called `owner`; use \"Lan\" as sample)\n\nTabs (on every Screen): `Today`, `All reminders`, `Settings`\n\nToday and All reminders:\n- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).\n- Button text on each line: `Done`\n- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).\n- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example \"Nothing left for today.\").\n\nSettings:\n- Label: `Notification time`\n- Field id: `notify-time` (a time of day)\n- Button text: `Save`\n\n## What needs to look better\n- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.\n- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.\n- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.\n- The tabs give no sign of which one is active.\n- There is no empty state when there are no reminders.\n- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.\n\n## Target users\nAbout 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.\n\n## Most important user actions\n1. See what needs doing today (the Today tab, only unfinished reminders).\n2. Mark a reminder as done, quickly, with one clear tap.\n3. Set the time of day they get notifications.\n\n## Direction\n\n- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration\n- **Change level**: A clear upgrade that current users still recognise\n- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.\n- **Keep**: the main blue (#2b6cb0) and the word \"Reminders\"\n- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.\n\nCommit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.\n\n### Craft rules\nThe brand, the existing design tokens and the real copy listed in this prompt win over these rules.\n- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.\n- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.\n- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.\n- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.\n- Icons: one icon set with one stroke weight.\n- New copy (only where this prompt gives none): a button says what it does (\"Export report\", not \"Submit\"). An error says what went wrong and how to fix it.\n- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.\n\n### Avoid\nThese make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.\n- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos\n- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow\n- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards\n- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03\n- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data\n- A centred headline over a gradient blob\n- A thick coloured stripe on one side of a card or alert\n- Emoji used as icons, or more than one icon style\n- Inter, Roboto or the platform font as the only typeface\n- Pure black (#000000) text or backgrounds\n- Filler words such as \"Elevate\", \"Seamless\", \"Unleash\", \"Next-gen\"; invented numbers, testimonials or logos\n- The same entrance animation on every section, or animations that loop forever without showing a state\n\n### Before you finish\nCheck every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.\n\n## Brand\n\n- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab\n- **Secondary / accent color**: none: one accent only\n- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces\n- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only\n- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.\n- **Heading font family**: same as body\n- **Logo**: text-only logo: \"Reminders\", in Inter bold. No image, no icon.\n- **Tone**: minimal\n\n## Visual personality (free-form, 2–3 lines)\nCalm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.\n\n## Constraints\n\n### Responsive\n- **Mobile-first** design\n- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)\n- Tap targets minimum **44 × 44 px**\n- No horizontal scroll on any viewport ≥ 320px\n- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)\n- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.\n\n### Accessibility\n- **WCAG 2.1 AA** minimum\n- Every `<img>` has an `alt` attribute\n- Form fields have **visible labels** (not placeholder-only)\n- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text\n- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)\n- Interactive elements are real `<button>` / `<a>` (not styled `<div>`s)\n\n### Performance\n- No animations longer than 300ms\n- No autoplay video\n- Lazy-load images below the fold (`loading=\"lazy\"`)\n- No blocking 3rd-party scripts above the fold\n\n### Browser support\n- Latest Chrome, Safari, Firefox, Edge (last 2 versions)\n- iOS Safari 15+\n- Android Chrome 100+\n- **No IE support required** unless explicitly noted below\n\n### State coverage (required for every async interaction)\n1. **Loading** — visible feedback during fetch / submit\n2. **Success** — default rendered state\n3. **Empty** — explicit empty-state UI (not a blank page)\n4. **Error** — readable error message + a retry path where applicable\n\n### Hard constraints\n- none\n\n## Existing design tokens (REUSE — do not invent new colors)\n```css\n:root {\n  --color-primary: #2b6cb0;\n  --color-success: #38a169;\n  --color-text: #1a202c;\n  --space-2: 8px;\n}\n```\nKeep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.\n\n## Deliverable\n- One page or route per Screen above, with the real copy and field names.\n- One CSS file with the design tokens as CSS variables at the top.\n- Every component state above shown at least once.\n- A plain-English interaction comment on every interactive element.\n- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.\n\n## One shared style\nThis may be the only message I can send, so build everything now.\n- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.\n- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.\n- Build one version of each Screen: no alternative versions, variations or style switchers.\n\n## Out of scope (do not produce)\n- Routing, state management, data fetching, backend or server code, auth, database, API keys\n- Screens, features or fields not listed above\n- Extra dependencies or build configuration beyond what your tool needs by default\n\n=== END COPY ===\n\n## Required behaviour\n\n### Today — app/templates/index.html#today\n- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.\n- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.\n\n### All reminders — app/templates/index.html#all\n- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.\n- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.\n\n### Settings — app/templates/index.html#settings\n- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.\n- Does: `Save` only shows a browser alert `Saved <value>`. It sends nothing to the server and stores nothing, so the notification time is not saved today.\n\n### Stakeholder must-haves\n- Each reminder can still be marked done individually.\n- The Today tab shows only reminders that are not done yet.\n"
+              },
+              {
+                "name": "existing-tokens",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched --color-primary",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "next-is-ingest",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Current step:\\s*ingest\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-framework-ban",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "one-shared-style",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "<!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. -->\n\n=== COPY EVERYTHING BELOW INTO Google AI Studio ===\n\nYou are designing the **look** of an existing web application called \"Reminders\". A developer will rebuild your design by hand in the project's existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.\n\n## What to design\n\nDesign only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).\n\n## How to build it\n\n- Prefer **plain semantic HTML** (`<header>`, `<nav>`, `<main>`, `<section>`, `<form>`, `<button>`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.\n- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.\n- Avoid markup that only makes sense for one component library.\n- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.\n- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.\n- Describe every interaction in a plain-English comment next to the element, for example:\n  ```html\n  <!-- interaction: clicking Done marks this reminder as done -->\n  ```\n\n## Screens to redesign (only the look changes)\nToday, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.\n- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.\n- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.\n- `Settings` — one field, the time of day the user wants to be notified, and a Save button.\n\n## Real copy and field names (use these exactly)\nHeader (on every Screen):\n- Product name: `Reminders` (text only, bold)\n- Greeting: `Hello Lan` (the name is a variable called `owner`; use \"Lan\" as sample)\n\nTabs (on every Screen): `Today`, `All reminders`, `Settings`\n\nToday and All reminders:\n- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).\n- Button text on each line: `Done`\n- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).\n- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example \"Nothing left for today.\").\n\nSettings:\n- Label: `Notification time`\n- Field id: `notify-time` (a time of day)\n- Button text: `Save`\n\n## What needs to look better\n- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.\n- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.\n- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.\n- The tabs give no sign of which one is active.\n- There is no empty state when there are no reminders.\n- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.\n\n## Target users\nAbout 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.\n\n## Most important user actions\n1. See what needs doing today (the Today tab, only unfinished reminders).\n2. Mark a reminder as done, quickly, with one clear tap.\n3. Set the time of day they get notifications.\n\n## Direction\n\n- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration\n- **Change level**: A clear upgrade that current users still recognise\n- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.\n- **Keep**: the main blue (#2b6cb0) and the word \"Reminders\"\n- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.\n\nCommit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.\n\n### Craft rules\nThe brand, the existing design tokens and the real copy listed in this prompt win over these rules.\n- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.\n- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.\n- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.\n- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.\n- Icons: one icon set with one stroke weight.\n- New copy (only where this prompt gives none): a button says what it does (\"Export report\", not \"Submit\"). An error says what went wrong and how to fix it.\n- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.\n\n### Avoid\nThese make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.\n- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos\n- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow\n- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards\n- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03\n- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data\n- A centred headline over a gradient blob\n- A thick coloured stripe on one side of a card or alert\n- Emoji used as icons, or more than one icon style\n- Inter, Roboto or the platform font as the only typeface\n- Pure black (#000000) text or backgrounds\n- Filler words such as \"Elevate\", \"Seamless\", \"Unleash\", \"Next-gen\"; invented numbers, testimonials or logos\n- The same entrance animation on every section, or animations that loop forever without showing a state\n\n### Before you finish\nCheck every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.\n\n## Brand\n\n- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab\n- **Secondary / accent color**: none: one accent only\n- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces\n- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only\n- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.\n- **Heading font family**: same as body\n- **Logo**: text-only logo: \"Reminders\", in Inter bold. No image, no icon.\n- **Tone**: minimal\n\n## Visual personality (free-form, 2–3 lines)\nCalm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.\n\n## Constraints\n\n### Responsive\n- **Mobile-first** design\n- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)\n- Tap targets minimum **44 × 44 px**\n- No horizontal scroll on any viewport ≥ 320px\n- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)\n- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.\n\n### Accessibility\n- **WCAG 2.1 AA** minimum\n- Every `<img>` has an `alt` attribute\n- Form fields have **visible labels** (not placeholder-only)\n- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text\n- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)\n- Interactive elements are real `<button>` / `<a>` (not styled `<div>`s)\n\n### Performance\n- No animations longer than 300ms\n- No autoplay video\n- Lazy-load images below the fold (`loading=\"lazy\"`)\n- No blocking 3rd-party scripts above the fold\n\n### Browser support\n- Latest Chrome, Safari, Firefox, Edge (last 2 versions)\n- iOS Safari 15+\n- Android Chrome 100+\n- **No IE support required** unless explicitly noted below\n\n### State coverage (required for every async interaction)\n1. **Loading** — visible feedback during fetch / submit\n2. **Success** — default rendered state\n3. **Empty** — explicit empty-state UI (not a blank page)\n4. **Error** — readable error message + a retry path where applicable\n\n### Hard constraints\n- none\n\n## Existing design tokens (REUSE — do not invent new colors)\n```css\n:root {\n  --color-primary: #2b6cb0;\n  --color-success: #38a169;\n  --color-text: #1a202c;\n  --space-2: 8px;\n}\n```\nKeep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.\n\n## Deliverable\n- One page or route per Screen above, with the real copy and field names.\n- One CSS file with the design tokens as CSS variables at the top.\n- Every component state above shown at least once.\n- A plain-English interaction comment on every interactive element.\n- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.\n\n## One shared style\nThis may be the only message I can send, so build everything now.\n- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.\n- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.\n- Build one version of each Screen: no alternative versions, variations or style switchers.\n\n## Out of scope (do not produce)\n- Routing, state management, data fetching, backend or server code, auth, database, API keys\n- Screens, features or fields not listed above\n- Extra dependencies or build configuration beyond what your tool needs by default\n\n=== END COPY ===\n\n## Required behaviour\n\n### Today — app/templates/index.html#today\n- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.\n- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.\n\n### All reminders — app/templates/index.html#all\n- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.\n- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.\n\n### Settings — app/templates/index.html#settings\n- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.\n- Does: `Save` only shows a browser alert `Saved <value>`. It sends nothing to the server and stores nothing, so the notification time is not saved today.\n\n### Stakeholder must-haves\n- Each reminder can still be marked done individually.\n- The Today tab shows only reminders that are not done yet.\n"
+              },
+              {
+                "name": "prompt-english",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "prompt-look-only",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched === COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*only the look)(?=(?:(?!=== END COPY)[\\s\\S])*[Pp]lain[^\\n]{0,20}HTML)(?=(?:(?!=== END COPY)[\\s\\S])*CSS variable)(?=(?:(?!=== END COPY)[\\s\\S])*[Nn]o routing[^\\n]*no state[^\\n]*backend)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "prompt-real-copy",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched === COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Done[`\"“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Notification time[`\"“”*])(?=(?:(?!=== END COPY)[\\s\\S])*[`\"“”*]Save[`\"“”*])",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "prompt-screens",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched === COPY EVERYTHING BELOW INTO[^\\n]*===(?=(?:(?!=== END COPY)[\\s\\S])*one page or route per Screen)(?=(?:(?!=== END COPY)[\\s\\S])*Today)(?=(?:(?!=== END COPY)[\\s\\S])*All reminders)(?=(?:(?!=== END COPY)[\\s\\S])*Settings)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "prompt-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": ".ui-workflow/design-prompt.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reply",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "✅ Mình đã lưu prompt vào `.ui-workflow/design-prompt.md`. Bạn đã trả lời đủ nên mình không hỏi thêm câu nào.\n\n**Hướng thiết kế mình chốt từ các câu trả lời:**\n- **Loại giao diện:** ứng dụng để làm việc, nên ưu tiên rõ ràng và tiết chế, không trang trí. Nếu bạn thấy không đúng thì nói mình sửa.\n- **Mức thay đổi:** nâng cấp rõ rệt, người dùng hiện tại vẫn nhận ra.\n- **Sửa trước:** tab Hôm nay (danh sách rối, nút Xong nhỏ). Sau đó là chiều rộng cố định 800px làm điện thoại bị cuộn ngang, tab không báo đang ở tab nào, và chưa có trạng thái trống.\n- **Giữ:** xanh dương #2b6cb0 và chữ \"Reminders\".\n- **Cảm giác:** theo Things 3 (bình tĩnh, mỗi việc một dòng) và Todoist (đánh dấu xong nhanh).\n- **Thương hiệu:** xanh lá #38a169 cho trạng thái xong, font Inter, logo chỉ là chữ \"Reminders\" đậm.\n- **Thiết bị:** điện thoại là ưu tiên chính, máy tính vẫn dùng tốt. Nút Xong tối thiểu 44×44px.\n- **Màu và chữ:** các màu còn lại (xám, cảnh báo, nguy hiểm) mình chọn thêm cho đồng bộ với xanh dương. Chữ giữ nguyên tiếng Anh như trong dự án.\n\n**Điểm bạn nên biết:**\n- **Nút Lưu (Save)** ở tab Cài đặt hiện chỉ hiện hộp thoại \"Saved …\", chưa lưu giờ thông báo vào đâu. Mình ghi rõ điều này vào phần \"Required behaviour\" để bước sau không hiểu nhầm là đã có tính năng lưu. Vì \"đặt giờ nhận thông báo\" là một trong ba việc quan trọng nhất của bạn, nên đây có thể là việc cần nhờ lập trình viên làm riêng.\n- **Câu chữ cho trạng thái trống:** dự án chưa có, nên prompt cho phép công cụ thêm câu ngắn kiểu \"Nothing left for today.\"\n\n**Bước tiếp theo:**\n1. Mở file `.ui-workflow/design-prompt.md`. Chép phần giữa hai dòng `=== COPY ===` và dán vào Google AI Studio (Build). Phần \"Required behaviour\" nằm bên dưới, không cần dán.\n2. Trước khi dán, mở Settings. Nếu có tuỳ chọn HTML thuần thì chọn nó, không thì chọn framework nhẹ nhất (React, không chọn Next.js hay Angular). Mình chưa kiểm chứng được; nếu không thấy lựa chọn nào thì cứ dán, framework nào cũng dùng được.\n3. Khi ưng kết quả, tải về dạng ZIP hoặc đồng bộ lên GitHub. Sau đó quay lại chạy `/ui-workflow-skills:ingest-design-export`.\n\nTrạng thái workflow đã cập nhật: bước `brief` xong, công cụ là Google AI Studio, bước kế tiếp là `ingest`."
+              },
+              {
+                "name": "required-behaviour-heading",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched === END COPY ===[\\s\\S]*\\n## Required behaviour[ \\t]*\\r?\\n",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "required-behaviour",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS — note: long file (12710 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "<!-- Generated by /ui-workflow-skills:design-brief on 2026-11-05. Scenario: C. Design tool: Google AI Studio. -->\n\n=== COPY EVERYTHING BELOW INTO Google AI Studio ===\n\nYou are designing the **look** of an existing web application called \"Reminders\". A developer will rebuild your design by hand in the project's existing stack (FastAPI + Jinja2 templates, plain CSS, vanilla JavaScript). Your code is read as a visual reference for its layout, styles and copy. It is never run or shipped, so only the look matters.\n\n## What to design\n\nDesign only the look: **layout, spacing, colours, fonts and component states** (hover, focus, disabled, active, open, empty, loading, error).\n\n## How to build it\n\n- Prefer **plain semantic HTML** (`<header>`, `<nav>`, `<main>`, `<section>`, `<form>`, `<button>`) and **one CSS file** that defines every colour, spacing, font, radius and shadow as a **CSS variable**.\n- If your tool always builds with a framework, that is fine. Keep components shallow and keep every style value readable in the source.\n- Avoid markup that only makes sense for one component library.\n- Build **one page or route per Screen** listed below. When several Screens share one page today (tabs, steps), still give each Screen its own page or route.\n- **No routing logic, no state management, no data fetching, no real backend, no auth.** Use static sample content.\n- Describe every interaction in a plain-English comment next to the element, for example:\n  ```html\n  <!-- interaction: clicking Done marks this reminder as done -->\n  ```\n\n## Screens to redesign (only the look changes)\nToday, All reminders and Settings are three tabs of one page today. Give each its own page or route, all sharing the same header and the same tab bar.\n- `Today` — the list of reminders that are not done yet, one reminder per line. The user can mark any reminder as done with a Done button on its line.\n- `All reminders` — the list of every reminder, done and not done, one per line. Done reminders look finished (struck through, muted). The user can press Done on a line.\n- `Settings` — one field, the time of day the user wants to be notified, and a Save button.\n\n## Real copy and field names (use these exactly)\nHeader (on every Screen):\n- Product name: `Reminders` (text only, bold)\n- Greeting: `Hello Lan` (the name is a variable called `owner`; use \"Lan\" as sample)\n\nTabs (on every Screen): `Today`, `All reminders`, `Settings`\n\nToday and All reminders:\n- Each reminder line shows the fields `title` and `due` (a date written like `2026-11-01`), shown today as `title — due`. The line has a `done` state (true or false).\n- Button text on each line: `Done`\n- Sample content to use: `Pay rent` due `2026-11-01` (not done); `Call dentist` due `2026-11-03` (done, shown only on All reminders).\n- The project has no empty-state text today. Add a short, calm one for Today and for All reminders (new copy, for example \"Nothing left for today.\").\n\nSettings:\n- Label: `Notification time`\n- Field id: `notify-time` (a time of day)\n- Button text: `Save`\n\n## What needs to look better\n- The page is a fixed 800px wide and scrolls sideways on phones. It must fit any phone width.\n- On Today the list feels cluttered, and the `Done` button is far too small to tap on a phone.\n- Colours are hard-coded in many places instead of coming from the shared tokens. Use the tokens below everywhere.\n- The tabs give no sign of which one is active.\n- There is no empty state when there are no reminders.\n- The logo image has no alt text. There is no logo any more: the product name is the bold text `Reminders`.\n\n## Target users\nAbout 20 office employees of one company, using it as an internal tool. They are not technical. They open it many times a day, mostly on a phone, and also on a computer at their desk.\n\n## Most important user actions\n1. See what needs doing today (the Today tab, only unfinished reminders).\n2. Mark a reminder as done, quickly, with one clear tap.\n3. Set the time of day they get notifications.\n\n## Direction\n\n- **Kind of UI**: An app people use to get work done: favour clarity, precision and restraint over decoration\n- **Change level**: A clear upgrade that current users still recognise\n- **Fix first**: Today: the list is cluttered, and the Done button is too small to tap on a phone. Then: the fixed 800px width that makes phones scroll sideways, the tabs with no active state, and the missing empty state.\n- **Keep**: the main blue (#2b6cb0) and the word \"Reminders\"\n- **Feel like**: Things 3: calm, lots of white space, one task per line. Todoist: marking a task done is fast and obvious, in one tap. Borrow the feel; do not copy their layout or branding.\n\nCommit to this one direction on every Screen. A design that tries to please every taste looks like every other AI design.\n\n### Craft rules\nThe brand, the existing design tokens and the real copy listed in this prompt win over these rules.\n- Type: body text at least 16px, lines of 45-75 characters, a few clearly different sizes and weights, at most two font families. Hierarchy comes from weight, size and colour together, not from size alone.\n- Colour: give every colour a job (page background, text, secondary text, primary action, focus ring, border, success, warning, danger) and use the accent only for actions and the active state. Secondary text on a coloured surface is a tint of that surface, not plain grey. Never carry meaning by colour alone.\n- Spacing: related things sit close together, groups are clearly apart, and a heading has more space above it than below it.\n- Depth: show elevation with a border or with a shadow, never both. Corner radius between 4px and 16px, the same scale everywhere.\n- Icons: one icon set with one stroke weight.\n- New copy (only where this prompt gives none): a button says what it does (\"Export report\", not \"Submit\"). An error says what went wrong and how to fix it.\n- States: design hover, focus, disabled, loading, empty and error for every control and list, with realistic content, not lorem ipsum.\n\n### Avoid\nThese make a design look generic. Do not use them unless the brand or the existing design tokens in this prompt ask for them.\n- Purple or blue gradient backgrounds, gradient text, glowing buttons, neon or coloured halos\n- Glassmorphism or blur as decoration, heavy drop shadows, a thin border under a wide soft shadow\n- Rows of same-size cards with an icon, a heading and a line of text; cards inside cards\n- A rounded icon tile above every heading; small uppercase labels above headings; section numbers like 01 / 02 / 03\n- A big number with a small label as the main visual, and decorative charts, sparklines or progress rings with no real data\n- A centred headline over a gradient blob\n- A thick coloured stripe on one side of a card or alert\n- Emoji used as icons, or more than one icon style\n- Inter, Roboto or the platform font as the only typeface\n- Pure black (#000000) text or backgrounds\n- Filler words such as \"Elevate\", \"Seamless\", \"Unleash\", \"Next-gen\"; invented numbers, testimonials or logos\n- The same entrance animation on every section, or animations that loop forever without showing a state\n\n### Before you finish\nCheck every Screen against the Craft rules and the Avoid list above, and fix anything that breaks them before you show the result.\n\n## Brand\n\n- **Primary color**: #2b6cb0 — used for primary buttons, links, focus rings, and the active tab\n- **Secondary / accent color**: none: one accent only\n- **Neutral palette**: #f7fafc (page background), #edf2f7, #e2e8f0 (borders), #a0aec0 (disabled and done text, large text only), #4a5568 (secondary text), #2d3748, #1a202c (main text); cool greys, white (#ffffff) for surfaces\n- **Success / warning / danger**: #38a169 / #d69e2e / #c53030 — success (#38a169) marks a reminder as done; warning and danger are for rare messages only\n- **Body font family**: Inter, with a system fallback (system-ui, sans-serif). The Stakeholder chose Inter, so the Avoid rule about Inter does not apply here. Use one family with different weights.\n- **Heading font family**: same as body\n- **Logo**: text-only logo: \"Reminders\", in Inter bold. No image, no icon.\n- **Tone**: minimal\n\n## Visual personality (free-form, 2–3 lines)\nCalm, quiet and spacious, with lots of white space and one reminder per line. It should feel like a tidy desk, not a dashboard. It must not feel busy, decorative, loud or technical, and nothing on it should compete with the Done button.\n\n## Constraints\n\n### Responsive\n- **Mobile-first** design\n- Breakpoints: `640px` (tablet), `1024px` (desktop), `1280px` (wide)\n- Tap targets minimum **44 × 44 px**\n- No horizontal scroll on any viewport ≥ 320px\n- Device priority: mobile first and most important; desktop must also work well (on wide screens keep the content in a comfortable centred column, not stretched)\n- The `Done` button is the key tap target: make it at least 44 × 44 px, easy to hit with a thumb, and clearly visible on every line.\n\n### Accessibility\n- **WCAG 2.1 AA** minimum\n- Every `<img>` has an `alt` attribute\n- Form fields have **visible labels** (not placeholder-only)\n- Contrast ratio ≥ **4.5:1** for body text, ≥ 3:1 for large text\n- **Focus states are visible** for keyboard users (custom or browser default — never `outline: none`)\n- Interactive elements are real `<button>` / `<a>` (not styled `<div>`s)\n\n### Performance\n- No animations longer than 300ms\n- No autoplay video\n- Lazy-load images below the fold (`loading=\"lazy\"`)\n- No blocking 3rd-party scripts above the fold\n\n### Browser support\n- Latest Chrome, Safari, Firefox, Edge (last 2 versions)\n- iOS Safari 15+\n- Android Chrome 100+\n- **No IE support required** unless explicitly noted below\n\n### State coverage (required for every async interaction)\n1. **Loading** — visible feedback during fetch / submit\n2. **Success** — default rendered state\n3. **Empty** — explicit empty-state UI (not a blank page)\n4. **Error** — readable error message + a retry path where applicable\n\n### Hard constraints\n- none\n\n## Existing design tokens (REUSE — do not invent new colors)\n```css\n:root {\n  --color-primary: #2b6cb0;\n  --color-success: #38a169;\n  --color-text: #1a202c;\n  --space-2: 8px;\n}\n```\nKeep these names and values. Add new variables for anything else you need (backgrounds, borders, secondary text, radius, shadow, font), built on the same naming style.\n\n## Deliverable\n- One page or route per Screen above, with the real copy and field names.\n- One CSS file with the design tokens as CSS variables at the top.\n- Every component state above shown at least once.\n- A plain-English interaction comment on every interactive element.\n- Mobile-first responsive layout with breakpoints at `640px` and `1024px`.\n\n## One shared style\nThis may be the only message I can send, so build everything now.\n- Use the Direction and Brand above as one visual style on every Screen, from the same CSS file and variables.\n- Build every Screen above in this first build. Do not stop after the first Screen, and do not ask me to choose anything first.\n- Build one version of each Screen: no alternative versions, variations or style switchers.\n\n## Out of scope (do not produce)\n- Routing, state management, data fetching, backend or server code, auth, database, API keys\n- Screens, features or fields not listed above\n- Extra dependencies or build configuration beyond what your tool needs by default\n\n=== END COPY ===\n\n## Required behaviour\n\n### Today — app/templates/index.html#today\n- Shows: the reminders from `GET /api/reminders` (fields `id`, `title`, `due`, `done`) whose `done` is false, one line each as `title — due`. It does not filter by date: every unfinished reminder appears. The header shows `Hello {{ owner }}` (template variable `owner`, rendered by `GET /`). No empty state exists today.\n- Does: `Done` button on each line calls `POST /api/reminders/{id}/done`, then the list reloads and the reminder leaves this tab.\n\n### All reminders — app/templates/index.html#all\n- Shows: every reminder from `GET /api/reminders`, done and not done, as `title — due`. Done reminders get the `done` style (muted, struck through). No empty state exists today.\n- Does: `Done` button on each line (also shown on lines already done) calls `POST /api/reminders/{id}/done`, then the list reloads.\n\n### Settings — app/templates/index.html#settings\n- Shows: label `Notification time`, a text input `#notify-time`, and a `Save` button.\n- Does: `Save` only shows a browser alert `Saved <value>`. It sends nothing to the server and stores nothing, so the notification time is not saved today.\n\n### Stakeholder must-haves\n- Each reminder can still be marked done individually.\n- The Today tab shows only reminders that are not done yet.\n"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

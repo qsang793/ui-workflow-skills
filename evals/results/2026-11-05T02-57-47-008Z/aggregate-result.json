@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-05T02:57:47.008Z",
+  "durationSeconds": 13,
+  "costUsd": 0.07642809999999998,
+  "partial": false,
+  "suite": {
+    "root": "~/Documents/chill/ui-workflow-skills",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "caseFilter": "brief-names-missing-audit",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "ui-workflow-skills",
+        "version": "0.3.0",
+        "path": "~/Documents/chill/ui-workflow-skills"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "brief-names-missing-audit",
+      "dir": "evals/brief-names-missing-audit",
+      "source": "mixed",
+      "promptMarkdown": "Let's write the prompt for the design tool now.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 400,
+      "maxTurns": 20,
+      "graders": [
+        {
+          "name": "names-audit-command",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "/ui-workflow-skills:ui-audit",
+            "flags": "",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "no-prompt-written",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "files",
+            "pattern": "design-prompt\\.md",
+            "flags": "",
+            "match": "not_contains"
+          }
+        },
+        {
+          "name": "reply",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The final reply tells the Stakeholder that the UI audit step has not been done yet and must run before the Design prompt, and it does not start the Design prompt interview.",
+          "config": {
+            "criteria": "The final reply tells the Stakeholder that the UI audit step has not been done yet and must run before the Design prompt, and it does not start the Design prompt interview.",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.07642809999999998,
+            "judgeCostUsd": 0.0001104,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-05T02:57:47.323Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-jHri2V/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "names-audit-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched /ui-workflow-skills:ui-audit",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-prompt-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "reply",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "I can't write the design prompt yet because the audit hasn't been run.\n\nThe Workflow state says this is Scenario C (keep the stack). Only the `picker` step is complete, and the current step is `audit`. For Scenario C the brief is built from the audit's findings: the screens, their data fields and actions, the pain points, and the existing design tokens. I won't guess those.\n\nNext step: run `/ui-workflow-skills:ui-audit`. When it finishes, run `/ui-workflow-skills:design-brief` again and I'll start the interview."
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}
