@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This repo is public. Call any pilot project "a private project" in issues, PRs, commits and files, with no name, URL, content or deploy detail of it.
+This repo is public. Keep documentation project-agnostic and use synthetic examples. Do not include the owner's personal projects or correspondence in issues, PRs, commits or files, including as pilot or test evidence. Omit names, URLs, project content, deployment details and personal local paths.
 
 ## Agent skills
 

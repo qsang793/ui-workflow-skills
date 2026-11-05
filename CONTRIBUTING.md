@@ -5,7 +5,7 @@
 ```
 .claude-plugin/    plugin.json (the single source of the version), marketplace.json, icon.png
 skills/            the 8 skills; design-brief/templates/ holds the prompt templates
-docs/              Stakeholder guides, install, status, workflow contract, ADRs, pilots, research
+docs/              Stakeholder guides, install, status, workflow contract, ADRs, vendor research
 evals/             behavioural evals for `claude plugin eval`
 scripts/           static validator and its tests
 GLOSSARY.md        domain vocabulary

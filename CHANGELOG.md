@@ -4,7 +4,7 @@ All notable changes to this skill bundle are documented here. Format loosely fol
 
 ## [0.4.0] — 2026-11-05
 
-Every Scenario stays Beta: the end-to-end pilot with a person as Stakeholder is still open (#13). This release makes `design-brief` settle a design Direction before it writes the Design prompt, so the Design tool stops falling back on its generic default look.
+Every Scenario stays Beta until a real end-to-end pilot passes (#13). This release makes `design-brief` settle a design Direction before it writes the Design prompt, so the Design tool stops falling back on its generic default look.
 
 ### Migrating from 0.3.0
 
@@ -37,7 +37,7 @@ No file, command or Workflow state field changed. A `.ui-workflow/design-prompt.
 - The new interview with a Stakeholder who hesitates. The eval pre-answers every question, so it proves the prompt is assembled, not that the questions land.
 - A real Design tool receiving the new prompt, so whether the result looks less generic is unknown.
 - `scripts/eval.sh` with an API key only.
-- Everything listed under 0.3.0, including a full run to an approved Preview on a real phone.
+- Everything listed under 0.3.0, including an end-to-end run through an approved Preview.
 
 ### Known limits
 
@@ -46,7 +46,7 @@ No file, command or Workflow state field changed. A `.ui-workflow/design-prompt.
 
 ## [0.3.0] — 2026-11-02
 
-Every Scenario stays Beta. A pilot of Scenario C on a private project stopped before an approved Preview, and its Stakeholder was an agent, not a person. ADR-0001 stands: Scenario C becomes Production only after a real pilot passes (#13). Report: [docs/pilots/2026-11-01-scenario-c-pilot.md](docs/pilots/2026-11-01-scenario-c-pilot.md).
+Every Scenario stays Beta. ADR-0001 stands: Scenario C becomes Production only after its real end-to-end pilot passes (#13).
 
 ### Migrating from 0.x
 
@@ -80,27 +80,25 @@ Then start with `/ui-workflow-skills:ui-scenario-picker`: every other skill stop
   - **Lowest of the rest:** `ingest-react-scenario-c` 0.83, `preview-server-rendered` 0.87, `audit-lists-checks` 0.89, `planner-matching-backend` 0.92. `port-check-needs-install`, `preview-gap-outside-screens`, `preview-return-blocked` and `port-return-commits-fix` scored 1.00; `preview-first-deploy` 0.97.
   - **After the run:** only this changelog and the result folders changed.
 - **Real Vercel run, 2026-11-02, CLI 65.9.0, a new project holding one empty page, following the skill's commands by hand:** a named preview was refused (`first_deployment_production`), and `<project>.vercel.app` answered 404. After a placeholder deployment with `--prod --skip-domain`, it still answered 404. A named preview then gave `target preview` in `vercel inspect`, with the same address at 404 and the deployment's own URL behind the sign-in redirect. The deploy's own output said `target: null`, so only the read-back counts.
-- **Pilot:** [the report](docs/pilots/2026-11-01-scenario-c-pilot.md) has the findings and the commit-by-commit results.
-
 ### Not tested by anyone
 
-- A full run to an approved Preview on a real phone.
-- The skill's own check of a Shareable Link. The owner's link opened on a phone in the pilot, but the skill never checked it.
+- A full run to an approved Preview.
+- The skill's own check of a Shareable Link against a live service.
 - Closing a Preview, including the tunnel on the way back to the Port.
-- Whether a non-technical person can follow the replies. The pilot's Stakeholder was an agent.
+- Whether a non-technical person can follow the replies.
 
 ### Known limits
 
-- Finding 8, open: a Port report can name the wrong cause for a layout problem.
-- Finding 2, in part: the contrast step checks 4.5:1, so it cannot see a project's stricter rule. Running every project check is what catches that.
-- The pilot's one unexplained load failure has no established cause.
-- Findings 4, 5, 6, 9 and 10 were fixed after the pilot, on fixtures and in the guides only. No real run has tried those fixes, and no real Design tool has received the new prompt.
+- Fixture evaluations cover selected behavior; they do not establish comprehensive compatibility or acceptance in a live workflow.
+- A Port report can name the wrong cause for a layout problem.
+- The contrast step checks 4.5:1, so it cannot see a project's stricter rule. Running every project check is what catches that.
+- Several fixes in this release were tried on fixtures and in the guides only, and no real Design tool has received the new prompt.
 - `port-all-project-checks`: in 3 of 8 runs on this release, the reply opened with the app not starting and came to the failed check next, still above the approval question. The skill asks for the check first.
 - `stakeholder-never-runs` missed in 4 of 11 runs of `port-invented-provenance` on #32 and this release, and in 1 of 3 of `port-tailwind-screen`: when the app could not start, the reply told the Stakeholder to run a command or decide a setting.
 - `audit-lists-checks`: in 1 of 3 runs, the audit left two checks off the `Checks` line. `design-port` also looks for checks the line misses.
 - LLM reply graders are noisy, and the judges' reasons are not recorded. All three runs of `ingest-react-scenario-c` failed on replies that read as correct, while every file grader passed.
 - The eval sandbox refuses local ports, so the `port-*` runs reach only the path where the app does not start, and it runs no live tunnel or Vercel link.
-- Vercel path: checked on stand-ins and in the one real run above, not by the skill itself against a real project.
+- Vercel path: the disposable empty-page CLI experiment above does not establish the behavior of the skill against a live project.
 
 ### Fixed — the Design prompt works from one message and the chosen variation is recorded (#34)
 - The Design prompt of every Scenario now asks for one shared style on every Screen in its first message, and for no variations. The old prompt asked for variations of the first Screen and a second message to apply one, which a free plan can refuse.
@@ -124,16 +122,15 @@ Then start with `/ui-workflow-skills:ui-scenario-picker`: every other skill stop
 
 ### Fixed — a Vercel Preview is really a preview (#31)
 - `preview-deploy` deploys to the preview target by name, reads the target back with `vercel inspect`, and checks the project's production aliases from outside before and after the deploy: `<project>.vercel.app` and the aliases of its latest production deployment. A target other than `preview`, or an alias that newly opens, stops the step: no link, and the Developer is asked to act.
-- A project with no deployment cannot get a preview: CLI 65.9.0 refuses a named preview with `first_deployment_production`, and a deploy with no target goes to production. The pilot's proposed `--target preview` worked only because a production deployment already existed. The skill stops, never runs `--prod`, and asks the Developer for a first deployment of a placeholder page with `--prod --skip-domain`.
+- A project with no deployment cannot get a preview: CLI 65.9.0 refuses a named preview with `first_deployment_production`, and a deploy with no target goes to production. The skill stops, never runs `--prod`, and asks the Developer for a first deployment of a placeholder page with `--prod --skip-domain`.
 - A production alias that already opens before the deploy stops the step until the Developer confirms it, recorded as `Released site` in `preview.md`, so a project already live on Vercel can still get a Preview.
 - The step never offers a local address for a phone or any other device.
 - Real check on 2026-11-02, CLI 65.9.0, a new Vercel project holding one empty page: a named preview was refused and `<project>.vercel.app` answered `404`; after `--prod --skip-domain` it still answered `404` and the deployment's own alias ended on the login page; `deploy --environment preview` then read back `target preview`, and `<project>.vercel.app` still answered `404`. A framework-detected project was not tried with the placeholder; a failed placeholder build publishes nothing.
 - Evals: `preview-first-deploy` now expects the refusal and the stop; new `preview-later-deploy`, `preview-target-mismatch`, `preview-alias-answers` and `preview-live-site`. `fixtures/vercel-stub` follows the real CLI, `fixtures/curl-stub` is new, and `scripts/test_eval_stubs.py` checks both. Local run 2026-11-02, 7 `preview-*` cases × 3 runs on Sonnet, every case above the 0.8 threshold, with `preview-first-deploy` at 0.93 and `preview-server-rendered` at 0.87, both on LLM reply graders (`evals/results/2026-11-02T01-37-43-951Z/`).
 
 ### Changed — docs for marketplace users and Stakeholders
-- `README.md` is in English: install (plugin and symlink, commands re-checked), flow, every Scenario labelled Beta until the Scenario C pilot passes.
+- `README.md` is in English: install (plugin and symlink, commands re-checked), flow, every Scenario labelled Beta until end-to-end acceptance.
 - `docs/stakeholder-guide.md` and `docs/stakeholder-guide.vi.md` replace `UI_IMPROVEMENT_GUIDE.md` and `CHEAT_SHEET.md`. They use glossary terms and plugin command names, follow the skills' current behaviour, and say what has not been proven yet.
-- `PILOT_RETROSPECTIVE.md` moves to `docs/pilots/2026-05-21-retrospective.md`.
 - `scripts/validate.py` reports a guide that names a command with no matching skill under the plugin's name, a plugin command with no matching skill in any other current Markdown file, and guides whose headings or commands differ between languages. A missing guide is an error.
 
 ### Added — plugin icon
@@ -147,7 +144,7 @@ Then start with `/ui-workflow-skills:ui-scenario-picker`: every other skill stop
 
 ### Added — Workflow state and behavioural evals
 - `.ui-workflow/state.md` records Scenario, Design tool, current step, completed steps, Work branch, Stakeholder language and any Blocker. `ui-scenario-picker` writes it; every skill reads it first and names the missing step and its command instead of guessing. Contract, step order per Scenario and handoff formats: `docs/workflow-contract.md`.
-- Every skill replies in the Stakeholder's language. The picker labels every Scenario Beta; Scenario C becomes Production once its end-to-end pilot passes.
+- Every skill replies in the Stakeholder's language. The picker labels every Scenario Beta; Scenario C becomes Production once its end-to-end run is accepted.
 - Behavioural evals for `claude plugin eval` under `evals/`, with a FastAPI + vanilla JS fixture and a mixed framework/vanilla fixture. Run locally or via the manual `evals` workflow. Local run 2026-10-27: 5 cases × 3 runs, every run scored 1.0 (`evals/results/2026-10-27T09-39-42-094Z/`). Full suite 2026-10-30 with `--model sonnet`: 16 cases × 3 runs, every case ≥ 0.92 (`evals/results/2026-10-30T03-27-46-868Z/`). A run works on a Claude subscription when `claude` is started from a plain terminal, not from inside another Claude Code session.
 
 ### Changed — `ingest-design-export` takes any framework under Scenario C
@@ -178,8 +175,8 @@ Then start with `/ui-workflow-skills:ui-scenario-picker`: every other skill stop
 
 ### Added — `design-port` extraction rules (Scenario C, #9)
 - Step 3 now says how the look is read and rebuilt: sources, screenshot, markup, style values (Tailwind through the export's config, then the default scale), token mapping, copy, states, interaction intent, icons, images and values that cannot be resolved.
-- From the Stitch spike (`docs/research/2026-10-31-stitch-source-only-port-spike.md`): claims of fact in design copy are placeholders; an export's image is copied only after the Stakeholder says yes; contrast is computed after token mapping; fonts are checked by face; `design-port` views the Screen at phone and desktop width where it has a browser; Tailwind assumptions are stated; CSS the Port orphans is removed and the project's checks are run.
-- Tested on one Google Stitch Screen and on fixture exports, not on a real Lovable export. Pilot #13 checks that.
+- Claims of fact in an export's design copy are placeholders; an export's image is copied only after the Stakeholder says yes; contrast is computed after token mapping; fonts are checked by face; `design-port` views the Screen at phone and desktop width where it has a browser; Tailwind assumptions are stated; CSS the Port orphans is removed and the project's checks are run.
+- Fixture evaluations cover selected behavior, not comprehensive export compatibility or a live build. End-to-end acceptance remains open in #13.
 - Evals `port-tailwind-screen` and `port-invented-provenance`. Run with `--model sonnet`, 3 runs each: `port-tailwind-screen` 0.97, `port-invented-provenance` 1.00, `port-first-screen` 0.96, `port-approve-commits-screen` 0.97, the misses LLM judgements and one width value (`evals/results/2026-10-31T18-23-24-756Z/`). The eval sandbox refuses local ports, so the runs cover the escalation path; one Port from them was started by hand and Done clicked.
 
 ### Changed — `design-port` works one Screen per turn on a Work branch (Scenario C, part of #9)
@@ -226,7 +223,7 @@ The scenario-C template had the placeholder, but `design-brief` only said to "ap
 README install script used `grep -E '^(ui-|design-|integration-|preview-)'` to confirm symlinks landed. This regex was written for v0.1.1 (7 skills) and never updated when `ingest-lovable-export` was added in v0.1.2. A user following the install commands would see 7 results instead of 8 and reasonably conclude the install failed. Regex now includes `ingest-`.
 
 ### Fixed — LICENSE copyright holder
-v0.1.1 commit was authored by `qsang793` (the repo owner) but the `LICENSE` file accidentally listed `koliaphan` (the local git config name at the time the LICENSE was first written, before the per-repo author config was set). Corrected to `qsang793`.
+- Corrected the copyright attribution in `LICENSE`.
 
 ---
 
@@ -281,8 +278,8 @@ v0.1.1 had a quiet gap: after step 4 (user iterates in Lovable), users were expe
 
 ## [0.1.1] — 2026-05-21
 
-### Pilot test
-Ran the early skills (`ui-scenario-picker`, `ui-audit`, `design-brief` template inspection) against a real Vanilla JS + FastAPI repo. 12 friction points found and addressed below. See `PILOT_RETROSPECTIVE.md` for full details.
+### Early workflow evaluation
+Early workflow evaluation led to the changes listed below.
 
 ### Changed — `ui-scenario-picker`
 - Added **"I don't know" fallback** for Q2 — teaches the trade-off, then re-asks; defaults to C on second uncertainty.
