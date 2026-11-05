@@ -168,7 +168,7 @@ At most five bullets under each severity. An empty severity has the single bulle
 
 ### Design prompt (`.ui-workflow/design-prompt.md`)
 
-Besides the paste-ready prompt, it contains a `## Required behaviour` section: per existing screen, what it does today, plus the must-haves the Stakeholder named in the interview. The planner reads it.
+The paste-ready prompt carries a `## Direction` section (kind of UI, change level, what to fix first, what to keep, what to borrow from each reference, then fixed `### Craft rules`, `### Avoid` and `### Before you finish` parts) so the Design tool does not fall back on a generic look. Besides the prompt, the file contains a `## Required behaviour` section: per existing screen, what it does today, plus the must-haves the Stakeholder named in the interview. The planner reads it.
 
 ```markdown
 === COPY EVERYTHING BELOW INTO <Design tool> ===

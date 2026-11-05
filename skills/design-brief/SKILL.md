@@ -1,13 +1,13 @@
 ---
 name: design-brief
-description: Use after ui-audit (or first for scenario A) and before the Stakeholder opens Lovable / Google AI Studio. Interviews the Stakeholder with 5-10 plain questions, one at a time, in their language, records the chosen Design tool in the Workflow state and writes a paste-ready English Design prompt to .ui-workflow/design-prompt.md. For scenario C the prompt asks for the look only and the file lists the Required behaviour of every existing screen.
+description: Use after ui-audit (or first for scenario A) and before the Stakeholder opens Lovable / Google AI Studio. Interviews the Stakeholder with up to 12 plain questions, one at a time, in their language, starting from the audit's findings to settle how far the look should change, then records the chosen Design tool in the Workflow state and writes a paste-ready English Design prompt to .ui-workflow/design-prompt.md. For scenario C the prompt asks for the look only and the file lists the Required behaviour of every existing screen.
 ---
 
 # Design Brief
 
 ## Overview
 
-A non-tech Stakeholder cannot write a good prompt for a Design tool. This skill conducts a short interview and assembles a complete, paste-ready Design prompt with the Scenario's constraints applied. For Scenario C the Design export is only a visual reference (ADR-0004): the prompt asks for the look, prefers plain HTML + CSS, and never forbids frameworks, because neither Design tool reliably returns plain HTML.
+A non-tech Stakeholder cannot write a good prompt for a Design tool, and a Design tool given a vague prompt falls back on the same generic look every time. This skill conducts a short interview, grounded in what the audit found, that settles a design Direction (how far the look changes, what to fix first, what to keep, what it should feel like) and assembles a complete, paste-ready Design prompt with the Scenario's constraints applied. For Scenario C the Design export is only a visual reference (ADR-0004): the prompt asks for the look, prefers plain HTML + CSS, and never forbids frameworks, because neither Design tool reliably returns plain HTML.
 
 ## When to Use
 
@@ -56,28 +56,43 @@ Save the answer: it is the `Design tool` field and it changes the guidance in st
 
 Wait for each answer before sending the next. Do **not** dump all questions at once. If the Stakeholder's message already answers some questions, use those answers and ask only the missing ones; when everything is answered, go straight to step 3.
 
-1. **Audience**: "Who uses this UI most — internal team, external customers, or both?"
-2. **Top actions**: "What are the 3 most important things a user does in this UI?"
-3. **Brand**: "Do you have brand colors / fonts / logo to reuse? Paste hex codes if you can."
-4. **Tone**: "Which best describes the feel — professional, playful, minimal, luxurious, technical, friendly?"
-5. **Device**: "Mobile, desktop, or both equally important?"
-6. **Inspiration**: "Any sites or apps you'd want this to feel like? Drop links."
-7. **Must-haves**: "Which features must keep working or must be there, no matter what the design looks like — e.g. login, marking an item done, export?"
-8. **Constraints**: "Any technical constraints — must work offline, must support old browsers, must be SEO-friendly?"
-9. **Skip-list**: "Are there sections we should leave alone (not redesign)? Common ones: login, admin, settings."
+**Every question comes with your recommended answer**, taken from the audit, the templates and the earlier answers, so the Stakeholder can reply "yes" or correct it. Talk about Screens and what people see, never about files or CSS.
 
-**Probing for lazy answers**: if the Stakeholder replies "I don't know" or with a one-word answer to a question that needs a real choice (especially Q3 brand, Q4 tone, Q5 device), offer 2-3 concrete examples and re-ask. Example:
+**Direction first (Scenario B and C).** These three settle how far the look changes. Ask them before anything else:
 
-> Q4: Tone? "Idk."
-> Re-ask: "Three quick options to pick from: (a) calm/minimal like Linear, (b) bold/saturated like Notion, (c) earthy/warm like Roam. Which feels closest?"
+1. **Change level**: "How far should the look change? (a) keep it and tidy it up, (b) a clear upgrade that people still recognise, (c) a brand-new look." Recommend one from the audit: many high pain points or no design tokens point to (b) or (c); a working look with a few rough edges points to (a).
+2. **Worst part**: name the audit's top two or three pain points in plain words, each tied to a Screen ("on Today, the Done button is small on a phone"), then ask: "Which of these bothers you most, and is anything else worse?" If the Stakeholder pastes a screenshot, read it before going on.
+3. **Keep**: "What must stay so people still recognise it: the logo, the main colour, where things sit on a Screen?" Recommend from the change level and the audit's `Design tokens` line. For (c), "nothing" is a real answer.
 
-Never accept "idk" twice on the same question — pick the safest default ("minimal/calm") and tell the Stakeholder that's what you assumed. "None" is a real answer for Q6, Q8 and Q9.
+**Scenario A** has no current UI and no audit: skip Q1-Q3, and in the Direction write "New product: no current look to keep." under Change level and drop Fix first and Keep.
+
+**Kind of UI** is not a question: set it yourself from the audit (Scenario A: from the pages and top actions) and the answers (an app people work in, a marketing page, or docs), and say it back to the Stakeholder with the Direction so they can correct it. Most projects here are apps, which want restraint, not decoration.
+
+**Then, for every Scenario:**
+
+4. **Audience**: "Who uses this UI most — internal team, external customers, or both?"
+5. **Top actions**: "What are the 3 most important things a user does in this UI?"
+6. **Brand**: "Do you have brand colors / fonts / logo to reuse? Paste hex codes if you can."
+7. **Feel**: "Name one site or app this should feel like, and what you like about it (the calm, the big text, how fast it looks)." Record the tone it implies (professional, playful, minimal, luxurious, technical, friendly) and what to borrow from each reference.
+8. **Device**: "Mobile, desktop, or both equally important?"
+9. **Must-haves**: "Which features must keep working or must be there, no matter what the design looks like — e.g. login, marking an item done, export?"
+10. **Constraints**: "Any technical constraints — must work offline, must support old browsers, must be SEO-friendly?"
+11. **Skip-list** (B and C): "Are there sections we should leave alone (not redesign)? Common ones: login, admin, settings."
 
 **Scenario A only**, also ask:
-10. **Pages**: "Roughly how many distinct pages? List them."
+12. **Pages**: "Roughly how many distinct pages? List them."
 
 **Scenario B only**, also ask:
-10. **Target stack**: "Any preferred framework?" Lovable builds React only; AI Studio offers React, Angular or Next.js in Settings. Default: React.
+12. **Target stack**: "Any preferred framework?" Lovable builds React only; AI Studio offers React, Angular or Next.js in Settings. Default: React.
+
+**Probing for lazy answers**: if the Stakeholder replies "I don't know" or with a one-word answer to a question that needs a real choice (especially Q1 change level, Q6 brand, Q7 feel, Q8 device), offer 2-3 concrete options and re-ask. Example:
+
+> Q7: Feel? "Idk."
+> Re-ask: "Three quick options to pick from: (a) calm and spacious like Things 3, (b) dense and fast like Linear, (c) bold and friendly like Duolingo. Which feels closest?"
+
+**No brand (Q6 "none").** Do not leave colours and fonts to the Design tool. Offer three directions built from the audience and the feel, each one neutral palette, one accent colour (hex) and a font pair, and let the Stakeholder pick. None of them is the generic default of slate grey, Tailwind blue (`#2563eb`) and Inter unless the Stakeholder asks for it.
+
+Never accept "idk" twice on the same question: pick the option you recommended (for Q6 with no brand, the one of the three directions that best fits the audience and feel), tell the Stakeholder that is what you assumed, and go on. "None" is a real answer for Q3, Q10 and Q11.
 
 ### 3. Pick the right template
 
@@ -88,16 +103,17 @@ Never accept "idk" twice on the same question — pick the safest default ("mini
 | C | `${CLAUDE_SKILL_DIR}/templates/prompt-scenario-C.md` |
 
 Always also fill in:
-- `${CLAUDE_SKILL_DIR}/templates/brand-block.md` (from Q3, Q4)
-- `${CLAUDE_SKILL_DIR}/templates/constraints-block.md` (from Q5, Q8)
+- `${CLAUDE_SKILL_DIR}/templates/direction-block.md` (from Q1-Q3, Q7)
+- `${CLAUDE_SKILL_DIR}/templates/brand-block.md` (from Q6, Q7)
+- `${CLAUDE_SKILL_DIR}/templates/constraints-block.md` (from Q8, Q10)
 
 **Substitution mechanism (explicit)**:
-1. Use the `Read` tool to load all three files (base template + brand block + constraints block).
+1. Use the `Read` tool to load all four files (base template + direction, brand and constraints blocks).
 2. Fill `<PLACEHOLDERS>` in each file with the Stakeholder's answers, in English, using literal string replacement.
-3. In the base template, replace `{{brand-block}}` with the **entire filled brand-block content** and `{{constraints-block}}` with the **entire filled constraints-block content**. No paraphrasing, no summarizing — literal insertion.
+3. In the base template, replace `{{direction-block}}`, `{{brand-block}}` and `{{constraints-block}}` with the **entire filled content** of the matching block. No paraphrasing, no summarizing — literal insertion. The `### Craft rules`, `### Avoid` and `### Before you finish` parts of the direction block are copied as they are, every line: they are what keeps the Design tool off its generic default look.
 
 **For scenario C only**:
-- Screens: one per existing screen from step 1, minus the Q9 skip-list. Copy and field names come from the templates, quoted exactly.
+- Screens: one per existing screen from step 1, minus the Q11 skip-list. Copy and field names come from the templates, quoted exactly.
 - `{{existing-design-tokens}}`: if the audit's `Design tokens` line names a file, replace `{{existing-design-tokens}}` and the HTML comment under it with the section below. If it says `none`, delete the placeholder and the comment — never leave the raw placeholder in the prompt.
 
 ```
@@ -127,7 +143,7 @@ File content format:
 - Does: <each action today and the endpoint or code that serves it> | none
 
 ### Stakeholder must-haves
-- <each must-have from Q7, in English> | none
+- <each must-have from Q9, in English> | none
 ```
 
 `## Required behaviour` (Scenario B and C; omit it for A, which has no existing screens) sits after `=== END COPY ===`, so the Stakeholder never pastes it. It lists every existing screen from step 1, including skipped ones (add `(not redesigned)` after the template file), and states what each one does today as read from the audit and the templates, not what the new design should do. If a control does nothing lasting today (for example a Save that only shows an alert), say so. The planner reads this section: keep the heading and the `### Stakeholder must-haves` subsection exactly as above.
@@ -148,8 +164,10 @@ The assembled prompt asks for the **look only** (layout, spacing, colours, fonts
 
 ## Common Mistakes
 
-- **Question wall.** All 9 questions at once → the Stakeholder gives lazy answers. Ask one, wait, then next.
-- **Skipping the brand block** because the Stakeholder "doesn't have one". "No brand" is still information — record it.
+- **Question wall.** All the questions at once → the Stakeholder gives lazy answers. Ask one, wait, then next.
+- **Generic questions.** Asking "what's wrong?" without naming what the audit found. The Stakeholder cannot see the code; name the pain points per Screen and let them rank them.
+- **Leaving the look to the Design tool.** "Choose one visual style yourself" with no Direction and no brand gets the tool's default look. The direction block and a chosen palette and font pair always go in.
+- **Skipping the brand block** because the Stakeholder "doesn't have one". "No brand" is still information: record it and offer the three directions.
 - **Forbidding React in Scenario C.** Lovable cannot comply and AI Studio defaults to React, so the Stakeholder would stall at ingest.
 - **Relying on a second message.** On a free plan the next message can be refused for lack of credits, so the first one asks for one shared style on every Screen.
 - **Inventing copy or field names.** Scenario C quotes them from the project's templates.
@@ -159,6 +177,9 @@ The assembled prompt asks for the **look only** (layout, spacing, colours, fonts
 ## Red Flags — Stop and Re-check
 
 - Output prompt is < 500 words → too thin, ask follow-up questions on weak answers.
+- The prompt has no `## Direction` section, no `Kind of UI`, or its `### Craft rules`, `### Avoid` or `### Before you finish` part is shortened → fill it from the template.
+- For B and C, the Direction names no change level or no Screen to fix first → ask Q1 or Q2.
+- The brand block says slate grey, Tailwind blue or Inter though the Stakeholder never named them → offer the three directions.
 - For scenario C, the prompt says "do not use React" or any framework, or threatens to discard framework code → remove it.
 - For scenario C, `## Required behaviour` is missing a screen the audit lists → add it.
 - The prompt asks for variations, or for anything to wait for a later message → remove it.

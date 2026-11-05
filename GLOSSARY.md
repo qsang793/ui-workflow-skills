@@ -30,6 +30,10 @@ _Avoid_: Lovable (as a generic name)
 The paste-ready prompt the bundle assembles for the Design tool.
 _Avoid_: Lovable prompt, brief (the interview is the brief; the prompt is its output)
 
+**Direction**:
+The part of the Design prompt that says how far the look changes, what to fix first, what to keep and what it should feel like, followed by fixed craft rules and an Avoid list, so the Design tool does not fall back on a generic look.
+_Avoid_: style guide, vibe, mood
+
 **Design export**:
 The code the Design tool returns, whatever its framework, staged inside the project for the next steps. In Scenario C it is a visual reference only: its look is Ported, its runtime is discarded.
 _Avoid_: Lovable export, output, mockup
