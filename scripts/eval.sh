@@ -6,7 +6,9 @@ cd "$(dirname "$0")/.."
 started="$(mktemp)"
 status=0
 # env -i: a child `claude` that inherits a Claude Code session's environment can fail its subscription login.
+# ANTHROPIC_API_KEY passes through only when set, for API-key users.
 env -i HOME="$HOME" PATH="$PATH" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-en_US.UTF-8}" TMPDIR="${TMPDIR:-/tmp}" \
+  ${ANTHROPIC_API_KEY:+"ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"} \
   claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --ablation none --no-publish --model sonnet "$@" || status=$?
 
 # Results get committed and this repo is public; scripts/validate.py rejects a home path in them.
