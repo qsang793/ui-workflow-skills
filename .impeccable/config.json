@@ -1,0 +1,59 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-08T14:37:38.646Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "docs/demo/sites/before/index.html"
+        ],
+        "createdAt": "2026-11-08T14:37:38.715Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "docs/demo/sites/before/index.html"
+        ],
+        "createdAt": "2026-11-08T14:37:38.785Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "docs/demo/sites/before/index.html"
+        ],
+        "createdAt": "2026-11-08T14:37:38.855Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "docs/demo/film/compositions/work.html"
+        ],
+        "createdAt": "2026-11-08T14:53:04.542Z",
+        "reason": "agent: video scene; rasters start at opacity 0 and the timeline fades them in"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/demo/film/compositions/work.html"
+        ],
+        "createdAt": "2026-11-08T14:53:04.593Z",
+        "reason": "agent: video scene; screenshot crops intentionally fill browser-viewport and morph containers edge to edge"
+      }
+    ]
+  }
+}

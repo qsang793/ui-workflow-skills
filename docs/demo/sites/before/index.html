@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Larkspur Bakehouse - Home</title>
+<style>
+  body { margin: 0; background: #e9e4d8; font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #333; }
+  #container { width: 960px; margin: 0 auto; background: #fff; border-left: 1px solid #ccc; border-right: 1px solid #ccc; }
+  #header { padding: 18px 20px 12px; border-bottom: 3px solid #8b5a2b; }
+  #header h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 30px; color: #8b5a2b; font-weight: normal; }
+  #header p { margin: 4px 0 0; font-style: italic; color: #777; }
+  #nav { background: linear-gradient(#f4f4f4, #dcdcdc); border-bottom: 1px solid #bbb; padding: 7px 20px; }
+  #nav a { color: #0645ad; margin-right: 6px; }
+  #content { overflow: hidden; padding: 16px 20px 24px; }
+  #main { float: left; width: 600px; }
+  #sidebar { float: right; width: 280px; background: #f7f3ea; border: 1px solid #ddd; padding: 10px 12px; box-sizing: border-box; }
+  h2 { font-family: Georgia, serif; font-size: 18px; color: #8b5a2b; font-weight: normal; margin: 6px 0 8px; }
+  h3 { font-size: 14px; margin: 14px 0 6px; }
+  p { line-height: 1.4; margin: 0 0 10px; }
+  img.left { float: left; width: 220px; margin: 0 12px 8px 0; border: 1px solid #999; }
+  table.products { width: 100%; border-collapse: collapse; margin-top: 6px; clear: both; }
+  table.products th, table.products td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+  table.products th { background: #eee; }
+  #sidebar label { display: block; margin-top: 6px; }
+  #sidebar input[type=text], #sidebar select { width: 100%; box-sizing: border-box; font-size: 12px; }
+  #sidebar .small { font-size: 11px; color: #777; }
+  #footer { clear: both; border-top: 1px solid #ccc; padding: 10px 20px; font-size: 11px; color: #777; background: #f4f4f4; }
+  #footer a { color: #0645ad; }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="header">
+    <h1>Larkspur Bakehouse</h1>
+    <p>Fresh bread and pastries since 2014</p>
+  </div>
+  <div id="nav">
+    <a href="#">Home</a> | <a href="#menu">Our Products</a> | <a href="#about">About Us</a> | <a href="#hours">Opening Hours</a> | <a href="#order">Pre-order</a>
+  </div>
+  <div id="content">
+    <div id="main">
+      <h2>Welcome to our website!</h2>
+      <img class="left" src="../img/sourdough.jpg" alt="bread">
+      <p>Welcome to Larkspur Bakehouse. We are a small bakery on Mill Lane. All of our bread and pastries are baked fresh every morning in our shop.</p>
+      <p>You can pre-order bread for the next day using the form on this page. Please order before 6pm. Payment is taken when you collect your order.</p>
+      <h3 id="about">About Us</h3>
+      <p>Our bakers start at 4am. We feed the levain, mix the dough, shape the loaves by hand and bake them so they are ready when we open at 7am.</p>
+      <h3 id="menu">Our Products</h3>
+      <table class="products">
+        <tr><th>Product</th><th>Description</th><th>Price</th></tr>
+        <tr><td>Country sourdough</td><td>Wheat and rye, long cold proof</td><td>&pound;5.20</td></tr>
+        <tr><td>Butter croissant</td><td>Made with cultured butter</td><td>&pound;2.60</td></tr>
+        <tr><td>Cinnamon bun</td><td>Cardamom dough, cinnamon sugar</td><td>&pound;3.10</td></tr>
+        <tr><td>Rye &amp; seeds</td><td>Dark rye with sunflower seeds</td><td>&pound;5.80</td></tr>
+        <tr><td>Flat white</td><td>Coffee</td><td>&pound;3.20</td></tr>
+      </table>
+      <h3 id="hours">Opening Hours</h3>
+      <p>Tuesday - Sunday: 7am - 2pm<br>Monday: Closed<br>Address: 14 Mill Lane</p>
+    </div>
+    <div id="sidebar">
+      <h2 id="order">Pre-order Form</h2>
+      <form onsubmit="return false">
+        <label>Your name:</label><input type="text">
+        <label>Product:</label>
+        <select><option>Country sourdough - &pound;5.20</option><option>Butter croissant - &pound;2.60</option><option>Cinnamon bun - &pound;3.10</option><option>Rye &amp; seeds - &pound;5.80</option></select>
+        <label>Quantity:</label><input type="text" value="1">
+        <label>Pick up date:</label><input type="text" value="dd/mm/yyyy">
+        <p class="small">Orders must be placed before 6pm for next day collection.</p>
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+  </div>
+  <div id="footer">&copy; 2014 Larkspur Bakehouse | <a href="#">Home</a> | <a href="#">Contact</a> | Fictional bakery, synthetic demo content</div>
+</div>
+</body>
+</html>

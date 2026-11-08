@@ -15,6 +15,10 @@ A Claude Code plugin that walks a non-technical Stakeholder from "this UI looks 
 
 [Stakeholder guide](docs/stakeholder-guide.md) · [Hướng dẫn tiếng Việt](docs/stakeholder-guide.vi.md) · [Install](docs/install.md) · [Status](docs/status.md)
 
+<img src="docs/demo/film/film-hook.gif" alt="A dated bakery homepage is wiped into its redesigned version, under the line: Claude Code asks a few questions, AI Studio draws it, you approve every step" width="100%">
+
+<sub>Illustrative, with a synthetic bakery, not a recorded run. [Full 49 s walkthrough (MP4)](docs/demo/film/film.mp4) · [Source](docs/demo/film/)</sub>
+
 </div>
 
 ## Why

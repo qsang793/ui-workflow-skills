@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Larkspur Bakehouse · Reserve tomorrow's bread</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Courier+Prime:wght@400;700&family=Public+Sans:wght@400;500;700&display=block" rel="stylesheet">
+<style>
+  :root {
+    --kraft: #c08c57;
+    --kraft-deep: #96632f;
+    --kraft-light: #c08c57;
+    --ink: #1c1a17;
+    --ink-soft: #33241a;
+    --stamp: #1f3c96;
+    --stamp-deep: #172d73;
+    --ticket: #f3ebdd;
+    --ticket-line: #d9ccb6;
+    --display: "Archivo", sans-serif;
+    --body: "Public Sans", sans-serif;
+    --type: "Courier Prime", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--kraft);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0 0.05 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23f)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.06' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.2 0 0 0 0 0.07 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23g)'/%3E%3C/svg%3E");
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--stamp); color: var(--ticket); }
+  a { color: inherit; text-underline-offset: 0.22em; text-decoration-thickness: 2px; }
+  :focus-visible { outline: 3px solid var(--stamp); outline-offset: 3px; }
+
+  .wrap { width: min(1680px, calc(100% - 96px)); margin: 0 auto; }
+
+  /* Printed bag-face header */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 22px; border-bottom: 2px solid var(--ink); }
+  .mark { display: flex; align-items: center; gap: 14px; font-family: var(--display); font-stretch: 125%; font-weight: 800; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; text-decoration: none; }
+  .mark svg { width: 40px; height: 40px; }
+  .top nav { display: flex; gap: 40px; font-weight: 700; font-size: 17px; }
+  .top nav a { text-decoration: none; }
+  .top nav a:hover { text-decoration: underline; }
+  .hours { font-family: var(--type); font-size: 17px; }
+
+  /* First viewport */
+  .hero { display: grid; grid-template-columns: 1fr 560px; gap: 64px; padding: 56px 0 96px; align-items: start; }
+  .stamp-title {
+    font-family: var(--display); font-stretch: 125%; font-weight: 900; text-transform: uppercase;
+    font-size: clamp(56px, 5vw, 96px); line-height: 0.92; letter-spacing: -0.02em; color: var(--ink);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.3 1.8'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23m)'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.3 1.8'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23m)'/%3E%3C/svg%3E");
+  }
+  .stamp-title span { color: var(--stamp); }
+  .lede { max-width: 34ch; margin-top: 28px; font-size: 22px; line-height: 1.45; color: var(--ink-soft); }
+  .window { position: relative; margin-top: 44px; height: 460px; border: 2px solid var(--ink); background: var(--ink); overflow: hidden; }
+  .window img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; display: block; }
+  .window figcaption { position: absolute; left: 0; bottom: 0; background: var(--ink); color: var(--ticket); font-family: var(--type); font-size: 16px; padding: 10px 16px; }
+
+  /* The pickup ticket */
+  .ticket {
+    position: relative; margin-top: 8px; background: var(--ticket); color: var(--ink);
+    padding: 40px 40px 36px; transform: rotate(1.4deg); transform-origin: 50% 0;
+    box-shadow: 0 2px 3px rgba(40, 22, 6, 0.25), 0 22px 46px rgba(40, 22, 6, 0.32);
+    -webkit-mask: radial-gradient(circle at 50% 22px, transparent 11px, #000 12px);
+    mask: radial-gradient(circle at 50% 22px, transparent 11px, #000 12px);
+  }
+  .ticket h2 { font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: 34px; line-height: 1.05; text-transform: uppercase; margin-top: 18px; }
+  .ticket .when { font-family: var(--type); font-size: 18px; margin: 10px 0 24px; color: var(--ink-soft); }
+  .lines { list-style: none; border-top: 2px solid var(--ink); }
+  .line { display: grid; grid-template-columns: 1fr auto 92px; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--ticket-line); }
+  .line label { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 19px; cursor: pointer; }
+  .line input[type="checkbox"] { appearance: none; width: 24px; height: 24px; border: 2px solid var(--ink); display: grid; place-content: center; cursor: pointer; }
+  .line input[type="checkbox"]:checked { background: var(--stamp); border-color: var(--stamp); }
+  .line input[type="checkbox"]:checked::after { content: ""; width: 10px; height: 6px; border: 3px solid var(--ticket); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+  .qty { display: flex; align-items: center; border: 2px solid var(--ink); font-family: var(--type); font-size: 18px; }
+  .qty button { width: 34px; height: 34px; border: 0; background: transparent; font: inherit; font-weight: 700; cursor: pointer; color: var(--ink); }
+  .qty button:hover { background: var(--ink); color: var(--ticket); }
+  .qty output { min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
+  .price { font-family: var(--type); font-size: 18px; text-align: right; font-variant-numeric: tabular-nums; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; margin: 22px -40px 30px; padding: 22px 40px 0; border-top: 2px dashed var(--ticket-line); font-family: var(--type); font-size: 20px; }
+  .total strong { font-size: 30px; }
+  .reserve {
+    display: flex; width: 100%; justify-content: center; align-items: center; gap: 12px; height: 64px;
+    background: var(--stamp); color: var(--ticket); border: 0; cursor: pointer;
+    font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: 20px; letter-spacing: 0.04em; text-transform: uppercase;
+    transition: background 160ms ease-out, transform 120ms ease-out;
+  }
+  .reserve:hover { background: var(--stamp-deep); }
+  .reserve:active { transform: translateY(1px); }
+  .fine { margin-top: 14px; font-size: 14px; color: var(--ink-soft); text-align: center; }
+  .stamped { position: absolute; right: 34px; top: 40px; font-family: var(--display); font-stretch: 125%; font-weight: 900; font-size: 18px; text-transform: uppercase; color: var(--stamp); border: 3px solid var(--stamp); padding: 6px 10px; transform: rotate(-8deg); opacity: 0.88; }
+  .ticket.pressed .stamped { animation: press 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes press { from { transform: rotate(-8deg) scale(1.5); opacity: 0; } to { transform: rotate(-8deg) scale(1); opacity: 0.88; } }
+
+  /* Morning strip */
+  .morning { border-top: 2px solid var(--ink); padding: 88px 0; display: grid; grid-template-columns: 560px 1fr; gap: 80px; align-items: center; }
+  .morning img { width: 100%; height: 520px; object-fit: cover; border: 2px solid var(--ink); display: block; }
+  h3.section { font-family: var(--display); font-stretch: 125%; font-weight: 900; text-transform: uppercase; font-size: 64px; line-height: 0.95; letter-spacing: -0.02em; }
+  .clock { list-style: none; margin-top: 40px; border-top: 2px solid var(--ink); }
+  .clock li { display: grid; grid-template-columns: 140px 1fr; gap: 24px; padding: 20px 0; border-bottom: 2px solid var(--ink); font-size: 21px; }
+  .clock time { font-family: var(--type); font-weight: 700; font-size: 26px; }
+
+  /* Bakes: one label grid rules every line */
+  .bakes { border-top: 2px solid var(--ink); padding: 88px 0; }
+  .bakes h3 { margin-bottom: 40px; }
+  .bake { display: grid; grid-template-columns: 220px 1fr 1.2fr 140px; gap: 36px; align-items: center; padding: 20px 0; border-top: 2px solid var(--ink); }
+  .bake:last-child { border-bottom: 2px solid var(--ink); }
+  .bake img { width: 220px; height: 140px; object-fit: cover; display: block; border: 2px solid var(--ink); }
+  .bake b { font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: 32px; text-transform: uppercase; line-height: 1; }
+  .bake p { color: var(--ink-soft); max-width: 46ch; }
+  .bake .price { font-size: 26px; }
+
+  /* Visit */
+  .visit { border-top: 2px solid var(--ink); padding: 88px 0 72px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+  .visit dl { display: grid; grid-template-columns: 160px 1fr; row-gap: 16px; margin-top: 36px; font-size: 21px; }
+  .visit dt { font-family: var(--type); font-weight: 700; }
+  .visit img { width: 100%; height: 440px; object-fit: cover; border: 2px solid var(--ink); display: block; }
+  footer { border-top: 2px solid var(--ink); padding: 28px 0 40px; display: flex; justify-content: space-between; font-family: var(--type); font-size: 15px; }
+
+  @media (max-width: 1100px) {
+    .hero, .morning, .visit { grid-template-columns: 1fr; }
+    .ticket { transform: none; }
+    .bake { grid-template-columns: 120px 1fr 90px; }
+    .bake img { width: 120px; height: 90px; }
+    .bake p { display: none; }
+    .top nav { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="22" rx="17" ry="12" fill="none" stroke="currentColor" stroke-width="3"/><path d="M11 18c3 4 6 4 9 0M20 18c3 4 6 4 9 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+      Larkspur Bakehouse
+    </a>
+    <nav aria-label="Main"><a href="#bakes">Today's bakes</a><a href="#morning">Our morning</a><a href="#visit">Visit</a></nav>
+    <span class="hours">Tue–Sun · 7:00–14:00</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1 class="stamp-title">Baked at four.<br><span>Yours</span> by seven.</h1>
+        <p class="lede">Everything on the counter came out of our oven this morning. Reserve tonight and it waits for you tomorrow.</p>
+        <figure class="window">
+          <img src="../img/sourdough.jpg" alt="Wholewheat loaves in a bread basket">
+          <figcaption>Country sourdough · out of the oven 6:40</figcaption>
+        </figure>
+      </div>
+
+      <form class="ticket" id="ticket" aria-labelledby="ticket-title" onsubmit="return false">
+        <span class="stamped">Tomorrow</span>
+        <h2 id="ticket-title">Pickup ticket</h2>
+        <p class="when">Wed 9 Nov · from 7:00 · 14 Mill Lane</p>
+        <ul class="lines">
+          <li class="line" data-price="5.20"><label><input type="checkbox" checked> Country sourdough</label><span class="qty"><button type="button" aria-label="One fewer">−</button><output>1</output><button type="button" aria-label="One more">+</button></span><span class="price">£5.20</span></li>
+          <li class="line" data-price="2.60"><label><input type="checkbox" checked> Butter croissant</label><span class="qty"><button type="button" aria-label="One fewer">−</button><output>2</output><button type="button" aria-label="One more">+</button></span><span class="price">£5.20</span></li>
+          <li class="line" data-price="3.10"><label><input type="checkbox"> Cinnamon bun</label><span class="qty"><button type="button" aria-label="One fewer">−</button><output>1</output><button type="button" aria-label="One more">+</button></span><span class="price">£3.10</span></li>
+          <li class="line" data-price="5.80"><label><input type="checkbox"> Rye &amp; seeds</label><span class="qty"><button type="button" aria-label="One fewer">−</button><output>1</output><button type="button" aria-label="One more">+</button></span><span class="price">£5.80</span></li>
+        </ul>
+        <p class="total"><span>Pay at pickup</span><strong id="total">£10.40</strong></p>
+        <button class="reserve" type="submit">Reserve for tomorrow</button>
+        <p class="fine">Reserve by 18:00. Nothing to pay now.</p>
+      </form>
+    </section>
+
+    <section class="morning" id="morning">
+      <img src="../img/hands-flour.jpg" alt="Flour dusted over a round of dough">
+      <div>
+        <h3 class="section">Our morning<br>starts at four</h3>
+        <ol class="clock">
+          <li><time>4:00</time><span>We feed the levain and mix the first dough.</span></li>
+          <li><time>5:30</time><span>Loaves are shaped by hand and left to proof.</span></li>
+          <li><time>6:40</time><span>The sourdough comes out of the oven.</span></li>
+          <li><time>7:00</time><span>Doors open. Reserved bags wait on the left.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="bakes" id="bakes">
+      <h3 class="section">Today's bakes</h3>
+      <div class="bake"><img src="../img/sourdough.jpg" alt=""><b>Country sourdough</b><p>Wheat, rye and a long cold proof. A dark, crackling crust.</p><span class="price">£5.20</span></div>
+      <div class="bake"><img src="../img/croissants.jpg" alt=""><b>Butter croissant</b><p>Laminated over two days with cultured butter.</p><span class="price">£2.60</span></div>
+      <div class="bake"><img src="../img/cinnamon-buns.jpg" alt=""><b>Cinnamon bun</b><p>Cardamom dough, cinnamon sugar, a thin glaze.</p><span class="price">£3.10</span></div>
+      <div class="bake"><img src="../img/coffee.jpg" alt=""><b>Flat white</b><p>Made at the counter while your bag is packed.</p><span class="price">£3.20</span></div>
+    </section>
+
+    <section class="visit" id="visit">
+      <div>
+        <h3 class="section">Come by<br>the counter</h3>
+        <dl>
+          <dt>Address</dt><dd>14 Mill Lane</dd>
+          <dt>Open</dt><dd>Tuesday to Sunday, 7:00–14:00</dd>
+          <dt>Pre-order</dt><dd>Reserve by 18:00, pick up from 7:00 next day</dd>
+        </dl>
+      </div>
+      <img src="../img/counter.jpg" alt="The bakery counter with bread in baskets">
+    </section>
+  </main>
+
+  <footer><span>Larkspur Bakehouse · 14 Mill Lane</span><span>Fictional bakery · synthetic demo content</span></footer>
+</div>
+<script>
+  const ticket = document.getElementById("ticket");
+  const fmt = (n) => "£" + n.toFixed(2);
+  function update() {
+    let sum = 0;
+    ticket.querySelectorAll(".line").forEach((line) => {
+      const n = Number(line.querySelector("output").value);
+      const price = Number(line.dataset.price) * n;
+      line.querySelector(".price").textContent = fmt(price);
+      if (line.querySelector("input").checked) sum += price;
+    });
+    document.getElementById("total").textContent = fmt(sum);
+    ticket.classList.remove("pressed"); void ticket.offsetWidth; ticket.classList.add("pressed");
+  }
+  ticket.querySelectorAll(".line").forEach((line) => {
+    const out = line.querySelector("output");
+    const [less, more] = line.querySelectorAll("button");
+    less.addEventListener("click", () => { out.value = Math.max(1, Number(out.value) - 1); update(); });
+    more.addEventListener("click", () => { out.value = Math.min(9, Number(out.value) + 1); line.querySelector("input").checked = true; update(); });
+    line.querySelector("input").addEventListener("change", update);
+  });
+</script>
+</body>
+</html>
