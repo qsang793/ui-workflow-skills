@@ -21,3 +21,8 @@ Thumbs.db
 
 # Python
 __pycache__/
+
+# HyperFrames cache, snapshots and check reports
+docs/demo/**/.hyperframes/
+docs/demo/**/.media/
+docs/demo/**/.shots/

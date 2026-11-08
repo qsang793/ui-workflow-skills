@@ -1,0 +1,353 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #1a1918; }
+    #w-cam { position: absolute; inset: 0; transform-origin: 0 0; }
+    #w-drift { position: absolute; inset: 0; }
+
+    /* Browser with two tabs: the bakery on localhost, and AI Studio. */
+    #w-win { position: absolute; left: 48px; top: 48px; width: 1296px; height: 984px; border-radius: 14px; overflow: hidden; background: #e9e4d8; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); }
+    #w-bar { position: relative; height: 52px; background: #2c2a27; display: flex; align-items: center; gap: 10px; padding: 0 18px; font-family: "Inter", sans-serif; }
+    #w-bar > i { width: 13px; height: 13px; border-radius: 50%; background: #4a4642; flex: none; }
+    .w-tab { position: relative; height: 36px; margin-top: 16px; padding: 0 18px; border-radius: 9px 9px 0 0; font-size: 17px; color: #a39d95; display: flex; align-items: center; }
+    #w-tab1 { margin-left: 16px; width: 214px; }
+    #w-tab2 { width: 176px; }
+    .w-tab b { position: absolute; inset: 0; border-radius: 9px 9px 0 0; background: #1f1d1b; }
+    .w-tab span { position: relative; }
+    #w-url { position: relative; margin-left: 16px; flex: 1; height: 32px; border-radius: 8px; background: #1f1d1b; color: #b9b3ab; font-size: 17px; }
+    #w-url span { position: absolute; left: 14px; top: 6px; }
+    #w-vp { position: absolute; left: 0; top: 52px; width: 1296px; height: 932px; overflow: hidden; }
+
+    /* Morph stage at page scale; the viewport shows it at 0.675. */
+    #m-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1380px; transform: scale(0.675); transform-origin: 0 0; }
+    #m-base { position: absolute; left: 0; top: 0; width: 1920px; }
+    #m-ground { position: absolute; inset: 0; background: #c08c57; opacity: 0; }
+    .m-r { position: absolute; overflow: hidden; transform-origin: 0 0; }
+    .m-r i { position: absolute; inset: 0; }
+    .m-a { opacity: 0; }
+    #m-final { position: absolute; left: 0; top: 0; width: 1920px; height: 1380px; overflow: hidden; opacity: 0; }
+    #m-final img { position: absolute; left: 0; top: 0; width: 1920px; }
+    #w-hl { position: absolute; left: 820px; top: 350px; width: 51px; height: 27px; border: 3px solid #d97757; border-radius: 5px; }
+
+    /* AI Studio, rebuilt as a generic layout: no logo. */
+    #s-app { position: absolute; inset: 0; background: #131314; color: #e3e3e3; font-family: "Inter", sans-serif; opacity: 0; }
+    #s-top { height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid #2a2b2d; font-size: 21px; font-weight: 700; }
+    #s-top span { color: #9aa0a6; font-weight: 400; }
+    #s-left { position: absolute; left: 0; top: 56px; width: 420px; bottom: 0; border-right: 1px solid #2a2b2d; }
+    #s-reply { position: absolute; left: 24px; right: 24px; top: 28px; font-size: 19px; line-height: 1.45; color: #c4c7c5; }
+    #s-reply b { color: #e3e3e3; }
+    #s-input { position: absolute; left: 20px; right: 20px; top: 460px; height: 400px; border: 1px solid #3c4043; border-radius: 18px; background: #1e1f20; padding: 18px 20px; }
+    #s-ph { font-size: 19px; color: #80868b; }
+    #s-prompt { position: absolute; left: 20px; top: 18px; right: 20px; font-family: "JetBrains Mono", monospace; font-size: 17px; line-height: 1.55; color: #e3e3e3; }
+    #s-prompt p { white-space: pre; }
+    #s-prompt .h { color: #8ab4f8; }
+    #s-run { position: absolute; right: 16px; bottom: 16px; height: 46px; padding: 0 22px; border-radius: 23px; background: #8ab4f8; color: #131314; font-size: 19px; font-weight: 700; display: flex; align-items: center; }
+    #s-right { position: absolute; left: 436px; top: 72px; width: 844px; bottom: 16px; border: 1px solid #2a2b2d; border-radius: 14px; overflow: hidden; background: #1e1f20; }
+    #s-ptabs { height: 46px; display: flex; align-items: center; gap: 22px; padding: 0 18px; border-bottom: 1px solid #2a2b2d; font-size: 17px; color: #9aa0a6; }
+    #s-ptabs .on { color: #e3e3e3; font-weight: 700; }
+    #s-status { margin-left: auto; font-size: 16px; color: #9aa0a6; }
+    #s-dl { height: 32px; padding: 0 16px; border-radius: 16px; border: 1px solid #5f6368; color: #e3e3e3; font-size: 16px; font-weight: 700; display: flex; align-items: center; }
+    #s-empty { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font-size: 19px; color: #80868b; }
+    #s-prev { position: absolute; left: 0; top: 46px; width: 844px; bottom: 0; overflow: hidden; clip-path: inset(0px 0px 100% 0px); }
+    #s-prev img { width: 844px; display: block; }
+    #s-toast { position: absolute; right: 26px; top: 64px; padding: 12px 18px; border-radius: 12px; background: #e3e3e3; color: #131314; font-size: 18px; font-weight: 700; }
+
+    /* Claude Code beside the browser, rebuilt from its layout. */
+    #w-term { position: absolute; left: 1376px; top: 48px; width: 496px; height: 984px; border-radius: 14px; background: #262422; font-family: "JetBrains Mono", monospace; font-size: 28px; line-height: 1.42; color: #ece9e4; }
+    .w-blk { position: absolute; left: 30px; right: 24px; top: 100px; }
+    .w-blk p { white-space: pre; }
+    .w-dim { color: #8c8781; }
+    .w-acc { color: #d97757; font-weight: 700; }
+    .w-ok { color: #7fb685; font-weight: 700; }
+    .w-gap { height: 22px; }
+    #w-sel { position: absolute; left: 0; width: 100%; height: 40px; background: rgba(217, 119, 87, 0.22); border-radius: 6px; }
+    .w-btns { display: flex; gap: 14px; margin-top: 26px; font-family: "Inter", sans-serif; font-size: 26px; font-weight: 700; }
+    .w-btns span { padding: 12px 22px; border-radius: 10px; }
+    #w-approve { background: #ece9e4; color: #1a1918; }
+    #w-change { border: 2px solid #5a5550; color: #ece9e4; }
+    #w-cursor { position: absolute; left: 0; top: 0; width: 34px; height: 48px; }
+
+    /* End card. */
+    #e-card { position: absolute; inset: 0; background: #1a1918; display: flex; flex-direction: column; justify-content: center; padding-left: 192px; color: #ece9e4; }
+    #e-icon { width: 120px; height: 120px; border-radius: 26px; }
+    #e-name { font-size: 112px; font-weight: 900; letter-spacing: -0.035em; margin-top: 36px; line-height: 1; }
+    #e-line { font-size: 48px; color: #b9b3ab; margin-top: 22px; }
+    #e-cmd { font-family: "JetBrains Mono", monospace; font-size: 34px; color: #d97757; margin-top: 56px; }
+
+    /* Chapter captions: screen space, outside the camera. */
+    .c-cap { position: absolute; left: 48px; bottom: 40px; max-width: 1300px; padding: 20px 30px 22px; border-radius: 16px; background: rgba(20, 19, 18, 0.94); border: 1px solid rgba(255, 255, 255, 0.08); color: #ece9e4; }
+    .c-cap b { display: block; font-size: 52px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .c-cap b em { font-style: normal; color: #d97757; font-family: "JetBrains Mono", monospace; font-size: 34px; font-weight: 700; margin-right: 18px; vertical-align: 6px; }
+    .c-cap span { display: block; margin-top: 8px; font-family: "JetBrains Mono", monospace; font-size: 24px; color: #a39d95; }
+
+    #w-disc { position: absolute; right: 48px; bottom: 40px; font-size: 32px; font-weight: 700; color: #ece9e4; background: #1a1918; padding: 10px 18px; border-radius: 10px; }
+  </style>
+  <div id="root" data-composition-id="work" data-width="1920" data-height="1080">
+    <div id="w-cam"><div id="w-drift">
+      <div id="w-win">
+        <div id="w-bar">
+          <i></i><i></i><i></i>
+          <div id="w-tab1" class="w-tab"><b id="w-tab1-bg"></b><span>Larkspur Bakehouse</span></div>
+          <div id="w-tab2" class="w-tab"><b id="w-tab2-bg" style="opacity: 0"></b><span>AI Studio</span></div>
+          <div id="w-url"><span id="w-url1">localhost:8000</span><span id="w-url2" style="opacity: 0">aistudio.google.com</span></div>
+        </div>
+        <div id="w-vp">
+          <div id="m-stage">
+            <img id="m-base" src="assets/before.png" alt="The bakery site before: a 2014 template" />
+            <div id="m-ground"></div>
+            <div id="m-regions" class="clip" data-start="30" data-duration="13" data-layout-ignore>
+              <div id="m-brand" class="m-r" style="left:120px;top:28px;width:411px;height:40px"><i class="m-b" style="background:url(assets/before.png) -747.3px -21.2px / 2869.5px 1270.6px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -120px -28px / 1920px 3539px no-repeat"></i></div>
+              <div id="m-nav" class="m-r" style="left:898px;top:35px;width:331px;height:26px"><i class="m-b" style="background:url(assets/before.png) -165.5px -74.6px / 662.0px 905.8px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -898px -35px / 1920px 3539px no-repeat"></i></div>
+              <div id="m-head" class="m-r" style="left:120px;top:148px;width:1056px;height:265px"><i class="m-b" style="background:url(assets/before.png) -2640.0px -1710.5px / 10137.6px 13009.1px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -120px -148px / 1920px 3539px no-repeat"></i></div>
+              <div id="m-photo" class="m-r" style="left:120px;top:581px;width:1056px;height:460px"><i class="m-b" style="background:url(assets/before.png) -2378.4px -625.6px / 9133.0px 3974.4px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -120px -581px / 1920px 3539px no-repeat"></i></div>
+              <div id="m-lede" class="m-r" style="left:120px;top:441px;width:458px;height:96px"><i class="m-b" style="background:url(assets/before.png) -918.5px -136.0px / 2402.6px 864.0px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -120px -441px / 1920px 3539px no-repeat"></i></div>
+              <div id="m-form" class="m-r" style="left:1223px;top:149px;width:577px;height:697px"><i class="m-b" style="background:url(assets/before.png) -2349.2px -343.4px / 3956.6px 2727.4px no-repeat"></i><i class="m-a" style="background:url(assets/after-full.png) -1223px -149px / 1920px 3539px no-repeat"></i></div>
+            </div>
+            <div id="m-final"><img id="m-final-img" src="assets/after-full.png" alt="The bakery site after the redesign" /></div>
+          </div>
+
+          <div id="s-app">
+            <div id="s-top">AI Studio <span>/ Build</span></div>
+            <div id="s-left">
+              <p id="s-reply"><b>Built Home.</b> Header, hero, pickup ticket and today's bakes, in plain HTML and CSS.</p>
+              <div id="s-input">
+                <p id="s-ph">Describe your app…</p>
+                <div id="s-prompt">
+                  <p class="h"># Larkspur Bakehouse: Home</p>
+                  <p class="h">## Direction</p>
+                  <p>Change level:</p>
+                  <p>  A brand-new look</p>
+                  <p>Fix first: the pre-order</p>
+                  <p>  form, Submit too small</p>
+                  <p>Keep: name, menu, prices</p>
+                  <p class="h">### Avoid</p>
+                  <p>gradients, same-size cards</p>
+                </div>
+                <div id="s-run">Run</div>
+              </div>
+            </div>
+            <div id="s-right">
+              <div id="s-ptabs"><span class="on">Preview</span><span>Code</span><span id="s-status">Ready to run</span><span id="s-dl">Download</span></div>
+              <p id="s-empty">Run the prompt to see a preview</p>
+              <div id="s-prev"><img src="assets/after-full.png" alt="AI Studio preview of the generated page" /></div>
+              <p id="s-toast" class="clip" data-start="18.55" data-duration="1.9">larkspur-home.zip downloaded</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="w-hl" class="clip" data-start="1.4" data-duration="3.2"></div>
+
+      <div id="w-term">
+        <div id="w-b1" class="w-blk clip" data-start="0" data-duration="4.6">
+          <p><span class="w-acc">&gt;</span> /ui-workflow-skills:</p>
+          <p>  ui-audit</p>
+          <div class="w-gap"></div>
+          <p id="w-a1"><span class="w-acc">⏺</span> Home</p>
+          <p id="w-a2">  Submit is 22 px tall.</p>
+          <p id="w-a3">  Too small to tap</p>
+          <p id="w-a4">  on a phone.</p>
+        </div>
+        <div id="w-b2" class="w-blk clip" data-start="4.6" data-duration="3.8">
+          <p class="w-dim">☐ Change level</p>
+          <p>How far should the</p>
+          <p>look change?</p>
+          <div class="w-gap"></div>
+          <div style="position: relative">
+            <div id="w-sel" data-layout-ignore></div>
+            <p>  1. Tidy it up</p>
+            <p>  2. A clear upgrade</p>
+            <p>  3. A brand-new look</p>
+            <span id="w-caret" data-layout-ignore class="w-acc" style="position: absolute; left: 0; top: 0">❯</span>
+          </div>
+        </div>
+        <div id="w-b3" class="w-blk clip" data-start="8.4" data-duration="11.2">
+          <p><span class="w-acc">⏺</span> Prompt ready:</p>
+          <p class="w-dim">  design-prompt.md</p>
+          <div class="w-gap"></div>
+          <p>  Paste it into</p>
+          <p>  Google AI Studio.</p>
+        </div>
+        <div id="w-b4" class="w-blk clip" data-start="19.6" data-duration="3.6">
+          <p><span class="w-acc">&gt;</span> /ui-workflow-skills:</p>
+          <p>  ingest-design-export</p>
+          <div class="w-gap"></div>
+          <p><span class="w-acc">⏺</span> Design read:</p>
+          <p>  Home, 4 sections</p>
+        </div>
+        <div id="w-b5" class="w-blk clip" data-start="23.2" data-duration="3.6">
+          <p><span class="w-acc">&gt;</span> /ui-workflow-skills:</p>
+          <p>  integration-planner</p>
+          <div class="w-gap"></div>
+          <p><span class="w-acc">⏺</span> Matched to your</p>
+          <p>  pages and form.</p>
+          <p class="w-ok">  ✓ Safe to build</p>
+        </div>
+        <div id="w-b6" class="w-blk clip" data-start="26.8" data-duration="8.4">
+          <p><span class="w-acc">&gt;</span> /ui-workflow-skills:</p>
+          <p>  design-port</p>
+          <div class="w-gap"></div>
+          <p><span class="w-acc">⏺</span> Rebuilding Home</p>
+          <p class="w-dim">  in your templates</p>
+        </div>
+        <div id="w-b7" class="w-blk clip" data-start="35.2" data-duration="7.8">
+          <p><span class="w-acc">⏺</span> Home is ready.</p>
+          <p>  Waiting for your</p>
+          <p>  review.</p>
+          <div class="w-btns"><span id="w-approve">Approve</span><span id="w-change">Ask for changes</span></div>
+          <div class="w-gap" style="height: 64px"></div>
+          <p id="w-done"><span class="w-ok">✓</span> Approved.</p>
+          <p id="w-done2" class="w-dim">  Committed to</p>
+          <p id="w-done3" class="w-dim">  ui-workflow/2026-11-08</p>
+        </div>
+      </div>
+
+      <svg id="w-cursor" class="clip" data-start="10.5" data-duration="28.1" viewBox="0 0 23 32" aria-hidden="true">
+        <path d="M1.5 1.5 L1.5 26 L8 20 L12.5 30 L17 28 L12.5 18.5 L21 18.5 Z" fill="#ece9e4" stroke="#1a1918" stroke-width="1.6" stroke-linejoin="round" />
+      </svg>
+    </div></div>
+
+    <div id="e-card" class="clip" data-start="38.8" data-duration="4.2">
+      <img id="e-icon" src="assets/icon.png" alt="" />
+      <p id="e-name">UI Workflow Skills</p>
+      <p id="e-line">Answer the questions. Get a new UI.</p>
+      <p id="e-cmd">claude plugin install ui-workflow-skills@ui-workflow-skills</p>
+    </div>
+    <div id="c1" class="c-cap clip" data-layout-allow-overlap data-start="0" data-duration="4.6"><b><em>1/5</em>Claude checks your page</b><span>ui-audit</span></div>
+    <div id="c2" class="c-cap clip" data-layout-allow-overlap data-start="4.6" data-duration="3.8"><b><em>2/5</em>You choose how big a change</b><span>design-brief</span></div>
+    <div id="c3" class="c-cap clip" data-layout-allow-overlap data-start="8.4" data-duration="11.2"><b><em>3/5</em>Paste the prompt into AI Studio</b><span>design-prompt.md → Run → Download</span></div>
+    <div id="c4" class="c-cap clip" data-layout-allow-overlap data-start="19.6" data-duration="15.6"><b><em>4/5</em>Claude rebuilds it in your real code</b><span>ingest-design-export → integration-planner → design-port</span></div>
+    <div id="c5" class="c-cap clip" data-layout-allow-overlap data-start="35.2" data-duration="3.6"><b><em>5/5</em>Nothing ships until you approve</b><span>Approve, or ask for changes</span></div>
+    <p id="w-disc">Illustrative · synthetic bakery</p>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const SERVO = { duration: 1.1, ease: "power2.inOut" };
+    const W = { scale: 1, x: 0, y: 0 };
+    const A = { scale: 1.627, x: -1139, y: -212 };
+    const P = { scale: 2.0, x: -40, y: -1130 };
+    const D = { scale: 1.25, x: -175, y: -155 };
+    const B = { scale: 1.4815, x: -71, y: -71 };
+    const cam = (to, at) => tl.to("#w-cam", { ...to, ...SERVO }, at);
+    const swap = (sel, at) => tl.fromTo(sel, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, at);
+    const hide = (sel, at) => tl.fromTo(sel, { opacity: 0 }, { opacity: 0, duration: 0.01 }, at);
+    const point = (x, y, at, d = 0.55) => tl.to("#w-cursor", { x, y, duration: d, ease: "power3.inOut" }, at);
+    const click = (at, target, from, to) => {
+      tl.to("#w-cursor", { scale: 0.86, duration: 0.06, ease: "power2.in", transformOrigin: "0% 0%" }, at - 0.06);
+      tl.to("#w-cursor", { scale: 1, duration: 0.14, ease: "power2.out" }, at);
+      if (target) { tl.to(target, { backgroundColor: from, duration: 0.06 }, at - 0.06); tl.to(target, { backgroundColor: to, duration: 0.2 }, at); }
+    };
+    // Each chapter caption rises in at its start and fades just before its clip ends.
+    const caption = (sel, start, dur) => {
+      tl.fromTo(sel, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, start + 0.05);
+      tl.to(sel, { opacity: 0, duration: 0.25, ease: "power2.in" }, start + dur - 0.3);
+    };
+    caption("#c1", 0, 4.6);
+    caption("#c2", 4.6, 3.8);
+    caption("#c3", 8.4, 11.2);
+    caption("#c4", 19.6, 15.6);
+    caption("#c5", 35.2, 3.6);
+
+    // Micro-drift: whole sine cycles that end at zero before the end card, so every frame seeks the same.
+    const drift = { p: 0 };
+    tl.to(drift, { p: Math.PI * 2 * 6, duration: 38.8, ease: "none", onUpdate: () => gsap.set("#w-drift", { x: Math.sin(drift.p) * 3, y: Math.sin(drift.p * 1.5) * 2 }) }, 0);
+
+    // 1. Audit: push in on the cramped form and the finding.
+    tl.fromTo("#w-cam", W, { ...W, duration: 0.01 }, 0);
+    cam(A, 0.4);
+    tl.fromTo("#w-hl", { opacity: 0, clipPath: "inset(0 100% 0 0)" }, { opacity: 1, clipPath: "inset(0 0% 0 0)", duration: 0.4, ease: "expo.out" }, 1.4);
+    tl.fromTo("#w-a1, #w-a2, #w-a3, #w-a4", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power2.out", stagger: 0.12 }, 1.5);
+
+    // 2. The brief: the stakeholder moves to option 3 and picks it.
+    swap("#w-b2", 4.6);
+    hide("#w-sel", 4.6);
+    tl.fromTo("#w-caret", { y: 0 }, { y: 40, duration: 0.18, ease: "power2.inOut" }, 5.6);
+    tl.to("#w-caret", { y: 80, duration: 0.18, ease: "power2.inOut" }, 6.0);
+    tl.to("#w-sel", { y: 80, duration: 0.01 }, 6.35);
+    tl.to("#w-sel", { opacity: 1, duration: 0.2, ease: "power2.out" }, 6.4);
+    swap("#w-b3", 8.4);
+
+    // 3. AI Studio: open the tab, paste the prompt, run it, download the export.
+    cam(W, 9.6);
+    tl.fromTo("#w-cursor", { x: 1500, y: 1100 }, { x: 470, y: 66, duration: 0.7, ease: "power3.out" }, 10.5);
+    click(11.25);
+    tl.to("#w-tab1-bg", { opacity: 0, duration: 0.15 }, 11.25);
+    tl.to("#w-tab2-bg", { opacity: 1, duration: 0.15 }, 11.25);
+    tl.to("#w-url1", { opacity: 0, duration: 0.15 }, 11.25);
+    tl.to("#w-url2", { opacity: 1, duration: 0.15 }, 11.25);
+    tl.fromTo("#s-app", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.3, ease: "power2.out" }, 11.25);
+    hide("#s-prompt p, #s-reply", 11.25);
+    tl.fromTo("#s-prev", { clipPath: "inset(0px 0px 100% 0px)" }, { clipPath: "inset(0px 0px 100% 0px)", duration: 0.01 }, 11.25);
+    cam(P, 11.45);
+    point(250, 760, 11.6, 0.85);
+    click(12.6);
+    tl.to("#s-ph", { opacity: 0, duration: 0.1 }, 12.8);
+    tl.to("#s-prompt p", { opacity: 1, duration: 0.18, ease: "power2.out", stagger: 0.05 }, 12.8);
+    point(387, 970, 14.4);
+    click(15.05, "#s-run", "#c2d7fb", "#8ab4f8");
+    tl.to("#s-run", { opacity: 0.45, duration: 0.2 }, 15.2);
+    tl.set("#s-status", { textContent: "Generating…" }, 15.1);
+    cam(D, 15.15);
+    tl.to("#s-empty", { opacity: 0, duration: 0.2 }, 15.5);
+    [0.24, 0.48, 0.72, 1].forEach((f, i) => tl.to("#s-prev", { clipPath: `inset(0px 0px ${Math.round((1 - f) * 100)}% 0px)`, duration: 0.45, ease: "expo.out" }, 15.7 + i * 0.5));
+    tl.fromTo("#s-prev img", { filter: "blur(6px)" }, { filter: "blur(0px)", duration: 2.2, ease: "power2.out" }, 15.7);
+    tl.to("#s-reply", { opacity: 1, duration: 0.3 }, 17.6);
+    tl.set("#s-status", { textContent: "Ready" }, 17.7);
+    point(1262, 186, 17.8);
+    click(18.5, "#s-dl", "#3c4043", "#1e1f20");
+    tl.fromTo("#s-toast", { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.35, ease: "expo.out" }, 18.55);
+
+    // 4. Back in Claude Code: read the design, match it to the real app, rebuild it there.
+    cam(A, 19.6);
+    swap("#w-b4", 19.6);
+    swap("#w-b5", 23.2);
+    swap("#w-b6", 26.8);
+
+    // Back to the running site: every block of the old page moves into its new place.
+    cam(W, 27.0);
+    point(260, 66, 27.7, 0.7);
+    click(28.5);
+    tl.to("#w-tab2-bg", { opacity: 0, duration: 0.15 }, 28.5);
+    tl.to("#w-tab1-bg", { opacity: 1, duration: 0.15 }, 28.5);
+    tl.to("#w-url2", { opacity: 0, duration: 0.15 }, 28.5);
+    tl.to("#w-url1", { opacity: 1, duration: 0.15 }, 28.5);
+    tl.to("#s-app", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in" }, 28.5);
+    tl.to("#w-cursor", { opacity: 0, duration: 0.2 }, 28.8);
+    cam(B, 28.6);
+    const T0 = 30.0;
+    tl.to("#m-ground", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, T0);
+    tl.to("#m-base", { opacity: 0, filter: "blur(8px)", duration: 0.45, ease: "power2.in" }, T0 + 0.05);
+    [
+      ["#m-brand", 380, -10, 0.6691, 0.85],
+      ["#m-nav", -418, 54, 2.9003, 1.1923],
+      ["#m-head", 380, -6, 0.1894, 0.083],
+      ["#m-photo", 380, -411, 0.2102, 0.2717],
+      ["#m-lede", 614, -271, 0.7991, 1.25],
+      ["#m-form", -83, -13, 0.4853, 0.396],
+    ].forEach(([sel, x, y, sx, sy], i) => {
+      const at = T0 + i * 0.08;
+      tl.fromTo(sel, { x, y, scaleX: sx, scaleY: sy }, { x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 1.2, ease: "power3.inOut" }, at);
+      tl.fromTo(`${sel} .m-b`, { opacity: 1 }, { opacity: 0, duration: 0.45, ease: "power1.inOut" }, at + 0.15);
+      tl.fromTo(`${sel} .m-a`, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power1.inOut" }, at + 0.15);
+    });
+    tl.to("#m-final", { opacity: 1, duration: 0.35, ease: "power2.out" }, T0 + 1.5);
+
+    // A look down the new page.
+    tl.fromTo("#m-final-img", { y: 0 }, { y: -1900, duration: 2.2, ease: "power2.inOut" }, 32.6);
+
+    // 5. Review and approve.
+    cam(W, 35.0);
+    swap("#w-b7", 35.2);
+    hide("#w-done, #w-done2, #w-done3", 35.2);
+    tl.set("#w-cursor", { x: 1700, y: 900 }, 35.85);
+    tl.to("#w-cursor", { opacity: 1, duration: 0.01 }, 35.9);
+    tl.to("#w-cursor", { x: 1478, y: 318, duration: 0.6, ease: "power3.out" }, 35.9);
+    click(36.7, "#w-approve", "#bdb7af", "#ece9e4");
+    tl.to("#w-done, #w-done2, #w-done3", { opacity: 1, duration: 0.25, ease: "power2.out", stagger: 0.1 }, 36.7);
+
+    // End card: the workspace steps back and the name lands.
+    tl.to("#w-cam", { scale: 0.92, x: 77, y: 43, opacity: 0, filter: "blur(10px)", duration: 0.5, ease: "power3.in" }, 38.6);
+    tl.fromTo("#e-card", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 38.8);
+    tl.fromTo("#e-icon, #e-name, #e-line, #e-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, ease: "expo.out", stagger: 0.12 }, 38.95);
+
+    window.__timelines["work"] = tl;
+  </script>
+</template>

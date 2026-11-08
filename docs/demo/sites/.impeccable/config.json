@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "before/index.html"
+        ],
+        "createdAt": "2026-11-08T14:31:17.183Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "before/index.html"
+        ],
+        "createdAt": "2026-11-08T14:31:17.229Z",
+        "reason": "agent: intentional dated 'before' fixture for the demo video"
+      }
+    ]
+  }
+}
